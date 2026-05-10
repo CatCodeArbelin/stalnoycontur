@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 36 33% 97%;
+  --foreground: 204 32% 13%;
+  --card: 0 0% 100%;
+  --card-foreground: 204 32% 13%;
+  --primary: 204 32% 13%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 200 20% 92%;
+  --secondary-foreground: 204 32% 13%;
+  --muted: 200 20% 94%;
+  --muted-foreground: 204 17% 43%;
+  --accent: 34 76% 52%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 204 16% 86%;
+  --input: 204 16% 86%;
+  --ring: 34 76% 52%;
+  --radius: 1.5rem;
+}
+
+* { border-color: hsl(var(--border)); }
+html { scroll-behavior: smooth; }
+body {
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+::selection { background: #d9872f; color: white; }
+
+.section-padding { @apply py-14 md:py-20 lg:py-24; }
+.section-title { @apply text-3xl font-black tracking-tight text-steel-900 sm:text-4xl lg:text-5xl; }
+.section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
+.glass { @apply border border-white/20 bg-white/80 shadow-soft backdrop-blur-xl; }

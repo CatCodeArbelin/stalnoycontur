@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none">
+  <rect width="960" height="640" rx="48" fill="#344653"/>
+  <path d="M80 430L210 250H760L880 430H80Z" fill="#b76622" opacity="0.9"/>
+  <path d="M150 430H810" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.85"/>
+  <path d="M220 430V560M740 430V560M480 300V560" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.78"/>
+  <path d="M275 510C285 470 320 445 365 445H560C610 445 648 474 660 510" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.45"/>
+  <circle cx="335" cy="530" r="28" fill="white" opacity="0.55"/><circle cx="610" cy="530" r="28" fill="white" opacity="0.55"/>
+  <text x="70" y="110" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800">Профнастил</text>
+  <text x="72" y="160" fill="white" opacity="0.65" font-family="Arial, sans-serif" font-size="24">Стальной Контур • Крым</text>
+</svg>
