@@ -1,13 +1,20 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 
 import { CasesMapReviewsFaqContacts } from "@/components/sections/home-sections";
+import { BreadcrumbListJsonLd, ReviewJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cases } from "@/data/site";
+import { metadataForPath } from "@/lib/seo";
+
+export const metadata: Metadata = metadataForPath("/cases");
 
 export default function CasesPage() {
   return (
     <>
+      <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: "Кейсы", url: "/cases" }]} />
+      <ReviewJsonLd author="Ирина" text="Быстро согласовали эскиз и аккуратно смонтировали навес у террасы." ratingValue={5} />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container">
           <Badge className="border-white/20 bg-white/10 text-copper-400">Портфолио</Badge>

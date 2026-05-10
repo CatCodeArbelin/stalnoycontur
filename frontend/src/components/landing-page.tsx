@@ -2,12 +2,15 @@ import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 import { CasesMapReviewsFaqContacts, QuizCalculator, Types } from "@/components/sections/home-sections";
+import { BreadcrumbListJsonLd, FAQPageJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function LandingPage({ badge, title, description, points }: { badge: string; title: string; description: string; points: string[] }) {
+export function LandingPage({ badge, title, description, points, path }: { badge: string; title: string; description: string; points: string[]; path: string }) {
   return (
     <>
+      <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: title, url: path }]} />
+      <FAQPageJsonLd items={[{ question: "Как получить точную смету?", answer: "Оставьте заявку и пришлите размеры или фото участка: инженер уточнит задачу, предложит конструкцию и зафиксирует смету в договоре." }, { question: "Что входит в работу под ключ?", answer: "Замер, проект, изготовление каркаса, доставка, монтаж кровли, водосток по необходимости и уборка площадки." }]} />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container grid items-center gap-10 lg:grid-cols-2">
           <div>

@@ -6,6 +6,8 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MobileCta } from "@/components/mobile-cta";
 import { QuickContact } from "@/components/quick-contact";
+import { ConstructionBusinessJsonLd, LocalBusinessJsonLd } from "@/components/seo";
+import { createPageMetadata, siteConfig } from "@/lib/seo";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -15,15 +17,20 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Стальной Контур — навесы под ключ в Крыму",
-  description: "Проектирование, производство и монтаж металлических навесов для авто, дома и бизнеса по всему Крыму.",
-  metadataBase: new URL("https://stalnoy-contur.example"),
+  metadataBase: new URL(siteConfig.url),
+  ...createPageMetadata({
+    path: "/",
+    title: "Стальной Контур — навесы под ключ в Крыму",
+    description: siteConfig.defaultDescription,
+  }),
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ru" className={manrope.variable}>
       <body className="font-sans antialiased">
+        <LocalBusinessJsonLd />
+        <ConstructionBusinessJsonLd />
         <Header />
         <main>{children}</main>
         <Footer />
