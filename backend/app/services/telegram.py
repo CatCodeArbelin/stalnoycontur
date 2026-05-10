@@ -15,14 +15,22 @@ def build_lead_message(lead: LeadCreate) -> str:
         "🛠 Новая заявка с сайта Стальной Контур",
         f"Имя: {lead.name}",
         f"Телефон: {lead.phone}",
-        f"Согласие на обработку ПД: {'да' if lead.consent else 'нет'}",
     ]
     if lead.city:
         lines.append(f"Город: {lead.city}")
-    if lead.source:
-        lines.append(f"Источник: {lead.source}")
-    if lead.message:
-        lines.append(f"Комментарий: {lead.message}")
+    if lead.canopy_type:
+        lines.append(f"Тип навеса: {lead.canopy_type}")
+    if lead.material:
+        lines.append(f"Материал: {lead.material}")
+    if lead.comment:
+        lines.append(f"Комментарий: {lead.comment}")
+    if lead.image:
+        lines.append(f"Изображение: {lead.image}")
+    if lead.source_page:
+        lines.append(f"Страница: {lead.source_page}")
+    if lead.utm:
+        utm = ", ".join(f"{key}={value}" for key, value in lead.utm.items())
+        lines.append(f"UTM: {utm}")
     return "\n".join(lines)
 
 
