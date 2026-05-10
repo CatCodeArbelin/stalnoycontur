@@ -21,9 +21,17 @@ class Settings(BaseSettings):
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
 
+    admin_username: str = "admin"
+    admin_password: str = "change-me"
+    admin_token: str | None = None
+    admin_jwt_secret: str | None = None
+    admin_token_ttl_seconds: int = 12 * 60 * 60
+
+    upload_dir: str = "uploads"
+    upload_url_prefix: str = "/uploads"
     upload_max_size_bytes: int = 10 * 1024 * 1024
     upload_allowed_content_types: set[str] = Field(
-        default_factory=lambda: {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+        default_factory=lambda: {"image/jpeg", "image/png", "image/webp"}
     )
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
