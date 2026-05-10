@@ -92,6 +92,7 @@ def upgrade() -> None:
         "uploads",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("filename", sa.String(length=255), nullable=False),
+        sa.Column("url", sa.String(length=500), nullable=False),
         sa.Column("content_type", sa.String(length=120), nullable=False),
         sa.Column("size_bytes", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
