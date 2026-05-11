@@ -37,7 +37,8 @@
 │   └── Dockerfile
 ├── nginx/
 │   └── default.conf         # Reverse proxy конфигурация
-├── docker-compose.yml       # Production-like Docker Compose стек
+├── docker-compose.yml       # Production Docker Compose стек
+├── docker-compose.dev.yml   # Dev override: hot reload и bind mounts
 ├── README.md
 └── LICENSE
 ```
@@ -86,53 +87,63 @@
 
 ## Development mode
 
-Рекомендуемый режим разработки — также через Docker, без локальных Python, Node.js и PostgreSQL.
+Рекомендуемый режим разработки — через базовый `docker-compose.yml` и dev override `docker-compose.dev.yml`. Dev override включает hot reload, монтирует исходники в контейнеры и публикует сервисы напрямую на портах `3000` и `8000`.
 
 ### Запуск с логами в терминале
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-Полезно при активной разработке: все логи сервисов выводятся в текущий терминал.
+После запуска доступны:
+
+- frontend dev server: <http://localhost:3000>
+- backend API напрямую: <http://localhost:8000/api/health>
+- полный стек через nginx: <http://localhost>
 
 ### Запуск в фоне
 
 ```bash
-docker compose up --build -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
 ```
 
 После запуска смотрите логи нужного сервиса:
 
 ```bash
-docker compose logs -f backend
-docker compose logs -f frontend
-docker compose logs -f nginx
-docker compose logs -f postgres
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f backend
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f frontend
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f nginx
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f postgres
+```
+
+### Остановка dev-стека
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 ```
 
 ### Пересборка отдельного сервиса
 
 ```bash
-docker compose build backend
-docker compose build frontend
-docker compose up -d backend frontend nginx
+docker compose -f docker-compose.yml -f docker-compose.dev.yml build backend
+docker compose -f docker-compose.yml -f docker-compose.dev.yml build frontend
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d backend frontend nginx
 ```
 
 ### Выполнение команд внутри контейнеров
 
 ```bash
-docker compose exec backend python -m alembic current
-docker compose exec backend python -m alembic upgrade head
-docker compose exec frontend npm run typecheck
-docker compose exec frontend npm run lint
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python -m alembic current
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec backend python -m alembic upgrade head
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec frontend npm run typecheck
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec frontend npm run lint
 ```
 
-> Примечание: текущий compose-файл настроен как production-like стек. Для hot reload можно добавить отдельный `docker-compose.override.yml` с bind mount исходников и dev-командами (`uvicorn --reload`, `npm run dev`), но базовый запуск проекта не требует этого файла.
+Dev override запускает frontend командой `npm run dev` с bind mount `./frontend:/app`. Чтобы bind mount не перетирал установленные зависимости внутри Linux-контейнера, `node_modules` вынесен в named volume `frontend_node_modules`; это особенно важно для стабильной работы Docker Desktop на Windows. Backend запускается командой `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` с bind mount `./backend:/app`.
 
 ## Production mode
 
-Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
+Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Команда `docker compose up --build` остается рабочей без дополнительных ручных действий. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
 
 1. Скопируйте шаблон и настройте production-переменные:
 
@@ -203,10 +214,10 @@ docker compose exec frontend npm run lint
 ### Основные команды
 
 ```bash
-# Собрать и запустить все сервисы с логами
+# Production: собрать и запустить все сервисы с логами
 docker compose up --build
 
-# Собрать и запустить в фоне
+# Production: собрать и запустить в фоне
 docker compose up --build -d
 
 # Посмотреть статус контейнеров
