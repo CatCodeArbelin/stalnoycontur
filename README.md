@@ -176,6 +176,25 @@ Production запуск по-прежнему использует только 
    docker compose --env-file .env.production up -d --force-recreate
    ```
 
+### Production security headers
+
+Nginx в `nginx/default.conf` добавляет базовые защитные заголовки для production-трафика:
+
+- `X-Frame-Options: SAMEORIGIN` — разрешает встраивание сайта только страницами того же origin.
+- `X-Content-Type-Options: nosniff` — запрещает браузеру угадывать MIME-типы.
+- `Referrer-Policy: strict-origin-when-cross-origin` — ограничивает передачу полного referrer на внешние сайты.
+- `Permissions-Policy` — запрещает неиспользуемые browser API вроде камеры, микрофона, геолокации, USB, Bluetooth, payment, sensors и прочих возможностей.
+- `Content-Security-Policy-Report-Only` — стартовый CSP в режиме наблюдения: он совместим с Next.js, JSON-LD/inline scripts, текущими inline styles, локальными и внешними изображениями, а также ссылками/интеграциями Telegram и MAX. Нарушения только логируются браузером и не блокируют страницу.
+
+После правок `nginx/default.conf` пересоздайте nginx и проверьте заголовки:
+
+```bash
+docker compose --env-file .env.production up -d --force-recreate nginx
+curl -I http://127.0.0.1/
+```
+
+Если в браузерной консоли нет CSP-нарушений для критичных сценариев, можно перейти от `Content-Security-Policy-Report-Only` к принудительному `Content-Security-Policy`. Перед ужесточением уберите разрешения вроде `'unsafe-inline'` только после перевода inline script/style на nonce, hash или внешние файлы.
+
 ## Env variables
 
 В репозитории есть `.env.example`, `.env.development` и `.env.production`. Надежная схема одна и та же для Windows Docker Desktop и Ubuntu Docker Engine:
@@ -512,6 +531,23 @@ docker compose logs --tail=200 frontend
 ```
 
 Чаще всего причина в ошибке TypeScript, ESLint или недоступности npm registry при сборке.
+
+### Проверка и диагностика security headers / CSP
+
+Проверьте, что nginx вернул production-заголовки:
+
+```bash
+curl -I http://127.0.0.1/
+curl -I http://127.0.0.1/_next/static/
+```
+
+Ожидаемые заголовки: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` и `Content-Security-Policy-Report-Only`. Если заголовков нет, пересоздайте nginx после изменения конфигурации:
+
+```bash
+docker compose up -d --force-recreate nginx
+```
+
+Если браузер показывает CSP report-only warnings, сначала убедитесь, что сценарий действительно нужен приложению. Для новых внешних CDN/API добавьте минимально необходимый origin в соответствующую директиву `script-src`, `style-src`, `img-src` или `connect-src`; не расширяйте `default-src` без необходимости.
 
 ### CORS ошибки в браузере
 
