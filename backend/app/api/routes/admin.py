@@ -1,11 +1,17 @@
 from typing import TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.admin_auth import create_admin_token, require_admin
+from app.core.admin_auth import (
+    ADMIN_CSRF_COOKIE,
+    ADMIN_SESSION_COOKIE,
+    create_admin_token,
+    create_csrf_token,
+    require_admin,
+)
 from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.models.case import Case
@@ -29,15 +35,60 @@ class AdminLoginRequest(BaseModel):
 
 
 class AdminLoginResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+    csrf_token: str
 
 
 @router.post("/auth/login", response_model=AdminLoginResponse)
-def login(payload: AdminLoginRequest, settings: Settings = Depends(get_settings)) -> AdminLoginResponse:
+def login(
+    payload: AdminLoginRequest,
+    response: Response,
+    settings: Settings = Depends(get_settings),
+) -> AdminLoginResponse:
     if payload.username != settings.admin_username or payload.password != settings.admin_password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверные данные администратора")
-    return AdminLoginResponse(access_token=create_admin_token(settings))
+
+    csrf_token = create_csrf_token()
+    session_token = create_admin_token(
+        settings,
+        ttl_seconds=settings.admin_session_ttl_seconds,
+        csrf_token=csrf_token,
+    )
+    response.set_cookie(
+        ADMIN_SESSION_COOKIE,
+        session_token,
+        max_age=settings.admin_session_ttl_seconds,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path="/",
+    )
+    response.set_cookie(
+        ADMIN_CSRF_COOKIE,
+        csrf_token,
+        max_age=settings.admin_session_ttl_seconds,
+        httponly=False,
+        secure=True,
+        samesite="strict",
+        path="/",
+    )
+    return AdminLoginResponse(csrf_token=csrf_token)
+
+
+@router.get("/auth/csrf", response_model=AdminLoginResponse)
+def csrf_token(session: dict[str, object] = Depends(require_admin)) -> AdminLoginResponse:
+    csrf = session.get("csrf")
+    if not isinstance(csrf, str) or not csrf:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="CSRF token недоступен для этой сессии",
+        )
+    return AdminLoginResponse(csrf_token=csrf)
+
+
+@router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response) -> None:
+    response.delete_cookie(ADMIN_SESSION_COOKIE, path="/", secure=True, httponly=True, samesite="strict")
+    response.delete_cookie(ADMIN_CSRF_COOKIE, path="/", secure=True, httponly=False, samesite="strict")
 
 
 def get_or_404(db: Session, model: type[ModelT], item_id: int) -> ModelT:

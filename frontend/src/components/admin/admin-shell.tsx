@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,7 +125,8 @@ function toPayload(fields: Field[], form: Record<string, unknown>) {
 }
 
 export function AdminResource({ title, description, endpoint, fields, columns }: AdminResourceProps) {
-  const [token, setToken] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [csrfToken, setCsrfToken] = useState("");
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -134,32 +135,38 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
   const [messageType, setMessageType] = useState<MessageType>("success");
   const [form, setForm] = useState<Record<string, unknown>>(() => Object.fromEntries(fields.map((field) => [field.key, emptyValue(field)])));
 
-  const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
   function showMessage(text: string, type: MessageType = "success") {
     setMessage(text);
     setMessageType(type);
   }
 
-  function logout(messageText?: string) {
-    localStorage.removeItem("adminToken");
-    setToken("");
+  async function logout(messageText?: string) {
+    setIsAuthenticated(false);
+    setCsrfToken("");
     setItems([]);
+    try {
+      await fetch(`${apiBase}/admin/auth/logout`, { method: "POST", credentials: "same-origin" });
+    } catch {
+      // Local logout must still complete even if the session already expired.
+    }
     if (messageText) showMessage(messageText, "error");
   }
 
   async function request(path: string, init: RequestInit = {}) {
+    const method = (init.method ?? "GET").toUpperCase();
+    const headers = new Headers(init.headers);
+    if (!(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+    if (csrfToken && ["POST", "PATCH", "DELETE"].includes(method)) headers.set("X-CSRF-Token", csrfToken);
+
     const response = await fetch(`${apiBase}${path}`, {
       ...init,
-      headers: {
-        ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-        ...(token ? authHeaders : {}),
-        ...init.headers,
-      },
+      credentials: "same-origin",
+      headers,
     });
     if (!response.ok) {
       const errorMessage = response.status === 401 || response.status === 403 ? "Сессия истекла, войдите снова" : await formatApiError(response);
-      if (response.status === 401 || response.status === 403) logout(errorMessage);
+      if (response.status === 401 || response.status === 403) void logout(errorMessage);
       throw new Error(errorMessage);
     }
     if (response.status === 204) return null;
@@ -170,8 +177,8 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
     event.preventDefault();
     try {
       const data = await request("/admin/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
-      setToken(data.access_token);
-      localStorage.setItem("adminToken", data.access_token);
+      setCsrfToken(data.csrf_token);
+      setIsAuthenticated(true);
       showMessage("Вход выполнен");
     } catch (error) {
       showMessage(await formatApiError(error), "error");
@@ -179,7 +186,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
   }
 
   async function loadItems() {
-    if (!token) return;
+    if (!isAuthenticated) return;
     try {
       const data = await request(endpoint);
       setItems(data);
@@ -262,13 +269,25 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
   }
 
   useEffect(() => {
-    setToken(localStorage.getItem("adminToken") ?? "");
+    async function restoreSession() {
+      const response = await fetch(`${apiBase}/admin/auth/csrf`, { credentials: "same-origin" });
+      if (!response.ok) {
+        setIsAuthenticated(false);
+        setCsrfToken("");
+        return;
+      }
+      const data = await response.json();
+      setCsrfToken(data.csrf_token);
+      setIsAuthenticated(true);
+    }
+
+    void restoreSession();
   }, []);
 
   useEffect(() => {
     void loadItems();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, endpoint]);
+  }, [isAuthenticated, endpoint]);
 
   return (
     <section className="bg-slate-50 py-10">
@@ -285,11 +304,11 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                 <Link href={href}>{label}</Link>
               </Button>
             ))}
-            {token ? <Button variant="outline" size="sm" onClick={() => logout()}>Выйти</Button> : null}
+            {isAuthenticated ? <Button variant="outline" size="sm" onClick={() => void logout()}>Выйти</Button> : null}
           </div>
         </div>
 
-        {!token ? (
+        {!isAuthenticated ? (
           <Card>
             <CardHeader><CardTitle>Вход администратора</CardTitle></CardHeader>
             <CardContent>
@@ -307,7 +326,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
 
         {message ? <div className={cn("rounded-2xl p-4 text-sm font-semibold", messageType === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700")}>{message}</div> : null}
 
-        {token ? (
+        {isAuthenticated ? (
           <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
             <Card>
               <CardHeader><CardTitle>{editingId ? "Редактирование" : "Новая запись"}</CardTitle></CardHeader>

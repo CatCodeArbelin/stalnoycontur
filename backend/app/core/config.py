@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     admin_token: str | None = None
     admin_jwt_secret: str | None = None
     admin_token_ttl_seconds: int = 12 * 60 * 60
+    admin_session_ttl_seconds: int = 30 * 60
 
     images_root: str = "images"
     uploads_dir: str | None = Field(
