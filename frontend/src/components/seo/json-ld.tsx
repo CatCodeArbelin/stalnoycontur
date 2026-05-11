@@ -42,9 +42,9 @@ export function LocalBusinessJsonLd() {
       data={{
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "@id": `${siteConfig.url}/#local-business`,
+        "@id": absoluteUrl("/#local-business"),
         name: siteConfig.name,
-        url: siteConfig.url,
+        url: absoluteUrl("/"),
         image: absoluteUrl(siteConfig.image),
         telephone: siteConfig.phone,
         priceRange: "₽₽",
@@ -63,9 +63,9 @@ export function ConstructionBusinessJsonLd() {
       data={{
         "@context": "https://schema.org",
         "@type": "ConstructionBusiness",
-        "@id": `${siteConfig.url}/#construction-business`,
+        "@id": absoluteUrl("/#construction-business"),
         name: siteConfig.name,
-        url: siteConfig.url,
+        url: absoluteUrl("/"),
         image: absoluteUrl(siteConfig.image),
         telephone: siteConfig.phone,
         priceRange: "₽₽",
@@ -130,7 +130,7 @@ export function ReviewJsonLd({ author, text, ratingValue, itemName = siteConfig.
         itemReviewed: {
           "@type": "LocalBusiness",
           name: itemName,
-          url: siteConfig.url,
+          url: absoluteUrl("/"),
         },
         author: {
           "@type": "Person",

@@ -8,7 +8,7 @@
 
 Состав приложения:
 
-- **Frontend** — Next.js 15 с App Router, TypeScript и Tailwind CSS. Отвечает за публичные страницы, SEO, формы и админ-интерфейс.
+- **Frontend** — Next.js 15 с App Router, TypeScript и Tailwind CSS. Отвечает за публичные страницы, SEO через Next.js App Router Metadata API, формы и админ-интерфейс.
 - **Backend** — FastAPI API для заявок, контента, загрузок, админ-аутентификации, rate limit и Telegram-уведомлений.
 - **Database** — PostgreSQL 16 в отдельном контейнере.
 - **Reverse proxy** — nginx, который принимает HTTP-трафик, проксирует `/api/*` в backend, остальные запросы — во frontend, а также отдает healthcheck.
