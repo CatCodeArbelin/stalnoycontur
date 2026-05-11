@@ -214,8 +214,17 @@ curl -I http://127.0.0.1/
 | `API_PREFIX` | `/api` | Префикс backend routes за nginx. |
 | `DATABASE_URL` | PostgreSQL DSN | URL подключения backend к базе данных; этот же env используется Alembic для автоматического `alembic upgrade head` при старте контейнера. |
 | `CORS_ORIGINS` | `http://localhost,http://localhost:3000` | Разрешенные origins через запятую. |
-| `RATE_LIMIT_REQUESTS` | `60` | Количество запросов в окне rate limit. |
-| `RATE_LIMIT_WINDOW_SECONDS` | `60` | Длительность окна rate limit в секундах. |
+| `RATE_LIMIT_REQUESTS` | `60` | Количество запросов в базовом окне rate limit для routes без специальных правил. |
+| `RATE_LIMIT_WINDOW_SECONDS` | `60` | Длительность базового окна rate limit в секундах. |
+| `RATE_LIMIT_ADMIN_LOGIN_REQUESTS` | `5` | Лимит попыток входа на `/api/admin/auth/login` в окне; ключ считается по IP + username. |
+| `RATE_LIMIT_ADMIN_LOGIN_WINDOW_SECONDS` | `300` | Окно лимита входа администратора в секундах. |
+| `RATE_LIMIT_LEAD_REQUESTS` | `5` | Anti-spam лимит для публичной отправки заявки `/api/lead` по IP. |
+| `RATE_LIMIT_LEAD_WINDOW_SECONDS` | `300` | Окно anti-spam лимита для `/api/lead` в секундах. |
+| `RATE_LIMIT_UPLOAD_REQUESTS` | `10` | Anti-spam лимит для публичной загрузки `/api/upload` по IP. |
+| `RATE_LIMIT_UPLOAD_WINDOW_SECONDS` | `300` | Окно anti-spam лимита для `/api/upload` в секундах. |
+| `RATE_LIMIT_ADMIN_REQUESTS` | `120` | Мягкий лимит для `/api/admin/*` без валидной trusted admin session. |
+| `RATE_LIMIT_ADMIN_WINDOW_SECONDS` | `60` | Окно мягкого лимита для `/api/admin/*` в секундах. |
+| `RATE_LIMIT_ADMIN_AUTHENTICATED_EXEMPT` | `true` | Если `true`, запросы `/api/admin/*` с валидной admin cookie или bearer token не ограничиваются middleware. |
 | `UPLOAD_MAX_SIZE_BYTES` | `10485760` | Максимальный размер исходного загружаемого изображения: 10 МБ. |
 | `UPLOAD_MAX_WIDTH` | `1920` | Максимальная ширина оптимизированного изображения в пикселях. |
 | `UPLOAD_MAX_HEIGHT` | `1920` | Максимальная высота оптимизированного изображения в пикселях. |

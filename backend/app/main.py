@@ -21,8 +21,18 @@ app.add_middleware(
 )
 app.add_middleware(
     InMemoryRateLimitMiddleware,
+    settings=settings,
     requests=settings.rate_limit_requests,
     window_seconds=settings.rate_limit_window_seconds,
+    admin_login_requests=settings.rate_limit_admin_login_requests,
+    admin_login_window_seconds=settings.rate_limit_admin_login_window_seconds,
+    lead_requests=settings.rate_limit_lead_requests,
+    lead_window_seconds=settings.rate_limit_lead_window_seconds,
+    upload_requests=settings.rate_limit_upload_requests,
+    upload_window_seconds=settings.rate_limit_upload_window_seconds,
+    admin_requests=settings.rate_limit_admin_requests,
+    admin_window_seconds=settings.rate_limit_admin_window_seconds,
+    admin_authenticated_exempt=settings.rate_limit_admin_authenticated_exempt,
 )
 
 app.include_router(health_router, prefix=settings.api_prefix)
