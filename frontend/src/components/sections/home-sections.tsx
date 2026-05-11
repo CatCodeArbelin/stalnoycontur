@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,7 +7,7 @@ import { MotionReveal } from "@/components/motion-reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { advantages, canopyTypes } from "@/data/site";
+import { advantages, canopyTypes, contacts } from "@/data/site";
 import {
   fallbackFaq,
   fallbackPublicCases,
@@ -102,7 +102,7 @@ export function CasesMapReviewsFaqContacts({
       <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item) => <Card key={item.slug ?? item.title} className="overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600">{item.materials.join(" · ")}</p> : null}</CardContent></Card>)}</div></div></section>
       <section className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>Отзывы</Badge><h2 className="section-title mt-4">Клиенты отмечают аккуратность монтажа</h2><div className="mt-6 rounded-[2rem] bg-white p-6 shadow-card">«{featuredReview.text}»<p className="mt-4 font-black">{featuredReview.author}</p></div></div><div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="rounded-2xl bg-white p-5 shadow-card"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div></div></div></section>
-      <section id="contacts" className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={`tel:${settings.phone.replace(/\D/g, "")}`}><Phone className="h-5 w-5" /> {settings.phone}</a></Button><Button asChild size="lg" variant="copper"><a href={settings.whatsapp}><MessageCircle className="h-5 w-5" /> WhatsApp</a></Button></div></div><ContactLeadForm /></div></section>
+      <section id="contacts" className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={contacts.phones[0].href}><Phone className="h-5 w-5" /> {contacts.phones[0].label}</a></Button><Button asChild size="lg" variant="outline"><a href={contacts.telegram.href}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={contacts.max.href}><MessageCircle className="h-5 w-5" /> MAX</a></Button></div></div><ContactLeadForm /></div></section>
     </>
   );
 }

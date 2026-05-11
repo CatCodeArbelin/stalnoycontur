@@ -1,6 +1,15 @@
 import { Car, Factory, Home, MapPin, ShieldCheck, Sparkles, Timer, Wrench } from "lucide-react";
 
 export const phone = "+7 978 000-44-88";
+
+export const contacts = {
+  phones: [
+    { label: "+7 978 000-44-88", href: "tel:+79780004488" },
+    { label: "+7 978 000-44-99", href: "tel:+79780004499" },
+  ],
+  telegram: { label: "Telegram", href: "https://t.me/stalnoycontur" },
+  max: { label: "MAX", href: "https://max.ru/stalnoycontur" },
+};
 export const nav = [
   { href: "/", label: "Главная" },
   { href: "/cases", label: "Кейсы" },

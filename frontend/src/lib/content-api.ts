@@ -1,4 +1,4 @@
-import { cases as fallbackCases, cities as fallbackCities, phone as fallbackPhone } from "@/data/site";
+import { cases as fallbackCases, cities as fallbackCities, contacts, phone as fallbackPhone } from "@/data/site";
 
 export type PublicCase = {
   id?: number | null;
@@ -30,7 +30,8 @@ export type PublicFaq = {
 export type PublicSettings = {
   company_name: string;
   phone: string;
-  whatsapp: string;
+  telegram?: string;
+  max?: string;
   cities: string[];
   personal_data_consent_text: string;
 };
@@ -45,7 +46,8 @@ export type ManagedContent = {
 export const fallbackSettings: PublicSettings = {
   company_name: "Стальной Контур",
   phone: fallbackPhone,
-  whatsapp: "https://wa.me/79780004488",
+  telegram: contacts.telegram.href,
+  max: contacts.max.href,
   cities: fallbackCities,
   personal_data_consent_text: "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
 };

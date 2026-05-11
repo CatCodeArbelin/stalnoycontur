@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { canopyTypes } from "@/data/site";
+import { canopyTypes, contacts } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 export function Footer({ settings = fallbackSettings }: { settings?: PublicSettings }) {
@@ -10,7 +10,7 @@ export function Footer({ settings = fallbackSettings }: { settings?: PublicSetti
         <div>
           <p className="text-2xl font-black">{settings.company_name}</p>
           <p className="mt-3 max-w-sm text-sm leading-6 text-white/65">Металлические навесы, козырьки, террасы и парковки под ключ по всему Крыму.</p>
-          <a className="mt-5 inline-block text-xl font-black" href={`tel:${settings.phone.replace(/\D/g, "")}`}>{settings.phone}</a>
+          <div className="mt-5 grid gap-2">{contacts.phones.map((phone) => <a key={phone.href} className="text-xl font-black" href={phone.href}>{phone.label}</a>)}</div>
         </div>
         <div>
           <p className="font-black">Типы навесов</p>
