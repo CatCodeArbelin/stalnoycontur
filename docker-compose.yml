@@ -1,5 +1,5 @@
 x-app-env-files: &app-env-files
-  - ${ENV_FILE:-.env.development}
+  - ${COMPOSE_ENV_FILE:-.env}
 
 services:
   postgres:
@@ -43,8 +43,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL in .env or pass --env-file .env.production before building frontend}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL in .env or pass --env-file .env.production before building frontend}
     env_file: *app-env-files
     environment:
       NODE_ENV: production
