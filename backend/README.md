@@ -30,6 +30,6 @@ uvicorn app.main:app --reload
 
 Uploads are optimized to WEBP and stored under `IMAGES_ROOT`. In Docker the shared image volume is mounted at `/images`; local backend-only runs can use relative paths from `backend/.env.example`.
 
-- Public `/upload` and admin `/admin/upload` accept an optional multipart `category` field: `uploads`, `cases`, `gallery`, `reviews`, or `production`.
-- Multipart lead attachments are stored in the `production` category.
+- Public `/upload` always stores files in the `uploads` category; admin `/admin/upload` accepts an optional multipart `category` field: `uploads`, `cases`, `gallery`, `reviews`, or `production`.
+- Multipart lead attachments are stored in the `uploads` category.
 - Category directories are configured by `UPLOAD_DIR`/`UPLOAD_PATH`, `CASES_DIR`, `GALLERY_DIR`, `REVIEWS_DIR`, and `PRODUCTION_DIR`.

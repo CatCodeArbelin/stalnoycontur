@@ -1,4 +1,5 @@
 import base64
+from contextlib import contextmanager
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
@@ -20,13 +21,14 @@ def _png_bytes() -> bytes:
     )
 
 
-def test_create_lead_multipart_file_uses_uploads_url(tmp_path, monkeypatch):
+@contextmanager
+def _test_client(tmp_path):
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    TestingSessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     Base.metadata.create_all(bind=engine)
 
     settings = Settings(
@@ -37,41 +39,47 @@ def test_create_lead_multipart_file_uses_uploads_url(tmp_path, monkeypatch):
     )
 
     def override_get_db():
-        db = TestingSessionLocal()
+        db = testing_session_local()
         try:
             yield db
         finally:
             db.close()
 
-    async def fake_send_lead_to_telegram(*args, **kwargs):
-        return False
-
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_settings] = lambda: settings
-    monkeypatch.setattr(lead_route, "send_lead_to_telegram", fake_send_lead_to_telegram)
 
     try:
         with TestClient(app) as client:
-            response = client.post(
-                "/lead",
-                data={
-                    "name": "Иван Иванов",
-                    "phone": "+7 (999) 123-45-67",
-                    "city": "Москва",
-                    "comment": "Нужен навес",
-                    "utm": '{"source":"test"}',
-                },
-                files={"file": ("canopy.png", _png_bytes(), "image/png")},
-            )
+            yield client, testing_session_local, settings
     finally:
         app.dependency_overrides.clear()
+
+
+def test_create_lead_multipart_file_uses_uploads_url(tmp_path, monkeypatch):
+    async def fake_send_lead_to_telegram(*args, **kwargs):
+        return False
+
+    monkeypatch.setattr(lead_route, "send_lead_to_telegram", fake_send_lead_to_telegram)
+
+    with _test_client(tmp_path) as (client, testing_session_local, _settings):
+        response = client.post(
+            "/lead",
+            data={
+                "name": "Иван Иванов",
+                "phone": "+7 (999) 123-45-67",
+                "city": "Москва",
+                "comment": "Нужен навес",
+                "utm": '{"source":"test"}',
+            },
+            files={"file": ("canopy.png", _png_bytes(), "image/png")},
+        )
 
     assert response.status_code == 201
     lead_image_url = response.json()["image"]
     assert lead_image_url.startswith("/images/uploads/")
     assert lead_image_url.endswith(".webp")
 
-    with TestingSessionLocal() as db:
+    with testing_session_local() as db:
         lead = db.scalars(select(Lead)).one()
         upload = db.scalars(select(Upload)).one()
 
@@ -79,3 +87,37 @@ def test_create_lead_multipart_file_uses_uploads_url(tmp_path, monkeypatch):
         assert upload.url == lead_image_url
         assert upload.filename == lead_image_url.removeprefix("/images/uploads/")
         assert (tmp_path / "images" / "uploads" / upload.filename).is_file()
+
+
+def test_public_upload_always_returns_uploads_url(tmp_path):
+    with _test_client(tmp_path) as (client, _testing_session_local, _settings):
+        response = client.post(
+            "/upload",
+            files={"file": ("public.png", _png_bytes(), "image/png")},
+        )
+
+    assert response.status_code == 201
+    image_url = response.json()["url"]
+    assert image_url.startswith("/images/uploads/")
+    assert image_url.endswith(".webp")
+
+
+def test_public_upload_ignores_cases_category(tmp_path):
+    with _test_client(tmp_path) as (client, testing_session_local, _settings):
+        response = client.post(
+            "/upload",
+            data={"category": "cases"},
+            files={"file": ("case.png", _png_bytes(), "image/png")},
+        )
+
+    assert response.status_code == 201
+    image_url = response.json()["url"]
+    assert image_url.startswith("/images/uploads/")
+    assert not image_url.startswith("/images/cases/")
+
+    with testing_session_local() as db:
+        upload = db.scalars(select(Upload)).one()
+
+    assert upload.url == image_url
+    assert (tmp_path / "images" / "uploads" / upload.filename).is_file()
+    assert not (tmp_path / "images" / "cases" / upload.filename).exists()

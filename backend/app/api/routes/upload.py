@@ -16,7 +16,7 @@ def persist_upload(
     data: bytes,
     db: Session,
     settings: Settings,
-    category: str | None = None,
+    category: UploadCategory | str | None = None,
 ) -> Upload:
     saved = save_optimized_upload(data, file.filename, settings, category)
     upload = Upload(
@@ -34,12 +34,11 @@ def persist_upload(
 @router.post("/upload", response_model=UploadRead, status_code=status.HTTP_201_CREATED)
 async def upload_public_image(
     file: UploadFile = File(...),
-    category: str = Form(default=UploadCategory.UPLOADS.value),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> Upload:
     data = await validate_upload(file, settings)
-    return persist_upload(file, data, db, settings, category)
+    return persist_upload(file, data, db, settings, UploadCategory.UPLOADS)
 
 
 @router.post(
