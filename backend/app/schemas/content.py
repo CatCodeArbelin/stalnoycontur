@@ -36,9 +36,17 @@ class FaqItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PublicPhone(BaseModel):
+    label: str
+    href: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class PublicSettings(BaseModel):
     company_name: str
     phone: str
+    phones: list[PublicPhone]
     telegram: str
     max: str
     cities: list[str]

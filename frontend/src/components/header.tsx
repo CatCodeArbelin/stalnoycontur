@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 
 export function Header({ settings = fallbackSettings }: { settings?: PublicSettings }) {
   const [open, setOpen] = useState(false);
+  const phones = settings.phones?.length ? settings.phones : fallbackSettings.phones;
+  const primaryPhone = phones[0];
   const telegramHref = settings.telegram || contacts.telegram.href;
   const maxHref = settings.max || contacts.max.href;
 
@@ -33,7 +35,7 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
         </nav>
         <div className="hidden items-center gap-3 md:flex">
           <div className="hidden flex-col items-end leading-tight xl:flex">
-            {contacts.phones.map((phone) => (
+            {phones.map((phone) => (
               <a key={phone.href} href={phone.href} className="text-sm font-black text-steel-900 transition hover:text-copper-600">
                 {phone.label}
               </a>
@@ -61,7 +63,7 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
             </Link>
           ))}
           <div className="mt-2 grid grid-cols-3 gap-2">
-            <a href={contacts.phones[0].href} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-steel-900 px-3 py-3 text-sm font-black text-white">
+            <a href={primaryPhone.href} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-steel-900 px-3 py-3 text-sm font-black text-white">
               <Phone className="h-4 w-4" />
               Позвонить
             </a>

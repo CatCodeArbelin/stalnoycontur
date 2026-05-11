@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 import { cityContent, contacts, pageContent } from "@/data/site";
+import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 export const siteConfig = {
   name: "Стальной Контур",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://stalnoy-contur.ru",
   defaultDescription: "Проектирование, производство и монтаж металлических навесов для авто, дома и бизнеса по всему Крыму.",
-  phone: contacts.phones[0].label,
-  phones: contacts.phones.map((phone) => phone.label),
+  phone: fallbackSettings.phones[0]?.label ?? fallbackSettings.phone,
+  phones: fallbackSettings.phones.map((phone) => phone.label),
   telegram: contacts.telegram.href,
   max: contacts.max.href,
   locale: "ru_RU",
@@ -59,6 +60,10 @@ export const pagesByPath = pagesSeo.reduce<Record<string, PageSeo>>((acc, page) 
 
 export function absoluteUrl(path = "/") {
   return new URL(path, siteConfig.url).toString();
+}
+
+export function publicSettingsTelephone(settings?: Pick<PublicSettings, "phone" | "phones">) {
+  return settings?.phones?.[0]?.label ?? settings?.phone ?? siteConfig.phone;
 }
 
 export const seoDefaults: Metadata = {
