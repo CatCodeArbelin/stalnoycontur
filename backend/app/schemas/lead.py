@@ -58,6 +58,7 @@ class LeadUpdate(BaseModel):
 
 class LeadRead(LeadBase):
     id: int
+    telegram_status: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

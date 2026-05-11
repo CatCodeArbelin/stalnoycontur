@@ -1,7 +1,8 @@
 import json
+import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -91,11 +92,13 @@ async def create_lead(
     db.refresh(lead)
 
     try:
-        await send_lead_to_telegram(payload, settings)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Заявка сохранена, но не удалось отправить уведомление в Telegram",
-        ) from exc
+        telegram_sent = await send_lead_to_telegram(payload, settings)
+        lead.telegram_status = "sent" if telegram_sent else "skipped"
+    except Exception:
+        logging.exception("Lead %s was saved, but Telegram notification failed", lead.id)
+        lead.telegram_status = "failed"
+
+    db.commit()
+    db.refresh(lead)
 
     return lead

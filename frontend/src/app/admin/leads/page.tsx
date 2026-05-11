@@ -4,7 +4,7 @@ export default function AdminLeadsPage() {
   return (
     <AdminResource
       title="Заявки"
-      description="Список заявок с именем, телефоном, городом, типом навеса, материалом, размером, комментарием, страницей, UTM и датой создания."
+      description="Список заявок с именем, телефоном, городом, типом навеса, материалом, размером, комментарием, страницей, UTM, статусом Telegram-уведомления и датой создания."
       endpoint="/admin/leads"
       fields={[
         { key: "name", label: "Имя" },
@@ -28,6 +28,16 @@ export default function AdminLeadsPage() {
         { key: "comment", label: "Комментарий" },
         { key: "source_page", label: "Страница" },
         { key: "utm", label: "UTM" },
+        {
+          key: "telegram_status",
+          label: "Telegram",
+          render: (value) => {
+            if (value === "sent") return "Отправлено";
+            if (value === "failed") return "Ошибка";
+            if (value === "skipped") return "Не настроен";
+            return "Ожидает";
+          },
+        },
       ]}
     />
   );
