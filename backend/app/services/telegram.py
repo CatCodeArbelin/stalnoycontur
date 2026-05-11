@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 
@@ -9,7 +10,23 @@ from app.schemas.lead import LeadCreate
 logger = logging.getLogger(__name__)
 
 
-def build_lead_message(lead: LeadCreate) -> str:
+def _public_origin(settings: Settings) -> str:
+    """Return public site origin from frontend URL, falling back to API URL."""
+    public_url = settings.frontend_url or settings.api_url
+    parts = urlsplit(str(public_url))
+    return urlunsplit((parts.scheme, parts.netloc, "", "", "")).rstrip("/")
+
+
+def build_absolute_image_url(image: str, settings: Settings) -> str:
+    """Convert known local image paths to absolute public URLs for Telegram."""
+    if image.startswith(("http://", "https://")):
+        return image
+    if image.startswith("/images/"):
+        return f"{_public_origin(settings)}{image}"
+    return image
+
+
+def build_lead_message(lead: LeadCreate, settings: Settings | None = None) -> str:
     """Build the Telegram notification message in the project brief format."""
     lines = [
         "🛠 Новая заявка с сайта Стальной Контур",
@@ -27,7 +44,10 @@ def build_lead_message(lead: LeadCreate) -> str:
     if lead.comment:
         lines.append(f"Комментарий: {lead.comment}")
     if lead.image:
-        lines.append(f"Изображение: {lead.image}")
+        image = (
+            build_absolute_image_url(lead.image, settings) if settings else lead.image
+        )
+        lines.append(f"Изображение: {image}")
     if lead.source_page:
         lines.append(f"Страница: {lead.source_page}")
     if lead.utm:
@@ -41,10 +61,13 @@ async def send_lead_to_telegram(lead: LeadCreate, settings: Settings) -> bool:
         logger.info("Telegram credentials are not configured; lead notification skipped")
         return False
 
-    url = f"{str(settings.telegram_api_base_url).rstrip('/')}/bot{settings.telegram_bot_token}/sendMessage"
+    url = (
+        f"{str(settings.telegram_api_base_url).rstrip('/')}/"
+        f"bot{settings.telegram_bot_token}/sendMessage"
+    )
     payload: dict[str, Any] = {
         "chat_id": settings.telegram_chat_id,
-        "text": build_lead_message(lead),
+        "text": build_lead_message(lead, settings),
         "disable_web_page_preview": True,
     }
 

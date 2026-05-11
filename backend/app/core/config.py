@@ -25,6 +25,15 @@ class Settings(BaseSettings):
     telegram_api_base_url: AnyHttpUrl = "https://api.telegram.org"
     telegram_timeout_seconds: float = 8.0
 
+    frontend_url: AnyHttpUrl | None = Field(
+        default=None,
+        validation_alias=AliasChoices("FRONTEND_URL", "NEXT_PUBLIC_SITE_URL"),
+    )
+    api_url: AnyHttpUrl = Field(
+        default="http://localhost/api",
+        validation_alias=AliasChoices("API_URL", "NEXT_PUBLIC_API_URL"),
+    )
+
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
 
@@ -51,7 +60,12 @@ class Settings(BaseSettings):
         default_factory=lambda: {"image/jpeg", "image/png", "image/webp"}
     )
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        populate_by_name=True,
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod
