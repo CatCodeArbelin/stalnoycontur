@@ -7,6 +7,7 @@ import { Header } from "@/components/header";
 import { MobileCta } from "@/components/mobile-cta";
 import { QuickContact } from "@/components/quick-contact";
 import { ConstructionBusinessJsonLd, LocalBusinessJsonLd } from "@/components/seo";
+import { getPublicSettings } from "@/lib/content-api";
 import { createPageMetadata, siteConfig } from "@/lib/seo";
 import "./globals.css";
 
@@ -25,17 +26,19 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const settings = await getPublicSettings();
+
   return (
     <html lang="ru" className={manrope.variable}>
       <body className="font-sans antialiased">
         <LocalBusinessJsonLd />
         <ConstructionBusinessJsonLd />
-        <Header />
+        <Header settings={settings} />
         <main>{children}</main>
-        <Footer />
-        <QuickContact />
-        <MobileCta />
+        <Footer settings={settings} />
+        <QuickContact settings={settings} />
+        <MobileCta settings={settings} />
       </body>
     </html>
   );

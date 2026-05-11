@@ -4,20 +4,21 @@ import { Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { nav, phone } from "@/data/site";
 import { Button } from "@/components/ui/button";
+import { nav } from "@/data/site";
+import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 import { cn } from "@/lib/utils";
 
-export function Header() {
+export function Header({ settings = fallbackSettings }: { settings?: PublicSettings }) {
   const [open, setOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 bg-background/85 backdrop-blur-xl">
       <div className="container flex h-20 items-center justify-between gap-4 py-3">
-        <Link href="/" className="flex items-center gap-3" aria-label="Стальной Контур">
+        <Link href="/" className="flex items-center gap-3" aria-label={settings.company_name}>
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-steel-900 text-lg font-black text-white">СК</span>
           <span className="leading-tight">
-            <span className="block text-base font-black uppercase tracking-wide text-steel-900">Стальной Контур</span>
+            <span className="block text-base font-black uppercase tracking-wide text-steel-900">{settings.company_name}</span>
             <span className="text-xs font-semibold text-muted-foreground">навесы под ключ в Крыму</span>
           </span>
         </Link>
@@ -29,7 +30,7 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <a href={`tel:${phone.replace(/\D/g, "")}`} className="text-sm font-black text-steel-900">{phone}</a>
+          <a href={`tel:${settings.phone.replace(/\D/g, "")}`} className="text-sm font-black text-steel-900">{settings.phone}</a>
           <Button asChild variant="copper"><a href="#contacts"><Phone className="h-4 w-4" />Заказать замер</a></Button>
         </div>
         <button className="grid h-11 w-11 place-items-center rounded-full border bg-white lg:hidden" onClick={() => setOpen(!open)} aria-label="Открыть меню">
