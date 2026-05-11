@@ -12,6 +12,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 type SubmitState = "idle" | "loading" | "success" | "error";
 type LeadSource = "quiz" | "contact_form";
 
+type UploadResponse = {
+  url: string;
+};
+
 type QuizData = {
   canopyType: string;
   size: string;
@@ -88,26 +92,26 @@ function getUtmMarks() {
   }, {});
 }
 
-async function postLead(payload: Record<string, unknown>, photo?: File | null) {
+async function uploadImage(photo: File) {
   if (!API_URL) {
     throw new Error("Не задан NEXT_PUBLIC_API_URL");
   }
 
-  if (photo) {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value === undefined || value === null) return;
-      formData.append(key, typeof value === "object" ? JSON.stringify(value) : String(value));
-    });
-    formData.append("photo", photo);
+  const formData = new FormData();
+  formData.append("file", photo);
 
-    const response = await fetch(`${API_URL}/lead`, {
-      method: "POST",
-      body: formData,
-    });
+  const response = await fetch(`${API_URL}/upload`, {
+    method: "POST",
+    body: formData,
+  });
 
-    if (!response.ok) throw new Error("Не удалось отправить заявку");
-    return response.json();
+  if (!response.ok) throw new Error("Не удалось загрузить фото");
+  return response.json() as Promise<UploadResponse>;
+}
+
+async function postLead(payload: Record<string, unknown>) {
+  if (!API_URL) {
+    throw new Error("Не задан NEXT_PUBLIC_API_URL");
   }
 
   const response = await fetch(`${API_URL}/lead`, {
@@ -170,6 +174,7 @@ function Consent({ checked, onChange }: { checked: boolean; onChange: (checked: 
 export function QuizCalculator() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<QuizData>(defaultQuizData);
+  const [photo, setPhoto] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
@@ -191,11 +196,14 @@ export function QuizCalculator() {
     setError("");
 
     try {
-      await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice }));
+      const uploadedPhoto = photo ? await uploadImage(photo) : null;
+      await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice, image: uploadedPhoto?.url ?? null }));
       setState("success");
       setData(defaultQuizData);
+      setPhoto(null);
       setStep(0);
       setConsent(false);
+      event.currentTarget.reset();
     } catch (submitError) {
       setState("error");
       setError(submitError instanceof Error ? submitError.message : "Не удалось отправить заявку");
@@ -245,6 +253,11 @@ export function QuizCalculator() {
                   <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Телефон" type="tel" />
                 </div>
                 <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: адрес, сроки, особенности участка" />
+                <label className="mt-3 flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed px-4 py-4 text-sm font-bold text-muted-foreground transition hover:border-copper-400">
+                  <Upload className="h-5 w-5 text-copper-500" />
+                  <span>{photo ? photo.name : "Загрузить фото участка"}</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} />
+                </label>
                 <Consent checked={consent} onChange={setConsent} />
               </div>
             )}
@@ -303,7 +316,8 @@ export function ContactLeadForm() {
     setError("");
 
     try {
-      await postLead(makePayload({ source: "contact_form", data, image: photo?.name ?? null }), photo);
+      const uploadedPhoto = photo ? await uploadImage(photo) : null;
+      await postLead(makePayload({ source: "contact_form", data, image: uploadedPhoto?.url ?? null }));
       setState("success");
       setData(defaultContactData);
       setPhoto(null);
