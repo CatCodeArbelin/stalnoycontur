@@ -79,6 +79,12 @@
    docker compose down
    ```
 
+## Как войти в админку
+
+- UI админ-панели: `/admin`.
+- API login: `/api/admin/auth/login`.
+- Default dev credentials: `admin / change-me`.
+
 ## Development mode
 
 Рекомендуемый режим разработки — через базовый `docker-compose.yml` и dev override `docker-compose.dev.yml`. Dev override включает hot reload, монтирует исходники в контейнеры и публикует сервисы напрямую на портах `3000` и `8000`.

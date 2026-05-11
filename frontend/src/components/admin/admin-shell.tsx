@@ -298,6 +298,9 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                 <input className="rounded-2xl border p-3" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" type="password" />
                 <Button type="submit">Войти</Button>
               </form>
+              {process.env.NODE_ENV === "development" ? (
+                <p className="mt-3 text-xs text-steel-500">dev default: admin / change-me</p>
+              ) : null}
             </CardContent>
           </Card>
         ) : null}
