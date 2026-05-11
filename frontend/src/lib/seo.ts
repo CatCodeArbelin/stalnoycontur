@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 
-import { cityContent, pageContent } from "@/data/site";
+import { cityContent, contacts, pageContent } from "@/data/site";
 
 export const siteConfig = {
   name: "Стальной Контур",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://stalnoy-contur.ru",
   defaultDescription: "Проектирование, производство и монтаж металлических навесов для авто, дома и бизнеса по всему Крыму.",
-  phone: "+7 978 000-44-88",
-  whatsapp: "https://wa.me/79780004488",
+  phone: contacts.phones[0].label,
+  phones: contacts.phones.map((phone) => phone.label),
+  telegram: contacts.telegram.href,
+  max: contacts.max.href,
   locale: "ru_RU",
   image: "/images/hero-canopy.svg",
 };

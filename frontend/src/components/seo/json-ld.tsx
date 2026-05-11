@@ -51,7 +51,7 @@ export function LocalBusinessJsonLd() {
         address,
         geo,
         areaServed: ["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч", "Крым"],
-        sameAs: [siteConfig.whatsapp],
+        sameAs: [siteConfig.telegram, siteConfig.max],
       }}
     />
   );
