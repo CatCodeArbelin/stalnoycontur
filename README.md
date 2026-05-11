@@ -59,13 +59,13 @@
 
 ## Быстрый запуск через Docker Compose
 
-1. При необходимости создайте `.env` в корне проекта:
+1. Создайте `.env` в корне проекта для локального запуска:
 
    ```bash
-   cp backend/.env.example .env
+   cp .env.example .env
    ```
 
-   Корневой `.env` используется Docker Compose для подстановки переменных. Для быстрого локального запуска файл можно не создавать: в `docker-compose.yml` заданы безопасные значения по умолчанию для разработки.
+   Docker Compose читает корневой `.env` до разбора `docker-compose.yml`: эти значения используются и для interpolation, и для `frontend.build.args`. Это важно для `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL`, потому что они встраиваются во frontend bundle на этапе сборки. Если используете `.env.development` напрямую, запускайте команды с `--env-file .env.development`.
 
 2. Соберите и запустите весь стек:
 
@@ -145,16 +145,15 @@ Dev override запускает frontend командой `npm run dev` с bind 
 
 ## Production mode
 
-Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Команда `docker compose up --build` остается рабочей без дополнительных ручных действий: backend-контейнер перед стартом uvicorn применяет миграции командой `alembic upgrade head`. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
+Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Backend-контейнер перед стартом uvicorn применяет миграции командой `alembic upgrade head`. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения через `--env-file .env.production` или через корневой `.env`, который Docker Compose читает для interpolation до `build.args`.
 
-1. Скопируйте шаблон и настройте production-переменные:
+1. Настройте production-переменные в `.env.production`:
 
    ```bash
-   cp .env.example .env.production
    nano .env.production
    ```
 
-   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`.
+   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`. Оставьте `COMPOSE_ENV_FILE=.env.production`, если запускаете Compose с `--env-file .env.production`. Если вместо этого переносите production-значения в корневой `.env`, задайте в нем `COMPOSE_ENV_FILE=.env`.
 
 2. Запустите стек с production env-файлом:
 
@@ -165,8 +164,8 @@ Production запуск по-прежнему использует только 
 3. Проверьте состояние:
 
    ```bash
-   docker compose ps
-   docker compose logs --tail=100 backend
+   docker compose --env-file .env.production ps
+   docker compose --env-file .env.production logs --tail=100 backend
    curl -f http://127.0.0.1/nginx-health
    curl -f http://127.0.0.1/api/health
    ```
@@ -179,11 +178,16 @@ Production запуск по-прежнему использует только 
 
 ## Env variables
 
-В репозитории есть корневые `.env.example`, `.env.development` и `.env.production`. По умолчанию сервисы в `docker-compose.yml` подключают `.env.development` через `env_file`; для production запускайте Compose с `--env-file .env.production`, чтобы эти же значения использовались и для build args фронтенда.
+В репозитории есть `.env.example`, `.env.development` и `.env.production`. Надежная схема одна и та же для Windows Docker Desktop и Ubuntu Docker Engine:
+
+- для development скопируйте `.env.example` в `.env` и запускайте обычный `docker compose ...`, либо явно передавайте `--env-file .env.development`;
+- для production запускайте `docker compose --env-file .env.production up --build -d` или создайте корневой `.env` с production-значениями;
+- значения `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL` должны находиться в файле, который Compose читает для interpolation (`--env-file ...` или `.env`), иначе сборка frontend остановится вместо тихого fallback на `http://localhost`;
+- `COMPOSE_ENV_FILE` должен указывать на тот же файл, чтобы сервисы получили те же переменные через `env_file`.
 
 | Переменная | Значение по умолчанию | Назначение |
 | --- | --- | --- |
-| `ENV_FILE` | `.env.development` | Env-файл, который подключается к сервисам через `env_file`. |
+| `COMPOSE_ENV_FILE` | `.env` | Env-файл, который подключается к сервисам через `env_file`; должен совпадать с файлом interpolation (`.env`, `.env.development` или `.env.production`). |
 | `FRONTEND_URL` | `http://localhost` | Публичный URL frontend-приложения. |
 | `API_URL` | `http://localhost/api` | Публичный URL API. |
 | `POSTGRES_DB` | `stalnoycontur` | Имя базы PostgreSQL. |
@@ -217,25 +221,25 @@ Production запуск по-прежнему использует только 
 
 ```bash
 # Production: собрать и запустить все сервисы с логами
-docker compose up --build
+docker compose --env-file .env.production up --build
 
 # Production: собрать и запустить в фоне
-docker compose up --build -d
+docker compose --env-file .env.production up --build -d
 
-# Посмотреть статус контейнеров
-docker compose ps
+# Посмотреть статус production-контейнеров при запуске через .env.production
+docker compose --env-file .env.production ps
 
-# Посмотреть логи всех сервисов
-docker compose logs -f
+# Посмотреть логи всех production-сервисов при запуске через .env.production
+docker compose --env-file .env.production logs -f
 
-# Посмотреть логи конкретного сервиса
-docker compose logs -f backend
+# Посмотреть логи конкретного production-сервиса при запуске через .env.production
+docker compose --env-file .env.production logs -f backend
 
-# Остановить и удалить контейнеры, сохранив volumes
-docker compose down
+# Остановить и удалить production-контейнеры, сохранив volumes
+docker compose --env-file .env.production down
 
-# Остановить и удалить контейнеры вместе с volumes: удалит БД и uploads
-docker compose down -v
+# Остановить и удалить production-контейнеры вместе с volumes: удалит БД и uploads
+docker compose --env-file .env.production down -v
 ```
 
 ### Обслуживание
@@ -428,9 +432,10 @@ Telegram-уведомления отправляются при создании
    cd stalnoycontur
    ```
 
-5. Создайте `.env` с production-значениями:
+5. Создайте `.env` с production-значениями. Если копируете из `.env.production`, замените `COMPOSE_ENV_FILE` на `.env`, чтобы Compose interpolation и `env_file` читали один и тот же файл:
 
    ```bash
+   cp .env.production .env
    nano .env
    ```
 
