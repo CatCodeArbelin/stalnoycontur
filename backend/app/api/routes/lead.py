@@ -71,7 +71,7 @@ async def _attach_lead_file(
         upload_data,
         file.filename,
         settings,
-        UploadCategory.PRODUCTION,
+        UploadCategory.UPLOADS,
     )
     upload = Upload(
         filename=saved.filename,
