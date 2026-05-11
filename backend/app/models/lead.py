@@ -16,6 +16,7 @@ class Lead(Base):
     city: Mapped[str | None] = mapped_column(String(80), nullable=True)
     canopy_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
     material: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    size: Mapped[str | None] = mapped_column(String(120), nullable=True)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     source_page: Mapped[str | None] = mapped_column(String(500), nullable=True)

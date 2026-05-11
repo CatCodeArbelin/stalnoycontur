@@ -22,6 +22,8 @@ def build_lead_message(lead: LeadCreate) -> str:
         lines.append(f"Тип навеса: {lead.canopy_type}")
     if lead.material:
         lines.append(f"Материал: {lead.material}")
+    if lead.size:
+        lines.append(f"Размер: {lead.size}")
     if lead.comment:
         lines.append(f"Комментарий: {lead.comment}")
     if lead.image:

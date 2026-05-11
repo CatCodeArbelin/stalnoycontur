@@ -24,4 +24,4 @@ uvicorn app.main:app --reload
 - `GET /faq`
 - `GET /settings`
 
-`POST /lead` requires `name` and `phone`; optional payload fields include `city`, `canopy_type`, `material`, `comment`, `image`, `source_page`, and `utm`. Telegram notifications are sent when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured.
+`POST /lead` requires `name` and `phone`; optional payload fields include `city`, `canopy_type`, `material`, `size`, `comment`, `image`, `source_page`, and `utm`. Telegram notifications are sent when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured.
