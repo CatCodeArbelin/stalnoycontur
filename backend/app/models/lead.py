@@ -21,4 +21,7 @@ class Lead(Base):
     image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     source_page: Mapped[str | None] = mapped_column(String(500), nullable=True)
     utm: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    telegram_status: Mapped[str | None] = mapped_column(
+        String(30), default="pending", server_default="pending", nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
