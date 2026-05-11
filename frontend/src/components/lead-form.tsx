@@ -17,11 +17,6 @@ const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
 type SubmitState = "idle" | "loading" | "success" | "error";
 type LeadSource = "quiz" | "contact_form";
 
-type UploadResponse = {
-  filename: string;
-  url: string;
-};
-
 type QuizData = {
   canopyType: string;
   size: string;
@@ -114,42 +109,35 @@ function getUtmMarks() {
   }, {});
 }
 
-async function uploadImage(photo: File) {
-  const validationError = validatePhotoFile(photo);
-  if (validationError) throw new Error(validationError);
-
+async function postLead(payload: Record<string, unknown>, photo?: File | null) {
   if (!API_URL) {
     throw new Error("Не задан NEXT_PUBLIC_API_URL");
   }
 
+  if (photo) {
+    const validationError = validatePhotoFile(photo);
+    if (validationError) throw new Error(validationError);
+  }
+
   const formData = new FormData();
-  formData.append("file", photo);
+  for (const [key, value] of Object.entries(payload)) {
+    formData.append(key, typeof value === "object" ? JSON.stringify(value ?? null) : String(value ?? ""));
+  }
 
-  const response = await fetch(`${API_URL}/upload`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) throw new Error("Не удалось загрузить фото");
-  return response.json() as Promise<UploadResponse>;
-}
-
-async function postLead(payload: Record<string, unknown>) {
-  if (!API_URL) {
-    throw new Error("Не задан NEXT_PUBLIC_API_URL");
+  if (photo) {
+    formData.append("file", photo);
   }
 
   const response = await fetch(`${API_URL}/lead`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: formData,
   });
 
   if (!response.ok) throw new Error("Не удалось отправить заявку");
   return response.json();
 }
 
-function makePayload({ source, data, quiz, estimatedPrice, image }: { source: LeadSource; data: ContactFormData | QuizData; quiz?: QuizData; estimatedPrice?: number; image?: string | null }) {
+function makePayload({ source, data, quiz, estimatedPrice }: { source: LeadSource; data: ContactFormData | QuizData; quiz?: QuizData; estimatedPrice?: number }) {
   return {
     name: data.name,
     phone: data.phone,
@@ -157,8 +145,7 @@ function makePayload({ source, data, quiz, estimatedPrice, image }: { source: Le
     canopy_type: "canopyType" in data ? data.canopyType : quiz?.canopyType,
     material: "material" in data ? data.material : quiz?.material,
     size: "size" in data ? data.size : quiz?.size,
-    comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}, город ${quiz.city}` : undefined),
-    image,
+    comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}, город ${quiz.city}` : ""),
     source_page: getSourcePage(),
     utm: {
       ...getUtmMarks(),
@@ -282,8 +269,7 @@ export function QuizCalculator() {
     setError("");
 
     try {
-      const uploadedPhoto = photo ? await uploadImage(photo) : null;
-      await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice, image: uploadedPhoto?.url ?? null }));
+      await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice }), photo);
       setState("success");
       setData(defaultQuizData);
       setPhoto(null);
@@ -400,8 +386,7 @@ export function ContactLeadForm() {
     setError("");
 
     try {
-      const uploadedPhoto = photo ? await uploadImage(photo) : null;
-      await postLead(makePayload({ source: "contact_form", data, image: uploadedPhoto?.url ?? null }));
+      await postLead(makePayload({ source: "contact_form", data }), photo);
       setState("success");
       setData(defaultContactData);
       setPhoto(null);
