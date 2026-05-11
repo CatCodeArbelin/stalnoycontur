@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getBrowserApiBase } from "@/lib/api-base";
 import { cn } from "@/lib/utils";
 
 type Field = {
@@ -38,7 +39,7 @@ const nav = [
   ["/admin/settings", "Настройки"],
 ];
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const apiBase = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";

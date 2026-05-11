@@ -7,8 +7,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getBrowserApiBase } from "@/lib/api-base";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
@@ -110,10 +111,6 @@ function getUtmMarks() {
 }
 
 async function postLead(payload: Record<string, unknown>, photo?: File | null) {
-  if (!API_URL) {
-    throw new Error("Не задан NEXT_PUBLIC_API_URL");
-  }
-
   if (photo) {
     const validationError = validatePhotoFile(photo);
     if (validationError) throw new Error(validationError);

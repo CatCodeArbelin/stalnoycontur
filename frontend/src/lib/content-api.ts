@@ -72,9 +72,31 @@ export const fallbackFaq: PublicFaq[] = [
   { question: "Можно ли сделать подсветку?", answer: "Да, предусматриваем подсветку, водосток и декоративные элементы на этапе проекта." },
 ];
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL;
+function trimTrailingSlashes(value: string) {
+  return value.replace(/\/+$/, "");
+}
+
+function getSsrApiBase() {
+  const apiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
+  if (!apiBase) {
+    return null;
+  }
+
+  const normalizedApiBase = trimTrailingSlashes(apiBase);
+  if (normalizedApiBase.startsWith("/")) {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      return null;
+    }
+
+    return new URL(normalizedApiBase, siteUrl).toString().replace(/\/+$/, "");
+  }
+
+  return normalizedApiBase;
+}
 
 async function fetchPublic<T>(path: string, fallback: T): Promise<T> {
+  const apiBase = getSsrApiBase();
   if (!apiBase) {
     return fallback;
   }

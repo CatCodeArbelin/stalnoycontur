@@ -65,7 +65,7 @@
    docker compose up --build
    ```
 
-   Базовый `docker-compose.yml` содержит development-safe значения по умолчанию для локального запуска: PostgreSQL, backend, frontend build/runtime-переменные и nginx стартуют без корневого `.env`. `NEXT_PUBLIC_SITE_URL` по умолчанию равен `http://localhost`, а `NEXT_PUBLIC_API_URL` — `http://localhost/api`; при необходимости их можно переопределить через shell, корневой `.env` или `--env-file`. При старте backend-контейнер автоматически выполняет `alembic upgrade head`, поэтому актуальные миграции базы данных применяются без ручных команд.
+   Базовый `docker-compose.yml` содержит development-safe значения по умолчанию для локального запуска: PostgreSQL, backend, frontend build/runtime-переменные и nginx стартуют без корневого `.env`. `NEXT_PUBLIC_SITE_URL` по умолчанию равен `http://localhost`, browser-facing `NEXT_PUBLIC_API_URL` — относительному `/api`, а server-only `INTERNAL_API_URL` для SSR-запросов — `http://backend:8000/api`; при необходимости их можно переопределить через shell, корневой `.env` или `--env-file`. При старте backend-контейнер автоматически выполняет `alembic upgrade head`, поэтому актуальные миграции базы данных применяются без ручных команд.
 
 2. Откройте приложение:
 
@@ -145,7 +145,7 @@ Production запуск по-прежнему использует только 
    nano .env.production
    ```
 
-   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`. Команда ниже по-прежнему поддерживается и передает production-значения и в сервисы, и в `frontend.build.args`.
+   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`. `NEXT_PUBLIC_API_URL` на VPS оставьте относительным `/api` либо задайте публичный домен вида `https://example.com/api`; не используйте `http://localhost/api`, потому что это значение попадает в браузерный bundle. `INTERNAL_API_URL` обычно оставляют `http://backend:8000/api` для SSR-запросов внутри docker-сети. Команда ниже по-прежнему поддерживается и передает production-значения и в сервисы, и в `frontend.build.args`.
 
 2. Запустите стек с production env-файлом:
 
@@ -193,7 +193,8 @@ curl -I http://127.0.0.1/
 
 - для development можно запускать обычный `docker compose ...` без `.env`; если нужны свои значения, создайте корневой `.env` на основе `.env.example`, экспортируйте переменные в shell или явно передайте `--env-file .env.development`;
 - для production запускайте `docker compose --env-file .env.production up --build -d` или создайте корневой `.env` с production-значениями;
-- `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL` имеют fallback `http://localhost` и `http://localhost/api`, но для production их обязательно нужно переопределить реальным доменом, потому что эти значения встраиваются во frontend bundle на этапе сборки.
+- `NEXT_PUBLIC_SITE_URL` имеет fallback `http://localhost`, а `NEXT_PUBLIC_API_URL` имеет browser-safe fallback `/api`. Для VPS браузерный API должен быть `/api` (через nginx reverse proxy) или публичным доменом вида `https://example.com/api`; `http://localhost/api` в production использовать нельзя, потому что это значение встраивается во frontend bundle и для посетителя указывает на его локальный компьютер.
+- `INTERNAL_API_URL` — server-only URL для SSR-запросов frontend-контейнера к backend внутри docker-сети; значение по умолчанию `http://backend:8000/api` не попадает в browser bundle.
 
 | Переменная | Значение по умолчанию | Назначение |
 | --- | --- | --- |
@@ -230,7 +231,8 @@ curl -I http://127.0.0.1/
 | `TELEGRAM_API_BASE_URL` | `https://api.telegram.org` | Базовый URL Telegram Bot API. |
 | `TELEGRAM_TIMEOUT_SECONDS` | `8` | Timeout запросов к Telegram API. |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost` | Публичный URL сайта, доступный в frontend bundle. |
-| `NEXT_PUBLIC_API_URL` | `http://localhost/api` | Публичный URL API, доступный в frontend bundle. |
+| `NEXT_PUBLIC_API_URL` | `/api` | Browser-facing URL API, доступный в frontend bundle; на VPS используйте `/api` или публичный домен, но не `http://localhost/api`. |
+| `INTERNAL_API_URL` | `http://backend:8000/api` | Server-only URL API для SSR-запросов frontend-контейнера внутри docker-сети. |
 
 ## Docker commands
 
