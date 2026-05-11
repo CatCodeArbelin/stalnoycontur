@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -8,18 +6,10 @@ from app.core.database import get_db
 from app.models.case import Case
 from app.models.faq import FAQ
 from app.models.review import Review
-from app.models.setting import Setting
 from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
-from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_REVIEWS, DEFAULT_SETTINGS
+from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_REVIEWS, assemble_public_settings
 
 router = APIRouter(tags=["content"])
-PUBLIC_SETTING_KEYS = set(PublicSettings.model_fields)
-
-
-def normalize_setting_value(value: Any) -> Any:
-    if isinstance(value, dict) and "value" in value and len(value) == 1:
-        return value["value"]
-    return value
 
 
 @router.get("/cases", response_model=list[CaseItem])
@@ -42,7 +32,4 @@ def get_faq(db: Session = Depends(get_db)) -> list[FAQ | FaqItem]:
 
 @router.get("/settings", response_model=PublicSettings)
 def get_settings(db: Session = Depends(get_db)) -> PublicSettings:
-    rows = db.scalars(select(Setting).where(Setting.key.in_(PUBLIC_SETTING_KEYS))).all()
-    values = DEFAULT_SETTINGS.model_dump()
-    values.update({row.key: normalize_setting_value(row.value) for row in rows if row.value is not None})
-    return PublicSettings.model_validate(values)
+    return assemble_public_settings(db)

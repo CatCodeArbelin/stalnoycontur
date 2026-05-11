@@ -1,3 +1,9 @@
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models.setting import Setting
 from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
 
 DEFAULT_CASES = [
@@ -45,8 +51,28 @@ DEFAULT_FAQ = [
 DEFAULT_SETTINGS = PublicSettings(
     company_name="Стальной Контур",
     phone="+7 978 000-44-88",
+    phones=[
+        {"label": "+7 978 000-44-88", "href": "tel:+79780004488"},
+        {"label": "+7 978 000-44-99", "href": "tel:+79780004499"},
+    ],
     telegram="https://t.me/stalnoycontur",
     max="https://max.ru/stalnoycontur",
     cities=["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч"],
     personal_data_consent_text="Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
 )
+
+
+PUBLIC_SETTING_KEYS = set(PublicSettings.model_fields)
+
+
+def normalize_setting_value(value: Any) -> Any:
+    if isinstance(value, dict) and "value" in value and len(value) == 1:
+        return value["value"]
+    return value
+
+
+def assemble_public_settings(db: Session) -> PublicSettings:
+    rows = db.scalars(select(Setting).where(Setting.key.in_(PUBLIC_SETTING_KEYS))).all()
+    values = DEFAULT_SETTINGS.model_dump()
+    values.update({row.key: normalize_setting_value(row.value) for row in rows if row.value is not None})
+    return PublicSettings.model_validate(values)

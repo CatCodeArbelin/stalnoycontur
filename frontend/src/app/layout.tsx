@@ -25,8 +25,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="ru" className={manrope.variable}>
       <body className="font-sans antialiased">
-        <LocalBusinessJsonLd />
-        <ConstructionBusinessJsonLd />
+        <LocalBusinessJsonLd settings={settings} />
+        <ConstructionBusinessJsonLd settings={settings} />
         <Header settings={settings} />
         <main>{children}</main>
         <Footer settings={settings} />

@@ -4,7 +4,7 @@ import { contacts } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 export function QuickContact({ settings = fallbackSettings }: { settings?: PublicSettings }) {
-  const primaryPhone = contacts.phones[0] ?? { href: `tel:${settings.phone.replace(/[^\d+]/g, "")}`, label: settings.phone };
+  const primaryPhone = settings.phones?.[0] ?? fallbackSettings.phones[0];
   const telegramHref = settings.telegram || contacts.telegram.href;
   const maxHref = settings.max || contacts.max.href;
 

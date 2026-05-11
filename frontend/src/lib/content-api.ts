@@ -27,9 +27,15 @@ export type PublicFaq = {
   sort_order?: number | null;
 };
 
+export type PublicPhone = {
+  label: string;
+  href: string;
+};
+
 export type PublicSettings = {
   company_name: string;
   phone: string;
+  phones: PublicPhone[];
   telegram?: string;
   max?: string;
   cities: string[];
@@ -46,6 +52,7 @@ export type ManagedContent = {
 export const fallbackSettings: PublicSettings = {
   company_name: "Стальной Контур",
   phone: fallbackPhone,
+  phones: contacts.phones,
   telegram: contacts.telegram.href,
   max: contacts.max.href,
   cities: fallbackCities,

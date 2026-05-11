@@ -1,5 +1,5 @@
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
-from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
+from app.schemas.content import CaseItem, FaqItem, PublicPhone, PublicSettings, ReviewItem
 from app.schemas.faq import FAQCreate, FAQRead, FAQUpdate
 from app.schemas.lead import LeadCreate, LeadRead, LeadUpdate
 from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
@@ -18,6 +18,7 @@ __all__ = [
     "LeadCreate",
     "LeadRead",
     "LeadUpdate",
+    "PublicPhone",
     "PublicSettings",
     "ReviewCreate",
     "ReviewItem",

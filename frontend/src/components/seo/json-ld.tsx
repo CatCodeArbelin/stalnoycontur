@@ -1,4 +1,5 @@
-import { siteConfig, absoluteUrl } from "@/lib/seo";
+import type { PublicSettings } from "@/lib/content-api";
+import { siteConfig, absoluteUrl, publicSettingsTelephone } from "@/lib/seo";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -36,7 +37,9 @@ const geo = {
   longitude: 34.1024,
 };
 
-export function LocalBusinessJsonLd() {
+export function LocalBusinessJsonLd({ settings }: { settings?: PublicSettings }) {
+  const telephone = publicSettingsTelephone(settings);
+
   return (
     <JsonLd
       data={{
@@ -46,7 +49,7 @@ export function LocalBusinessJsonLd() {
         name: siteConfig.name,
         url: absoluteUrl("/"),
         image: absoluteUrl(siteConfig.image),
-        telephone: siteConfig.phone,
+        telephone,
         priceRange: "₽₽",
         address,
         geo,
@@ -57,7 +60,9 @@ export function LocalBusinessJsonLd() {
   );
 }
 
-export function ConstructionBusinessJsonLd() {
+export function ConstructionBusinessJsonLd({ settings }: { settings?: PublicSettings }) {
+  const telephone = publicSettingsTelephone(settings);
+
   return (
     <JsonLd
       data={{
@@ -67,7 +72,7 @@ export function ConstructionBusinessJsonLd() {
         name: siteConfig.name,
         url: absoluteUrl("/"),
         image: absoluteUrl(siteConfig.image),
-        telephone: siteConfig.phone,
+        telephone,
         priceRange: "₽₽",
         address,
         geo,
