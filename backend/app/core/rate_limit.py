@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict, deque
-from collections.abc import Callable, Deque
+from collections.abc import Callable
+from typing import Deque
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
