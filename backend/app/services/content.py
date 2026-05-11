@@ -1,24 +1,48 @@
 from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
 
-CASES = [
-    CaseItem(title="Навес 6×8 м для двух авто", place="Симферополь", price="от 268 000 ₽", image="/images/case-1.svg"),
-    CaseItem(title="Терраса с поликарбонатом", place="Ялта", price="от 184 000 ₽", image="/images/case-2.svg"),
-    CaseItem(title="Двускатный навес для двора", place="Севастополь", price="от 315 000 ₽", image="/images/case-3.svg"),
+DEFAULT_CASES = [
+    CaseItem(
+        title="Навес 6×8 м для двух авто",
+        slug="naves-6x8-dlya-dvuh-avto",
+        city="Симферополь",
+        description="Металлический навес для парковки двух автомобилей с поликарбонатной кровлей.",
+        materials=["металлокаркас", "поликарбонат"],
+        cover_image="/images/case-1.svg",
+        gallery=["/images/case-1.svg"],
+    ),
+    CaseItem(
+        title="Терраса с поликарбонатом",
+        slug="terrasa-s-polikarbonatom",
+        city="Ялта",
+        description="Светлая терраса с прозрачной кровлей и аккуратным примыканием к дому.",
+        materials=["металлокаркас", "поликарбонат"],
+        cover_image="/images/case-2.svg",
+        gallery=["/images/case-2.svg"],
+    ),
+    CaseItem(
+        title="Двускатный навес для двора",
+        slug="dvuskatnyy-naves-dlya-dvora",
+        city="Севастополь",
+        description="Усиленная двускатная конструкция для частного двора с организованным водоотводом.",
+        materials=["металлокаркас", "профнастил"],
+        cover_image="/images/case-3.svg",
+        gallery=["/images/case-3.svg"],
+    ),
 ]
 
-REVIEWS = [
-    ReviewItem(author="Алексей", city="Симферополь", rating=5, text="Сделали навес для двух машин за три дня, аккуратно покрасили каркас."),
-    ReviewItem(author="Марина", city="Ялта", rating=5, text="Помогли подобрать поликарбонат под террасу и вывели водосток."),
-    ReviewItem(author="Игорь", city="Севастополь", rating=5, text="Понравились подробная смета и монтаж без затягивания сроков."),
+DEFAULT_REVIEWS = [
+    ReviewItem(author="Алексей", text="Сделали навес для двух машин за три дня, аккуратно покрасили каркас."),
+    ReviewItem(author="Марина", text="Помогли подобрать поликарбонат под террасу и вывели водосток."),
+    ReviewItem(author="Игорь", text="Понравились подробная смета и монтаж без затягивания сроков."),
 ]
 
-FAQ = [
-    FaqItem(question="Выезжаете ли на замер?", answer="Да, согласуем удобное время и выезжаем на объект по Крыму."),
-    FaqItem(question="Какая гарантия на навес?", answer="На конструкцию предоставляется гарантия до 7 лет в зависимости от проекта."),
-    FaqItem(question="Можно ли заказать навес под ключ?", answer="Да, делаем проект, фундамент, каркас, кровлю, водосток и уборку площадки."),
+DEFAULT_FAQ = [
+    FaqItem(question="Выезжаете ли на замер?", answer="Да, согласуем удобное время и выезжаем на объект по Крыму.", sort_order=10),
+    FaqItem(question="Какая гарантия на навес?", answer="На конструкцию предоставляется гарантия до 7 лет в зависимости от проекта.", sort_order=20),
+    FaqItem(question="Можно ли заказать навес под ключ?", answer="Да, делаем проект, фундамент, каркас, кровлю, водосток и уборку площадки.", sort_order=30),
 ]
 
-SETTINGS = PublicSettings(
+DEFAULT_SETTINGS = PublicSettings(
     company_name="Стальной Контур",
     phone="+7 978 000-44-88",
     whatsapp="https://wa.me/79780004488",

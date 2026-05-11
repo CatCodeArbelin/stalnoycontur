@@ -5,16 +5,19 @@ import { CasesMapReviewsFaqContacts } from "@/components/sections/home-sections"
 import { BreadcrumbListJsonLd, ReviewJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cases } from "@/data/site";
+import { fallbackReviews, getManagedContent } from "@/lib/content-api";
 import { metadataForPath } from "@/lib/seo";
 
 export const metadata: Metadata = metadataForPath("/cases");
 
-export default function CasesPage() {
+export default async function CasesPage() {
+  const content = await getManagedContent();
+  const review = content.reviews[0] ?? fallbackReviews[0];
+
   return (
     <>
       <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: "Кейсы", url: "/cases" }]} />
-      <ReviewJsonLd author="Ирина" text="Быстро согласовали эскиз и аккуратно смонтировали навес у террасы." ratingValue={5} />
+      <ReviewJsonLd author={review.author} text={review.text} ratingValue={5} />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container">
           <Badge className="border-white/20 bg-white/10 text-copper-400">Портфолио</Badge>
@@ -24,15 +27,15 @@ export default function CasesPage() {
       </section>
       <section className="section-padding">
         <div className="container grid gap-6 md:grid-cols-3">
-          {cases.concat(cases).map((item, index) => (
-            <Card key={`${item.title}-${index}`} className="overflow-hidden">
-              <Image src={item.image} alt={item.title} width={560} height={360} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-56 w-full object-cover" />
-              <div className="p-6"><h2 className="text-xl font-black">{item.title}</h2><p className="mt-2 text-muted-foreground">{item.place}</p><p className="mt-3 font-black text-copper-600">{item.price}</p></div>
+          {content.cases.map((item) => (
+            <Card key={item.slug ?? item.title} className="overflow-hidden">
+              <Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={560} height={360} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-56 w-full object-cover" />
+              <div className="p-6"><h2 className="text-xl font-black">{item.title}</h2>{item.city ? <p className="mt-2 text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-3 font-black text-copper-600">{item.materials.join(" · ")}</p> : null}</div>
             </Card>
           ))}
         </div>
       </section>
-      <CasesMapReviewsFaqContacts />
+      <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
     </>
   );
 }

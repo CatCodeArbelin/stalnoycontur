@@ -1,0 +1,116 @@
+import { cases as fallbackCases, cities as fallbackCities, phone as fallbackPhone } from "@/data/site";
+
+export type PublicCase = {
+  id?: number | null;
+  title: string;
+  slug?: string | null;
+  city?: string | null;
+  description?: string | null;
+  materials?: string[] | null;
+  cover_image?: string | null;
+  gallery?: string[] | null;
+  created_at?: string | null;
+};
+
+export type PublicReview = {
+  id?: number | null;
+  author: string;
+  text: string;
+  image?: string | null;
+  avito_url?: string | null;
+};
+
+export type PublicFaq = {
+  id?: number | null;
+  question: string;
+  answer: string;
+  sort_order?: number | null;
+};
+
+export type PublicSettings = {
+  company_name: string;
+  phone: string;
+  whatsapp: string;
+  cities: string[];
+  personal_data_consent_text: string;
+};
+
+export type ManagedContent = {
+  cases: PublicCase[];
+  reviews: PublicReview[];
+  faq: PublicFaq[];
+  settings: PublicSettings;
+};
+
+export const fallbackSettings: PublicSettings = {
+  company_name: "Стальной Контур",
+  phone: fallbackPhone,
+  whatsapp: "https://wa.me/79780004488",
+  cities: fallbackCities,
+  personal_data_consent_text: "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
+};
+
+export const fallbackPublicCases: PublicCase[] = fallbackCases.map((item, index) => ({
+  id: index + 1,
+  title: item.title,
+  city: item.place,
+  description: item.price,
+  cover_image: item.image,
+  gallery: [item.image],
+}));
+
+export const fallbackReviews: PublicReview[] = [
+  { author: "Алексей", text: "Сделали навес для двух машин, помогли выбрать цвет под забор. Монтаж занял два дня, участок оставили чистым." },
+];
+
+export const fallbackFaq: PublicFaq[] = [
+  { question: "Сколько длится монтаж?", answer: "После замера инженер предложит решение под ваш участок, бюджет и срок службы." },
+  { question: "Какая кровля лучше для Крыма?", answer: "Подбираем поликарбонат, профнастил или металлочерепицу под нагрузку, бюджет и архитектуру объекта." },
+  { question: "Нужен ли фундамент?", answer: "Тип основания рассчитываем после осмотра участка и выбора конструкции навеса." },
+  { question: "Можно ли сделать подсветку?", answer: "Да, предусматриваем подсветку, водосток и декоративные элементы на этапе проекта." },
+];
+
+const apiBase = process.env.NEXT_PUBLIC_API_URL;
+
+async function fetchPublic<T>(path: string, fallback: T): Promise<T> {
+  if (!apiBase) {
+    return fallback;
+  }
+
+  try {
+    const response = await fetch(`${apiBase}${path}`, { next: { revalidate: 60 } });
+    if (!response.ok) {
+      return fallback;
+    }
+    return (await response.json()) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export async function getPublicCases(): Promise<PublicCase[]> {
+  return fetchPublic("/cases", fallbackPublicCases);
+}
+
+export async function getPublicReviews(): Promise<PublicReview[]> {
+  return fetchPublic("/reviews", fallbackReviews);
+}
+
+export async function getPublicFaq(): Promise<PublicFaq[]> {
+  return fetchPublic("/faq", fallbackFaq);
+}
+
+export async function getPublicSettings(): Promise<PublicSettings> {
+  return fetchPublic("/settings", fallbackSettings);
+}
+
+export async function getManagedContent(): Promise<ManagedContent> {
+  const [cases, reviews, faq, settings] = await Promise.all([
+    getPublicCases(),
+    getPublicReviews(),
+    getPublicFaq(),
+    getPublicSettings(),
+  ]);
+
+  return { cases, reviews, faq, settings };
+}
