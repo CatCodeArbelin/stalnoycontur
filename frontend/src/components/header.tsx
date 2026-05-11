@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 
 export function Header({ settings = fallbackSettings }: { settings?: PublicSettings }) {
   const [open, setOpen] = useState(false);
+  const telegramHref = settings.telegram || contacts.telegram.href;
+  const maxHref = settings.max || contacts.max.href;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 bg-background/85 backdrop-blur-xl">
@@ -37,11 +39,11 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
               </a>
             ))}
           </div>
-          <a href={contacts.telegram.href} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в Telegram">
+          <a href={telegramHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в Telegram">
             <Send className="h-4 w-4" />
             {contacts.telegram.label}
           </a>
-          <a href={contacts.max.href} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в MAX">
+          <a href={maxHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в MAX">
             <MessageCircle className="h-4 w-4" />
             {contacts.max.label}
           </a>
@@ -63,11 +65,11 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
               <Phone className="h-4 w-4" />
               Позвонить
             </a>
-            <a href={contacts.telegram.href} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-sky-500 px-3 py-3 text-sm font-black text-white">
+            <a href={telegramHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-sky-500 px-3 py-3 text-sm font-black text-white">
               <Send className="h-4 w-4" />
               Telegram
             </a>
-            <a href={contacts.max.href} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-copper-500 px-3 py-3 text-sm font-black text-white">
+            <a href={maxHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-copper-500 px-3 py-3 text-sm font-black text-white">
               <MessageCircle className="h-4 w-4" />
               MAX
             </a>

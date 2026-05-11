@@ -4,7 +4,7 @@ export default function AdminSettingsPage() {
   return (
     <AdminResource
       title="Настройки"
-      description="CRUD для системных и публичных настроек. Значение можно вводить как JSON."
+      description="CRUD для системных и публичных настроек. Значение можно вводить как JSON. Ключи telegram и max управляют публичными кнопками Telegram и MAX."
       endpoint="/admin/settings"
       fields={[
         { key: "key", label: "Ключ" },

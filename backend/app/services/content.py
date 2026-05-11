@@ -45,7 +45,8 @@ DEFAULT_FAQ = [
 DEFAULT_SETTINGS = PublicSettings(
     company_name="Стальной Контур",
     phone="+7 978 000-44-88",
-    whatsapp="https://wa.me/79780004488",
+    telegram="https://t.me/stalnoycontur",
+    max="https://max.ru/stalnoycontur",
     cities=["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч"],
     personal_data_consent_text="Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
 )

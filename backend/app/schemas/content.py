@@ -39,7 +39,8 @@ class FaqItem(BaseModel):
 class PublicSettings(BaseModel):
     company_name: str
     phone: str
-    whatsapp: str
+    telegram: str
+    max: str
     cities: list[str]
     personal_data_consent_text: str
 
