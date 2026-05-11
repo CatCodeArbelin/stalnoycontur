@@ -12,12 +12,13 @@ class LeadBase(BaseModel):
     city: str | None = Field(default=None, max_length=80)
     canopy_type: str | None = Field(default=None, max_length=120)
     material: str | None = Field(default=None, max_length=120)
+    size: str | None = Field(default=None, max_length=120)
     comment: str | None = Field(default=None, max_length=2000)
     image: str | None = Field(default=None, max_length=500)
     source_page: str | None = Field(default=None, max_length=500)
     utm: dict[str, Any] | None = None
 
-    @field_validator("name", "city", "canopy_type", "material", "comment", "image", "source_page", mode="before")
+    @field_validator("name", "city", "canopy_type", "material", "size", "comment", "image", "source_page", mode="before")
     @classmethod
     def sanitize_strings(cls, value: str | None) -> str | None:
         return sanitize_text(value)
@@ -38,12 +39,13 @@ class LeadUpdate(BaseModel):
     city: str | None = Field(default=None, max_length=80)
     canopy_type: str | None = Field(default=None, max_length=120)
     material: str | None = Field(default=None, max_length=120)
+    size: str | None = Field(default=None, max_length=120)
     comment: str | None = Field(default=None, max_length=2000)
     image: str | None = Field(default=None, max_length=500)
     source_page: str | None = Field(default=None, max_length=500)
     utm: dict[str, Any] | None = None
 
-    @field_validator("name", "city", "canopy_type", "material", "comment", "image", "source_page", mode="before")
+    @field_validator("name", "city", "canopy_type", "material", "size", "comment", "image", "source_page", mode="before")
     @classmethod
     def sanitize_strings(cls, value: str | None) -> str | None:
         return sanitize_text(value)

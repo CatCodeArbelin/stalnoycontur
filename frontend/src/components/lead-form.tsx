@@ -127,6 +127,7 @@ function makePayload({ source, data, quiz, estimatedPrice, image }: { source: Le
     city: data.city,
     canopy_type: "canopyType" in data ? data.canopyType : quiz?.canopyType,
     material: "material" in data ? data.material : quiz?.material,
+    size: "size" in data ? data.size : quiz?.size,
     comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}, город ${quiz.city}` : undefined),
     image,
     source_page: getSourcePage(),
