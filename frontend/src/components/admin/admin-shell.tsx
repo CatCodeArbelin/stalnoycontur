@@ -44,6 +44,8 @@ const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
 
+type MessageType = "success" | "error";
+
 function formatFileSize(bytes: number) {
   return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024));
 }
@@ -52,6 +54,41 @@ function validateImageFile(file: File) {
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) return "Недопустимый тип файла. Загрузите JPG, PNG или WEBP.";
   if (file.size > MAX_IMAGE_SIZE_BYTES) return `Файл слишком большой: ${formatFileSize(file.size)} МБ. Максимум — ${formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ.`;
   return "";
+}
+
+function detailToMessage(detail: unknown) {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "msg" in item) return String(item.msg);
+        return JSON.stringify(item);
+      })
+      .filter(Boolean);
+    return messages.join("; ");
+  }
+  if (detail && typeof detail === "object") return JSON.stringify(detail);
+  return "";
+}
+
+async function formatApiError(error: unknown) {
+  if (error instanceof Response) {
+    const fallback = error.statusText || "Ошибка запроса";
+    const text = await error.text();
+    if (!text) return fallback;
+
+    try {
+      const data = JSON.parse(text) as { detail?: unknown; message?: unknown; error?: unknown };
+      return detailToMessage(data.detail ?? data.message ?? data.error) || fallback;
+    } catch {
+      return text;
+    }
+  }
+
+  if (error instanceof Error) return error.message || "Ошибка запроса";
+  if (typeof error === "string") return error;
+  return "Ошибка запроса";
 }
 
 function emptyValue(field: Field) {
@@ -94,9 +131,22 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<MessageType>("success");
   const [form, setForm] = useState<Record<string, unknown>>(() => Object.fromEntries(fields.map((field) => [field.key, emptyValue(field)])));
 
   const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
+
+  function showMessage(text: string, type: MessageType = "success") {
+    setMessage(text);
+    setMessageType(type);
+  }
+
+  function logout(messageText?: string) {
+    localStorage.removeItem("adminToken");
+    setToken("");
+    setItems([]);
+    if (messageText) showMessage(messageText, "error");
+  }
 
   async function request(path: string, init: RequestInit = {}) {
     const response = await fetch(`${apiBase}${path}`, {
@@ -107,40 +157,60 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
         ...init.headers,
       },
     });
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+      const errorMessage = response.status === 401 || response.status === 403 ? "Сессия истекла, войдите снова" : await formatApiError(response);
+      if (response.status === 401 || response.status === 403) logout(errorMessage);
+      throw new Error(errorMessage);
+    }
     if (response.status === 204) return null;
     return response.json();
   }
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = await request("/admin/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
-    setToken(data.access_token);
-    localStorage.setItem("adminToken", data.access_token);
-    setMessage("Вход выполнен");
+    try {
+      const data = await request("/admin/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
+      setToken(data.access_token);
+      localStorage.setItem("adminToken", data.access_token);
+      showMessage("Вход выполнен");
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
+    }
   }
 
   async function loadItems() {
     if (!token) return;
-    const data = await request(endpoint);
-    setItems(data);
+    try {
+      const data = await request(endpoint);
+      setItems(data);
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
+    }
   }
 
   async function saveItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const body = JSON.stringify(toPayload(fields, form));
-    await request(editingId ? `${endpoint}/${editingId}` : endpoint, { method: editingId ? "PATCH" : "POST", body });
-    setEditingId(null);
-    setForm(Object.fromEntries(fields.map((field) => [field.key, emptyValue(field)])));
-    setMessage("Сохранено");
-    await loadItems();
+    try {
+      const body = JSON.stringify(toPayload(fields, form));
+      await request(editingId ? `${endpoint}/${editingId}` : endpoint, { method: editingId ? "PATCH" : "POST", body });
+      setEditingId(null);
+      setForm(Object.fromEntries(fields.map((field) => [field.key, emptyValue(field)])));
+      showMessage("Сохранено");
+      await loadItems();
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
+    }
   }
 
   async function removeItem(id: unknown) {
     if (typeof id !== "number") return;
-    await request(`${endpoint}/${id}`, { method: "DELETE" });
-    setMessage("Удалено");
-    await loadItems();
+    try {
+      await request(`${endpoint}/${id}`, { method: "DELETE" });
+      showMessage("Удалено");
+      await loadItems();
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
+    }
   }
 
   function uploadCategory(fieldKey: string) {
@@ -151,36 +221,44 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
     if (!file) return;
     const validationError = validateImageFile(file);
     if (validationError) {
-      setMessage(validationError);
+      showMessage(validationError, "error");
       return;
     }
-    const payload = new FormData();
-    payload.append("file", file);
-    payload.append("category", uploadCategory(fieldKey));
-    const data = await request("/admin/upload", { method: "POST", body: payload });
-    setForm((current) => ({ ...current, [fieldKey]: data.url }));
-  }
-
-  async function uploadImageList(fieldKey: string, files: FileList | null) {
-    if (!files?.length) return;
-    const urls: string[] = [];
-    for (const file of Array.from(files)) {
-      const validationError = validateImageFile(file);
-      if (validationError) {
-        setMessage(`${file.name}: ${validationError}`);
-        return;
-      }
+    try {
       const payload = new FormData();
       payload.append("file", file);
       payload.append("category", uploadCategory(fieldKey));
       const data = await request("/admin/upload", { method: "POST", body: payload });
-      urls.push(data.url);
+      setForm((current) => ({ ...current, [fieldKey]: data.url }));
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
     }
-    setForm((current) => {
-      const currentValue = String(current[fieldKey] ?? "").trim();
-      const prefix = currentValue ? `${currentValue}\n` : "";
-      return { ...current, [fieldKey]: `${prefix}${urls.join("\n")}` };
-    });
+  }
+
+  async function uploadImageList(fieldKey: string, files: FileList | null) {
+    if (!files?.length) return;
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const validationError = validateImageFile(file);
+        if (validationError) {
+          showMessage(`${file.name}: ${validationError}`, "error");
+          return;
+        }
+        const payload = new FormData();
+        payload.append("file", file);
+        payload.append("category", uploadCategory(fieldKey));
+        const data = await request("/admin/upload", { method: "POST", body: payload });
+        urls.push(data.url);
+      }
+      setForm((current) => {
+        const currentValue = String(current[fieldKey] ?? "").trim();
+        const prefix = currentValue ? `${currentValue}\n` : "";
+        return { ...current, [fieldKey]: `${prefix}${urls.join("\n")}` };
+      });
+    } catch (error) {
+      showMessage(await formatApiError(error), "error");
+    }
   }
 
   useEffect(() => {
@@ -207,6 +285,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                 <Link href={href}>{label}</Link>
               </Button>
             ))}
+            {token ? <Button variant="outline" size="sm" onClick={() => logout()}>Выйти</Button> : null}
           </div>
         </div>
 
@@ -223,7 +302,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
           </Card>
         ) : null}
 
-        {message ? <div className="rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">{message}</div> : null}
+        {message ? <div className={cn("rounded-2xl p-4 text-sm font-semibold", messageType === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700")}>{message}</div> : null}
 
         {token ? (
           <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
