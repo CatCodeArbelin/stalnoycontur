@@ -8,7 +8,7 @@ import { MobileCta } from "@/components/mobile-cta";
 import { QuickContact } from "@/components/quick-contact";
 import { ConstructionBusinessJsonLd, LocalBusinessJsonLd } from "@/components/seo";
 import { getPublicSettings } from "@/lib/content-api";
-import { createPageMetadata, siteConfig } from "@/lib/seo";
+import { createPageMetadata, homeSeo } from "@/lib/seo";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -17,14 +17,7 @@ const manrope = Manrope({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  ...createPageMetadata({
-    path: "/",
-    title: "Стальной Контур — навесы под ключ в Крыму",
-    description: siteConfig.defaultDescription,
-  }),
-};
+export const metadata: Metadata = createPageMetadata(homeSeo);
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const settings = await getPublicSettings();
