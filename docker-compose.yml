@@ -1,10 +1,43 @@
-x-app-env-files: &app-env-files
-  - ${COMPOSE_ENV_FILE:-.env}
+x-postgres-environment: &postgres-environment
+  POSTGRES_DB: "${POSTGRES_DB:-stalnoycontur}"
+  POSTGRES_USER: "${POSTGRES_USER:-stalnoycontur}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-stalnoycontur}"
+
+x-backend-environment: &backend-environment
+  APP_NAME: "${APP_NAME:-Stalnoy Contur API}"
+  API_PREFIX: "${API_PREFIX:-/api}"
+  DATABASE_URL: "${DATABASE_URL:-postgresql+psycopg://stalnoycontur:stalnoycontur@postgres:5432/stalnoycontur}"
+  FRONTEND_URL: "${FRONTEND_URL:-http://localhost}"
+  API_URL: "${API_URL:-http://localhost/api}"
+  CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost,http://localhost:3000}"
+  TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-${TG_BOT_TOKEN:-}}"
+  TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-${TG_GROUP_ID:-}}"
+  TELEGRAM_API_BASE_URL: "${TELEGRAM_API_BASE_URL:-https://api.telegram.org}"
+  TELEGRAM_TIMEOUT_SECONDS: "${TELEGRAM_TIMEOUT_SECONDS:-8}"
+  RATE_LIMIT_REQUESTS: "${RATE_LIMIT_REQUESTS:-60}"
+  RATE_LIMIT_WINDOW_SECONDS: "${RATE_LIMIT_WINDOW_SECONDS:-60}"
+  IMAGES_ROOT: "${IMAGES_ROOT:-/images}"
+  UPLOAD_DIR: "${UPLOAD_DIR:-/images/uploads}"
+  UPLOAD_PATH: "${UPLOAD_PATH:-/images/uploads}"
+  CASES_DIR: "${CASES_DIR:-/images/cases}"
+  GALLERY_DIR: "${GALLERY_DIR:-/images/gallery}"
+  REVIEWS_DIR: "${REVIEWS_DIR:-/images/reviews}"
+  PRODUCTION_DIR: "${PRODUCTION_DIR:-/images/production}"
+  UPLOAD_URL_PREFIX: "${UPLOAD_URL_PREFIX:-/images/uploads}"
+  UPLOAD_MAX_SIZE_BYTES: "${UPLOAD_MAX_SIZE_BYTES:-10485760}"
+  UPLOAD_MAX_WIDTH: "${UPLOAD_MAX_WIDTH:-1920}"
+  UPLOAD_MAX_HEIGHT: "${UPLOAD_MAX_HEIGHT:-1920}"
+  UPLOAD_WEBP_QUALITY: "${UPLOAD_WEBP_QUALITY:-82}"
+  ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+  ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-me}"
+  ADMIN_TOKEN: "${ADMIN_TOKEN:-}"
+  ADMIN_JWT_SECRET: "${ADMIN_JWT_SECRET:-dev-secret-change-me}"
+  ADMIN_TOKEN_TTL_SECONDS: "${ADMIN_TOKEN_TTL_SECONDS:-43200}"
 
 services:
   postgres:
     image: postgres:16-alpine
-    env_file: *app-env-files
+    environment: *postgres-environment
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,7 +52,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    env_file: *app-env-files
+    environment: *backend-environment
     volumes:
       - uploaded_images:/images
       - backend_logs:/app/logs
@@ -43,12 +76,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL in .env or pass --env-file .env.production before building frontend}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL in .env or pass --env-file .env.production before building frontend}
-    env_file: *app-env-files
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost/api}
     depends_on:
       backend:
         condition: service_healthy
@@ -56,7 +90,6 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    env_file: *app-env-files
     ports:
       - "${NGINX_PORT:-80}:80"
     volumes:
