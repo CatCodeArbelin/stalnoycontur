@@ -13,6 +13,7 @@ type Field = {
   label: string;
   type?: "text" | "textarea" | "number" | "checkbox" | "json" | "image" | "image-list";
   placeholder?: string;
+  uploadCategory?: "uploads" | "cases" | "gallery" | "reviews" | "production";
 };
 
 type Column = {
@@ -141,6 +142,10 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
     await loadItems();
   }
 
+  function uploadCategory(fieldKey: string) {
+    return fields.find((field) => field.key === fieldKey)?.uploadCategory ?? "uploads";
+  }
+
   async function uploadImage(fieldKey: string, file: File | null) {
     if (!file) return;
     const validationError = validateImageFile(file);
@@ -150,6 +155,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
     }
     const payload = new FormData();
     payload.append("file", file);
+    payload.append("category", uploadCategory(fieldKey));
     const data = await request("/admin/upload", { method: "POST", body: payload });
     setForm((current) => ({ ...current, [fieldKey]: data.url }));
   }
@@ -165,6 +171,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
       }
       const payload = new FormData();
       payload.append("file", file);
+      payload.append("category", uploadCategory(fieldKey));
       const data = await request("/admin/upload", { method: "POST", body: payload });
       urls.push(data.url);
     }

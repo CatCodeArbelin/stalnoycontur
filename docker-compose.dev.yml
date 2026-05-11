@@ -3,7 +3,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend:/app
-      - uploaded_images:/app/uploads
+      - uploaded_images:/images
       - backend_logs:/app/logs
     ports:
       - "8000:8000"

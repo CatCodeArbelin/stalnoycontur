@@ -204,8 +204,13 @@ Production запуск по-прежнему использует только 
 | `UPLOAD_MAX_WIDTH` | `1920` | Максимальная ширина оптимизированного изображения в пикселях. |
 | `UPLOAD_MAX_HEIGHT` | `1920` | Максимальная высота оптимизированного изображения в пикселях. |
 | `UPLOAD_WEBP_QUALITY` | `82` | Качество WEBP при сохранении оптимизированного изображения. |
-| `UPLOAD_DIR` / `UPLOAD_PATH` | `/app/uploads` | Директория uploads внутри backend-контейнера. |
-| `UPLOAD_URL_PREFIX` | `/uploads` | URL-префикс для отдачи загруженных файлов backend-ом. |
+| `IMAGES_ROOT` | `/images` | Общий корень persistent volume с изображениями внутри backend и nginx. |
+| `UPLOAD_DIR` / `UPLOAD_PATH` | `/images/uploads` | Директория для общих public uploads внутри `IMAGES_ROOT`. |
+| `CASES_DIR` | `/images/cases` | Директория для обложек кейсов, загружаемых из админки. |
+| `GALLERY_DIR` | `/images/gallery` | Директория для галерей кейсов, загружаемых из админки. |
+| `REVIEWS_DIR` | `/images/reviews` | Директория для изображений отзывов, загружаемых из админки. |
+| `PRODUCTION_DIR` | `/images/production` | Директория для изображений из публичных multipart-заявок. |
+| `UPLOAD_URL_PREFIX` | `/images/uploads` | URL-префикс для общей категории uploads; категорийные URL формируются как `/images/<category>/...`. |
 | `ADMIN_USERNAME` | `admin` | Логин админ-панели. |
 | `ADMIN_PASSWORD` | `change-me` | Пароль админ-панели. В production обязательно заменить. |
 | `ADMIN_TOKEN` | пусто | Опциональный постоянный bearer token для админки. |
@@ -241,7 +246,7 @@ docker compose --env-file .env.production logs -f backend
 # Остановить и удалить production-контейнеры, сохранив volumes
 docker compose --env-file .env.production down
 
-# Остановить и удалить production-контейнеры вместе с volumes: удалит БД и uploads
+# Остановить и удалить production-контейнеры вместе с volumes: удалит БД и images
 docker compose --env-file .env.production down -v
 ```
 
@@ -333,27 +338,28 @@ docker compose exec -T postgres psql \
 - Разрешенные исходные типы по умолчанию: JPEG (`image/jpeg`), PNG (`image/png`) и WEBP (`image/webp`).
 - Максимальный размер исходного файла по умолчанию: `10485760` байт (10 МБ), настраивается через `UPLOAD_MAX_SIZE_BYTES`; frontend также показывает понятную ошибку до отправки файла.
 - После загрузки backend открывает изображение через Pillow, применяет EXIF-ориентацию, уменьшает до `UPLOAD_MAX_WIDTH` × `UPLOAD_MAX_HEIGHT` (по умолчанию 1920 × 1920 px), сжимает с `UPLOAD_WEBP_QUALITY` (по умолчанию 82) и сохраняет только оптимизированный `.webp`.
-- В Docker оптимизированные изображения хранятся в volume `uploaded_images`, который смонтирован в backend как `/app/uploads`; вне Docker путь задается `UPLOAD_DIR` / `UPLOAD_PATH`.
-- URL оптимизированного изображения формируется с префиксом `UPLOAD_URL_PREFIX`, по умолчанию `/uploads`, а записи uploads получают `content_type=image/webp` и filename с расширением `.webp`.
+- В Docker оптимизированные изображения хранятся в общем volume `uploaded_images`, который смонтирован в backend и nginx как `/images`. Nginx отдает `/images/` напрямую с cache headers, поэтому backend нужен только для записи файлов и dev-режима без nginx.
+- Категория загрузки выбирает поддиректорию: `uploads` → `/images/uploads`, `cases` → `/images/cases`, `gallery` → `/images/gallery`, `reviews` → `/images/reviews`, `production` → `/images/production`. Public upload API и admin upload API принимают multipart-поле `category`; файлы из multipart-заявок сохраняются в `production`.
+- URL оптимизированного изображения формируется как `/images/<category>/<filename>.webp` (для общей категории — `UPLOAD_URL_PREFIX`, по умолчанию `/images/uploads`), а записи uploads получают `content_type=image/webp` и filename с расширением `.webp`.
 - `docker compose down` сохраняет volume с изображениями; `docker compose down -v` удаляет его вместе с БД и логами.
 
-### Backup uploads
+### Backup images
 
 ```bash
 mkdir -p backups
 docker run --rm \
   -v stalnoycontur_uploaded_images:/data:ro \
   -v "$(pwd)/backups:/backup" \
-  alpine tar -czf /backup/uploads-$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
+  alpine tar -czf /backup/images-$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
 ```
 
-### Restore uploads
+### Restore images
 
 ```bash
 docker run --rm \
   -v stalnoycontur_uploaded_images:/data \
   -v "$(pwd)/backups:/backup" \
-  alpine sh -c 'cd /data && tar -xzf /backup/uploads.tar.gz'
+  alpine sh -c 'cd /data && tar -xzf /backup/images.tar.gz'
 ```
 
 > Имя volume может отличаться, если проект запущен с другим `COMPOSE_PROJECT_NAME`. Проверьте фактические имена командой `docker volume ls`.
@@ -538,7 +544,7 @@ docker compose logs --tail=200 backend
 
 ### Пропали данные после остановки
 
-`docker compose down` не удаляет volumes. `docker compose down -v` удаляет volumes, включая PostgreSQL и uploads. Если была выполнена команда с `-v`, восстановите данные из backup.
+`docker compose down` не удаляет volumes. `docker compose down -v` удаляет volumes, включая PostgreSQL и images. Если была выполнена команда с `-v`, восстановите данные из backup.
 
 ### Посмотреть имена volumes
 

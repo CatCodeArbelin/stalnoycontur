@@ -31,5 +31,5 @@ app.include_router(upload_router, prefix=settings.api_prefix)
 app.include_router(content_router, prefix=settings.api_prefix)
 app.include_router(admin_router, prefix=settings.api_prefix)
 
-Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
-app.mount(settings.upload_url_prefix, StaticFiles(directory=settings.upload_dir), name="uploads")
+Path(settings.images_root).mkdir(parents=True, exist_ok=True)
+app.mount("/images", StaticFiles(directory=settings.images_root), name="images")

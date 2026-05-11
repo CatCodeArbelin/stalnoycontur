@@ -14,7 +14,7 @@ from app.models.lead import Lead
 from app.models.upload import Upload
 from app.schemas.lead import LeadCreate, LeadRead
 from app.services.telegram import send_lead_to_telegram
-from app.services.upload import save_optimized_upload, validate_upload
+from app.services.upload import UploadCategory, save_optimized_upload, validate_upload
 
 router = APIRouter(tags=["lead"])
 LEAD_FILE_FIELD = "file"
@@ -67,7 +67,12 @@ async def _attach_lead_file(
         return payload
 
     upload_data = await validate_upload(file, settings)
-    saved = save_optimized_upload(upload_data, file.filename, settings)
+    saved = save_optimized_upload(
+        upload_data,
+        file.filename,
+        settings,
+        UploadCategory.PRODUCTION,
+    )
     upload = Upload(
         filename=saved.filename,
         url=saved.url,
