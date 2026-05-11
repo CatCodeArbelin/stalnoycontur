@@ -59,29 +59,21 @@
 
 ## Быстрый запуск через Docker Compose
 
-1. Создайте `.env` в корне проекта для локального запуска:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Docker Compose читает корневой `.env` до разбора `docker-compose.yml`: эти значения используются и для interpolation, и для `frontend.build.args`. Это важно для `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL`, потому что они встраиваются во frontend bundle на этапе сборки. Если используете `.env.development` напрямую, запускайте команды с `--env-file .env.development`.
-
-2. Соберите и запустите весь стек:
+1. Соберите и запустите весь стек из чистого checkout без предварительного копирования `.env`:
 
    ```bash
    docker compose up --build
    ```
 
-   При старте backend-контейнер автоматически выполняет `alembic upgrade head`, поэтому актуальные миграции базы данных применяются без ручных команд. Alembic использует тот же `DATABASE_URL`, который передается backend-у из env-файла Docker Compose.
+   Базовый `docker-compose.yml` содержит development-safe значения по умолчанию для локального запуска: PostgreSQL, backend, frontend build/runtime-переменные и nginx стартуют без корневого `.env`. `NEXT_PUBLIC_SITE_URL` по умолчанию равен `http://localhost`, а `NEXT_PUBLIC_API_URL` — `http://localhost/api`; при необходимости их можно переопределить через shell, корневой `.env` или `--env-file`. При старте backend-контейнер автоматически выполняет `alembic upgrade head`, поэтому актуальные миграции базы данных применяются без ручных команд.
 
-3. Откройте приложение:
+2. Откройте приложение:
 
    - сайт: <http://localhost>
    - API healthcheck через nginx: <http://localhost/api/health>
    - nginx healthcheck: <http://localhost/nginx-health>
 
-4. Остановите стек клавишами `Ctrl+C` или командой из другого терминала:
+3. Остановите стек клавишами `Ctrl+C` или командой из другого терминала:
 
    ```bash
    docker compose down
@@ -145,7 +137,7 @@ Dev override запускает frontend командой `npm run dev` с bind 
 
 ## Production mode
 
-Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Backend-контейнер перед стартом uvicorn применяет миграции командой `alembic upgrade head`. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения через `--env-file .env.production` или через корневой `.env`, который Docker Compose читает для interpolation до `build.args`.
+Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Backend-контейнер перед стартом uvicorn применяет миграции командой `alembic upgrade head`. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения через `--env-file .env.production`, корневой `.env` или переменные shell; эти значения переопределят development-safe defaults из `docker-compose.yml`, включая `frontend.build.args`.
 
 1. Настройте production-переменные в `.env.production`:
 
@@ -153,7 +145,7 @@ Production запуск по-прежнему использует только 
    nano .env.production
    ```
 
-   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`. Оставьте `COMPOSE_ENV_FILE=.env.production`, если запускаете Compose с `--env-file .env.production`. Если вместо этого переносите production-значения в корневой `.env`, задайте в нем `COMPOSE_ENV_FILE=.env`.
+   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`. Команда ниже по-прежнему поддерживается и передает production-значения и в сервисы, и в `frontend.build.args`.
 
 2. Запустите стек с production env-файлом:
 
@@ -197,16 +189,14 @@ curl -I http://127.0.0.1/
 
 ## Env variables
 
-В репозитории есть `.env.example`, `.env.development` и `.env.production`. Надежная схема одна и та же для Windows Docker Desktop и Ubuntu Docker Engine:
+В репозитории есть `.env.example`, `.env.development` и `.env.production`. Базовый `docker-compose.yml` больше не подключает обязательный `env_file`, поэтому чистый checkout запускается сразу с безопасными локальными defaults:
 
-- для development скопируйте `.env.example` в `.env` и запускайте обычный `docker compose ...`, либо явно передавайте `--env-file .env.development`;
+- для development можно запускать обычный `docker compose ...` без `.env`; если нужны свои значения, создайте корневой `.env` на основе `.env.example`, экспортируйте переменные в shell или явно передайте `--env-file .env.development`;
 - для production запускайте `docker compose --env-file .env.production up --build -d` или создайте корневой `.env` с production-значениями;
-- значения `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL` должны находиться в файле, который Compose читает для interpolation (`--env-file ...` или `.env`), иначе сборка frontend остановится вместо тихого fallback на `http://localhost`;
-- `COMPOSE_ENV_FILE` должен указывать на тот же файл, чтобы сервисы получили те же переменные через `env_file`.
+- `NEXT_PUBLIC_SITE_URL` и `NEXT_PUBLIC_API_URL` имеют fallback `http://localhost` и `http://localhost/api`, но для production их обязательно нужно переопределить реальным доменом, потому что эти значения встраиваются во frontend bundle на этапе сборки.
 
 | Переменная | Значение по умолчанию | Назначение |
 | --- | --- | --- |
-| `COMPOSE_ENV_FILE` | `.env` | Env-файл, который подключается к сервисам через `env_file`; должен совпадать с файлом interpolation (`.env`, `.env.development` или `.env.production`). |
 | `FRONTEND_URL` | `http://localhost` | Публичный URL frontend-приложения. |
 | `API_URL` | `http://localhost/api` | Публичный URL API. |
 | `POSTGRES_DB` | `stalnoycontur` | Имя базы PostgreSQL. |
@@ -461,7 +451,7 @@ Telegram-уведомления отправляются при создании
    cd stalnoycontur
    ```
 
-5. Создайте `.env` с production-значениями. Если копируете из `.env.production`, замените `COMPOSE_ENV_FILE` на `.env`, чтобы Compose interpolation и `env_file` читали один и тот же файл:
+5. Создайте `.env` с production-значениями или используйте `.env.production` через `--env-file`. Если копируете шаблон, замените все секреты и публичные URL на реальные значения домена:
 
    ```bash
    cp .env.production .env
