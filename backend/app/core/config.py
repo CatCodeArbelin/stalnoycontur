@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     )
     upload_url_prefix: str = "/uploads"
     upload_max_size_bytes: int = 10 * 1024 * 1024
+    upload_max_width: int = 1920
+    upload_max_height: int = 1920
+    upload_webp_quality: int = 82
     upload_allowed_content_types: set[str] = Field(
         default_factory=lambda: {"image/jpeg", "image/png", "image/webp"}
     )

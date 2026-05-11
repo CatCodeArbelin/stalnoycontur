@@ -200,7 +200,10 @@ Production запуск по-прежнему использует только 
 | `CORS_ORIGINS` | `http://localhost,http://localhost:3000` | Разрешенные origins через запятую. |
 | `RATE_LIMIT_REQUESTS` | `60` | Количество запросов в окне rate limit. |
 | `RATE_LIMIT_WINDOW_SECONDS` | `60` | Длительность окна rate limit в секундах. |
-| `UPLOAD_MAX_SIZE_BYTES` | `10485760` | Максимальный размер загружаемого файла. |
+| `UPLOAD_MAX_SIZE_BYTES` | `10485760` | Максимальный размер исходного загружаемого изображения: 10 МБ. |
+| `UPLOAD_MAX_WIDTH` | `1920` | Максимальная ширина оптимизированного изображения в пикселях. |
+| `UPLOAD_MAX_HEIGHT` | `1920` | Максимальная высота оптимизированного изображения в пикселях. |
+| `UPLOAD_WEBP_QUALITY` | `82` | Качество WEBP при сохранении оптимизированного изображения. |
 | `UPLOAD_DIR` / `UPLOAD_PATH` | `/app/uploads` | Директория uploads внутри backend-контейнера. |
 | `UPLOAD_URL_PREFIX` | `/uploads` | URL-префикс для отдачи загруженных файлов backend-ом. |
 | `ADMIN_USERNAME` | `admin` | Логин админ-панели. |
@@ -326,11 +329,12 @@ docker compose exec -T postgres psql \
 
 ## Хранение изображений
 
-- Backend принимает изображения через upload API, валидирует тип и размер файла.
-- Разрешенные типы по умолчанию: JPEG, PNG и WEBP.
-- Максимальный размер по умолчанию: `10485760` байт, настраивается через `UPLOAD_MAX_SIZE_BYTES`.
-- В Docker изображения хранятся в volume `uploaded_images`, который смонтирован в backend как `/app/uploads`.
-- URL загруженного изображения формируется с префиксом `UPLOAD_URL_PREFIX`, по умолчанию `/uploads`.
+- Backend принимает изображения через public upload API, admin upload API и multipart-заявки, валидирует тип и размер файла единым сервисом.
+- Разрешенные исходные типы по умолчанию: JPEG (`image/jpeg`), PNG (`image/png`) и WEBP (`image/webp`).
+- Максимальный размер исходного файла по умолчанию: `10485760` байт (10 МБ), настраивается через `UPLOAD_MAX_SIZE_BYTES`; frontend также показывает понятную ошибку до отправки файла.
+- После загрузки backend открывает изображение через Pillow, применяет EXIF-ориентацию, уменьшает до `UPLOAD_MAX_WIDTH` × `UPLOAD_MAX_HEIGHT` (по умолчанию 1920 × 1920 px), сжимает с `UPLOAD_WEBP_QUALITY` (по умолчанию 82) и сохраняет только оптимизированный `.webp`.
+- В Docker оптимизированные изображения хранятся в volume `uploaded_images`, который смонтирован в backend как `/app/uploads`; вне Docker путь задается `UPLOAD_DIR` / `UPLOAD_PATH`.
+- URL оптимизированного изображения формируется с префиксом `UPLOAD_URL_PREFIX`, по умолчанию `/uploads`, а записи uploads получают `content_type=image/webp` и filename с расширением `.webp`.
 - `docker compose down` сохраняет volume с изображениями; `docker compose down -v` удаляет его вместе с БД и логами.
 
 ### Backup uploads

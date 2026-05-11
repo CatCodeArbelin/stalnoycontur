@@ -11,7 +11,7 @@ from app.models.lead import Lead
 from app.models.upload import Upload
 from app.schemas.lead import LeadCreate, LeadRead
 from app.services.telegram import send_lead_to_telegram
-from app.services.upload import save_upload, validate_upload
+from app.services.upload import save_optimized_upload, validate_upload
 
 router = APIRouter(tags=["lead"])
 
@@ -43,15 +43,15 @@ async def _payload_from_request(request: Request, db: Session, settings: Setting
 
         if photo is not None:
             upload_data = await validate_upload(photo, settings)
-            filename, url = save_upload(upload_data, photo.filename, settings)
+            saved = save_optimized_upload(upload_data, photo.filename, settings)
             upload = Upload(
-                filename=filename,
-                url=url,
-                content_type=photo.content_type or "application/octet-stream",
-                size_bytes=len(upload_data),
+                filename=saved.filename,
+                url=saved.url,
+                content_type=saved.content_type,
+                size_bytes=saved.size_bytes,
             )
             db.add(upload)
-            data["image"] = url
+            data["image"] = saved.url
 
         return LeadCreate.model_validate(data)
 

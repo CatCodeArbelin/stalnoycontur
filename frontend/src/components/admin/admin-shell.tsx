@@ -38,6 +38,19 @@ const nav = [
 ];
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
+
+function formatFileSize(bytes: number) {
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024));
+}
+
+function validateImageFile(file: File) {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) return "Недопустимый тип файла. Загрузите JPG, PNG или WEBP.";
+  if (file.size > MAX_IMAGE_SIZE_BYTES) return `Файл слишком большой: ${formatFileSize(file.size)} МБ. Максимум — ${formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ.`;
+  return "";
+}
 
 function emptyValue(field: Field) {
   if (field.type === "checkbox") return false;
@@ -130,6 +143,11 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
 
   async function uploadImage(fieldKey: string, file: File | null) {
     if (!file) return;
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
     const payload = new FormData();
     payload.append("file", file);
     const data = await request("/admin/upload", { method: "POST", body: payload });
@@ -140,6 +158,11 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
     if (!files?.length) return;
     const urls: string[] = [];
     for (const file of Array.from(files)) {
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        setMessage(`${file.name}: ${validationError}`);
+        return;
+      }
       const payload = new FormData();
       payload.append("file", file);
       const data = await request("/admin/upload", { method: "POST", body: payload });
@@ -210,8 +233,8 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                       ) : (
                         <input className="rounded-2xl border p-3 font-normal" value={String(form[field.key] ?? "")} onChange={(e) => setForm((current) => ({ ...current, [field.key]: e.target.value }))} placeholder={field.placeholder} type={field.type === "number" ? "number" : "text"} />
                       )}
-                      {field.type === "image" ? <input className="text-xs" type="file" accept="image/*" onChange={(e) => uploadImage(field.key, e.target.files?.[0] ?? null)} /> : null}
-                      {field.type === "image-list" ? <input className="text-xs" type="file" accept="image/*" multiple onChange={(e) => uploadImageList(field.key, e.target.files)} /> : null}
+                      {field.type === "image" ? <input className="text-xs" type="file" accept={IMAGE_ACCEPT} onChange={(e) => uploadImage(field.key, e.target.files?.[0] ?? null)} /> : null}
+                      {field.type === "image-list" ? <input className="text-xs" type="file" accept={IMAGE_ACCEPT} multiple onChange={(e) => uploadImageList(field.key, e.target.files)} /> : null}
                     </label>
                   ))}
                   <div className="flex gap-2">
