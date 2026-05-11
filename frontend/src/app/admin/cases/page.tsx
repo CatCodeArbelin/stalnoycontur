@@ -12,8 +12,8 @@ export default function AdminCasesPage() {
         { key: "city", label: "Город" },
         { key: "description", label: "Описание", type: "textarea" },
         { key: "materials", label: "Материалы JSON/строки", type: "json" },
-        { key: "cover_image", label: "Обложка", type: "image" },
-        { key: "gallery", label: "Галерея JSON/строки", type: "image-list" },
+        { key: "cover_image", label: "Обложка", type: "image", uploadCategory: "cases" },
+        { key: "gallery", label: "Галерея JSON/строки", type: "image-list", uploadCategory: "gallery" },
       ]}
       columns={[
         { key: "id", label: "ID" },

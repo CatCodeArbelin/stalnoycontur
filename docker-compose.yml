@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     env_file: *app-env-files
     volumes:
-      - uploaded_images:/app/uploads
+      - uploaded_images:/images
       - backend_logs:/app/logs
     depends_on:
       postgres:
@@ -61,6 +61,7 @@ services:
       - "${NGINX_PORT:-80}:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - uploaded_images:/images:ro
       - nginx_logs:/var/log/nginx
     depends_on:
       frontend:

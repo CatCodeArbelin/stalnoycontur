@@ -9,7 +9,7 @@ export default function AdminReviewsPage() {
       fields={[
         { key: "author", label: "Автор" },
         { key: "text", label: "Текст", type: "textarea" },
-        { key: "image", label: "Изображение", type: "image" },
+        { key: "image", label: "Изображение", type: "image", uploadCategory: "reviews" },
         { key: "avito_url", label: "Ссылка Avito" },
       ]}
       columns={[
