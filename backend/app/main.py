@@ -6,12 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import admin_router, content_router, health_router, lead_router, upload_router
 from app.core.config import get_settings
-from app.core.database import Base, engine
 from app.core.rate_limit import InMemoryRateLimitMiddleware
 
 settings = get_settings()
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.app_name)
 

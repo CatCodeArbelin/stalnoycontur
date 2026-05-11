@@ -73,6 +73,8 @@
    docker compose up --build
    ```
 
+   При старте backend-контейнер автоматически выполняет `alembic upgrade head`, поэтому актуальные миграции базы данных применяются без ручных команд. Alembic использует тот же `DATABASE_URL`, который передается backend-у из env-файла Docker Compose.
+
 3. Откройте приложение:
 
    - сайт: <http://localhost>
@@ -139,11 +141,11 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml exec frontend npm
 docker compose -f docker-compose.yml -f docker-compose.dev.yml exec frontend npm run lint
 ```
 
-Dev override запускает frontend командой `npm run dev` с bind mount `./frontend:/app`. Чтобы bind mount не перетирал установленные зависимости внутри Linux-контейнера, `node_modules` вынесен в named volume `frontend_node_modules`; это особенно важно для стабильной работы Docker Desktop на Windows. Backend запускается командой `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` с bind mount `./backend:/app`.
+Dev override запускает frontend командой `npm run dev` с bind mount `./frontend:/app`. Чтобы bind mount не перетирал установленные зависимости внутри Linux-контейнера, `node_modules` вынесен в named volume `frontend_node_modules`; это особенно важно для стабильной работы Docker Desktop на Windows. Backend запускается командой `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` с bind mount `./backend:/app`; перед запуском этой команды entrypoint backend-контейнера также автоматически выполняет `alembic upgrade head`.
 
 ## Production mode
 
-Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Команда `docker compose up --build` остается рабочей без дополнительных ручных действий. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
+Production запуск по-прежнему использует только базовый `docker-compose.yml`; dev override подключать не нужно. Команда `docker compose up --build` остается рабочей без дополнительных ручных действий: backend-контейнер перед стартом uvicorn применяет миграции командой `alembic upgrade head`. Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
 
 1. Скопируйте шаблон и настройте production-переменные:
 
@@ -190,7 +192,7 @@ Production запуск по-прежнему использует только 
 | `NGINX_PORT` | `80` | Порт хоста, на который публикуется nginx. |
 | `APP_NAME` | `Stalnoy Contur API` | Название FastAPI-приложения. |
 | `API_PREFIX` | `/api` | Префикс backend routes за nginx. |
-| `DATABASE_URL` | PostgreSQL DSN | URL подключения backend к базе данных. |
+| `DATABASE_URL` | PostgreSQL DSN | URL подключения backend к базе данных; этот же env используется Alembic для автоматического `alembic upgrade head` при старте контейнера. |
 | `CORS_ORIGINS` | `http://localhost,http://localhost:3000` | Разрешенные origins через запятую. |
 | `RATE_LIMIT_REQUESTS` | `60` | Количество запросов в окне rate limit. |
 | `RATE_LIMIT_WINDOW_SECONDS` | `60` | Длительность окна rate limit в секундах. |
