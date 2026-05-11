@@ -134,34 +134,22 @@ docker compose exec frontend npm run lint
 
 Для VPS или сервера используйте фоновый запуск и задавайте реальные значения переменных окружения.
 
-1. Создайте корневой `.env`:
+1. Скопируйте шаблон и настройте production-переменные:
 
    ```bash
-   nano .env
+   cp .env.example .env.production
+   nano .env.production
    ```
 
-2. Минимально настройте production-переменные:
+   Обязательно замените `POSTGRES_PASSWORD`, `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `FRONTEND_URL`, `API_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` и, при необходимости, `TG_BOT_TOKEN` / `TG_GROUP_ID`.
 
-   ```dotenv
-   POSTGRES_DB=stalnoycontur
-   POSTGRES_USER=stalnoycontur
-   POSTGRES_PASSWORD=replace-with-long-random-password
-   NGINX_PORT=80
-   CORS_ORIGINS=https://example.com,https://www.example.com
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=replace-with-strong-admin-password
-   ADMIN_JWT_SECRET=replace-with-long-random-secret
-   TELEGRAM_BOT_TOKEN=
-   TELEGRAM_CHAT_ID=
-   ```
-
-3. Запустите стек:
+2. Запустите стек с production env-файлом:
 
    ```bash
-   docker compose up --build -d
+   docker compose --env-file .env.production up --build -d
    ```
 
-4. Проверьте состояние:
+3. Проверьте состояние:
 
    ```bash
    docker compose ps
@@ -170,39 +158,45 @@ docker compose exec frontend npm run lint
    curl -f http://127.0.0.1/api/health
    ```
 
-5. После изменения `.env` примените конфигурацию перезапуском:
+4. После изменения env-файла примените конфигурацию перезапуском:
 
    ```bash
-   docker compose up -d --force-recreate
+   docker compose --env-file .env.production up -d --force-recreate
    ```
 
 ## Env variables
 
-Docker Compose автоматически читает корневой файл `.env` для подстановки значений в `docker-compose.yml`.
+В репозитории есть корневые `.env.example`, `.env.development` и `.env.production`. По умолчанию сервисы в `docker-compose.yml` подключают `.env.development` через `env_file`; для production запускайте Compose с `--env-file .env.production`, чтобы эти же значения использовались и для build args фронтенда.
 
 | Переменная | Значение по умолчанию | Назначение |
 | --- | --- | --- |
+| `ENV_FILE` | `.env.development` | Env-файл, который подключается к сервисам через `env_file`. |
+| `FRONTEND_URL` | `http://localhost` | Публичный URL frontend-приложения. |
+| `API_URL` | `http://localhost/api` | Публичный URL API. |
 | `POSTGRES_DB` | `stalnoycontur` | Имя базы PostgreSQL. |
 | `POSTGRES_USER` | `stalnoycontur` | Пользователь PostgreSQL. |
 | `POSTGRES_PASSWORD` | `stalnoycontur` | Пароль PostgreSQL. В production обязательно заменить. |
 | `NGINX_PORT` | `80` | Порт хоста, на который публикуется nginx. |
 | `APP_NAME` | `Stalnoy Contur API` | Название FastAPI-приложения. |
 | `API_PREFIX` | `/api` | Префикс backend routes за nginx. |
+| `DATABASE_URL` | PostgreSQL DSN | URL подключения backend к базе данных. |
 | `CORS_ORIGINS` | `http://localhost,http://localhost:3000` | Разрешенные origins через запятую. |
 | `RATE_LIMIT_REQUESTS` | `60` | Количество запросов в окне rate limit. |
 | `RATE_LIMIT_WINDOW_SECONDS` | `60` | Длительность окна rate limit в секундах. |
 | `UPLOAD_MAX_SIZE_BYTES` | `10485760` | Максимальный размер загружаемого файла. |
-| `UPLOAD_DIR` | `/app/uploads` | Директория uploads внутри backend-контейнера. |
+| `UPLOAD_DIR` / `UPLOAD_PATH` | `/app/uploads` | Директория uploads внутри backend-контейнера. |
 | `UPLOAD_URL_PREFIX` | `/uploads` | URL-префикс для отдачи загруженных файлов backend-ом. |
 | `ADMIN_USERNAME` | `admin` | Логин админ-панели. |
 | `ADMIN_PASSWORD` | `change-me` | Пароль админ-панели. В production обязательно заменить. |
 | `ADMIN_TOKEN` | пусто | Опциональный постоянный bearer token для админки. |
 | `ADMIN_JWT_SECRET` | пусто | Секрет подписи JWT. В production рекомендуется задать. |
 | `ADMIN_TOKEN_TTL_SECONDS` | `43200` | Время жизни выданного админ-токена. |
-| `TELEGRAM_BOT_TOKEN` | пусто | Токен Telegram-бота для уведомлений. |
-| `TELEGRAM_CHAT_ID` | пусто | ID чата, куда отправляются заявки. |
+| `TG_BOT_TOKEN` | пусто | Токен Telegram-бота для уведомлений. |
+| `TG_GROUP_ID` | пусто | ID группы/чата, куда отправляются заявки. |
 | `TELEGRAM_API_BASE_URL` | `https://api.telegram.org` | Базовый URL Telegram Bot API. |
 | `TELEGRAM_TIMEOUT_SECONDS` | `8` | Timeout запросов к Telegram API. |
+| `NEXT_PUBLIC_SITE_URL` | `http://localhost` | Публичный URL сайта, доступный в frontend bundle. |
+| `NEXT_PUBLIC_API_URL` | `http://localhost/api` | Публичный URL API, доступный в frontend bundle. |
 
 ## Docker commands
 

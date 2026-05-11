@@ -1,8 +1,8 @@
 from functools import lru_cache
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import AnyHttpUrl, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import AliasChoices, AnyHttpUrl, Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -11,10 +11,16 @@ class Settings(BaseSettings):
     app_name: str = "Stalnoy Contur API"
     api_prefix: str = ""
     database_url: str = "sqlite:///./stalnoycontur.db"
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:3000"]
+    )
 
-    telegram_bot_token: str | None = None
-    telegram_chat_id: str | None = None
+    telegram_bot_token: str | None = Field(
+        default=None, validation_alias=AliasChoices("TELEGRAM_BOT_TOKEN", "TG_BOT_TOKEN")
+    )
+    telegram_chat_id: str | None = Field(
+        default=None, validation_alias=AliasChoices("TELEGRAM_CHAT_ID", "TG_GROUP_ID")
+    )
     telegram_api_base_url: AnyHttpUrl = "https://api.telegram.org"
     telegram_timeout_seconds: float = 8.0
 
@@ -27,7 +33,9 @@ class Settings(BaseSettings):
     admin_jwt_secret: str | None = None
     admin_token_ttl_seconds: int = 12 * 60 * 60
 
-    upload_dir: str = "uploads"
+    upload_dir: str = Field(
+        default="uploads", validation_alias=AliasChoices("UPLOAD_DIR", "UPLOAD_PATH")
+    )
     upload_url_prefix: str = "/uploads"
     upload_max_size_bytes: int = 10 * 1024 * 1024
     upload_allowed_content_types: set[str] = Field(
