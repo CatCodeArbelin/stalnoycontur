@@ -2,6 +2,7 @@ import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone } from "lucide-r
 import Image from "next/image";
 import Link from "next/link";
 
+import { ContactLeadForm } from "@/components/lead-form";
 import { MotionReveal } from "@/components/motion-reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,22 +50,6 @@ export function Advantages() {
   );
 }
 
-export function QuizCalculator() {
-  const fields = ["Тип навеса", "Размер", "Кровля", "Город монтажа"];
-  return (
-    <section id="quiz" className="section-padding bg-white">
-      <div className="container grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-        <div><Badge>Квиз-калькулятор</Badge><h2 className="section-title mt-4">Получите ориентировочную смету за 2 минуты</h2><p className="section-lead">Ответьте на 4 вопроса — менеджер уточнит детали, предложит материалы и пришлет расчет с несколькими вариантами.</p></div>
-        <Card className="p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {fields.map((field, i) => <label key={field} className="rounded-3xl border bg-muted/40 p-4"><span className="text-xs font-black uppercase tracking-widest text-copper-600">Шаг {i + 1}</span><span className="mt-2 block font-bold">{field}</span><input className="mt-3 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-copper-400" placeholder="Введите значение" /></label>)}
-          </div>
-          <Button className="mt-5 w-full" size="lg" variant="copper">Получить расчет</Button>
-        </Card>
-      </div>
-    </section>
-  );
-}
 
 export function Types() {
   return (
@@ -95,7 +80,7 @@ export function CasesMapReviewsFaqContacts() {
       <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item) => <Card key={item.title} className="overflow-hidden"><Image src={item.image} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent><p className="text-sm text-muted-foreground">{item.place}</p><p className="mt-2 font-black text-copper-600">{item.price}</p></CardContent></Card>)}</div></div></section>
       <section className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>Отзывы</Badge><h2 className="section-title mt-4">Клиенты отмечают аккуратность монтажа</h2><div className="mt-6 rounded-[2rem] bg-white p-6 shadow-card">«Сделали навес для двух машин, помогли выбрать цвет под забор. Монтаж занял два дня, участок оставили чистым.»<p className="mt-4 font-black">Алексей, Севастополь</p></div></div><div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((q) => <details key={q} className="rounded-2xl bg-white p-5 shadow-card"><summary className="cursor-pointer font-black">{q}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">После замера инженер предложит решение под ваш участок, бюджет и срок службы.</p></details>)}</div></div></div></section>
-      <section id="contacts" className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={`tel:${phone.replace(/\D/g, "")}`}><Phone className="h-5 w-5" /> {phone}</a></Button><Button asChild size="lg" variant="copper"><a href="https://wa.me/79780004488"><MessageCircle className="h-5 w-5" /> WhatsApp</a></Button></div></div><Card className="p-6"><input className="mb-3 w-full rounded-2xl border px-4 py-3" placeholder="Ваше имя" /><input className="mb-3 w-full rounded-2xl border px-4 py-3" placeholder="Телефон" /><textarea className="h-28 w-full rounded-2xl border px-4 py-3" placeholder="Что нужно построить?" /><Button className="mt-4 w-full" variant="copper">Отправить заявку</Button></Card></div></section>
+      <section id="contacts" className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={`tel:${phone.replace(/\D/g, "")}`}><Phone className="h-5 w-5" /> {phone}</a></Button><Button asChild size="lg" variant="copper"><a href="https://wa.me/79780004488"><MessageCircle className="h-5 w-5" /> WhatsApp</a></Button></div></div><ContactLeadForm /></div></section>
     </>
   );
 }

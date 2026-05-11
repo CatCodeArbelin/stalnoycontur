@@ -1,7 +1,8 @@
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
-import { CasesMapReviewsFaqContacts, QuizCalculator, Types } from "@/components/sections/home-sections";
+import { QuizCalculator } from "@/components/lead-form";
+import { CasesMapReviewsFaqContacts, Types } from "@/components/sections/home-sections";
 import { BreadcrumbListJsonLd, FAQPageJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { Advantages, CasesMapReviewsFaqContacts, Hero, QuizCalculator, SolutionsProductionSteps, Types } from "@/components/sections/home-sections";
+import { Advantages, CasesMapReviewsFaqContacts, Hero, SolutionsProductionSteps, Types } from "@/components/sections/home-sections";
+import { QuizCalculator } from "@/components/lead-form";
 import { FAQPageJsonLd, ReviewJsonLd } from "@/components/seo";
 import { metadataForPath } from "@/lib/seo";
 
