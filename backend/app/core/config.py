@@ -36,6 +36,15 @@ class Settings(BaseSettings):
 
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
+    rate_limit_admin_login_requests: int = 5
+    rate_limit_admin_login_window_seconds: int = 300
+    rate_limit_lead_requests: int = 5
+    rate_limit_lead_window_seconds: int = 300
+    rate_limit_upload_requests: int = 10
+    rate_limit_upload_window_seconds: int = 300
+    rate_limit_admin_requests: int = 120
+    rate_limit_admin_window_seconds: int = 60
+    rate_limit_admin_authenticated_exempt: bool = True
 
     admin_username: str = "admin"
     admin_password: str = "change-me"
