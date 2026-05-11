@@ -1,18 +1,24 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Upload } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import Image from "next/image";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
+
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 type LeadSource = "quiz" | "contact_form";
 
 type UploadResponse = {
+  filename: string;
   url: string;
 };
 
@@ -77,6 +83,22 @@ function formatPrice(value: number) {
   return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0, style: "currency", currency: "RUB" }).format(value);
 }
 
+function formatFileSize(bytes: number) {
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024));
+}
+
+function validatePhotoFile(file: File) {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return "Недопустимый тип файла. Загрузите JPG, PNG или WEBP.";
+  }
+
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    return `Файл слишком большой: ${formatFileSize(file.size)} МБ. Максимум — ${formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ.`;
+  }
+
+  return "";
+}
+
 function getSourcePage() {
   if (typeof window === "undefined") return "/";
   return `${window.location.pathname}${window.location.search}`;
@@ -93,6 +115,9 @@ function getUtmMarks() {
 }
 
 async function uploadImage(photo: File) {
+  const validationError = validatePhotoFile(photo);
+  if (validationError) throw new Error(validationError);
+
   if (!API_URL) {
     throw new Error("Не задан NEXT_PUBLIC_API_URL");
   }
@@ -156,6 +181,66 @@ function StatusMessage({ state, error }: { state: SubmitState; error: string }) 
   return null;
 }
 
+
+function PhotoPicker({ photo, onPhotoChange, error, onErrorChange }: { photo: File | null; onPhotoChange: (photo: File | null) => void; error: string; onErrorChange: (error: string) => void }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!photo) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(photo);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [photo]);
+
+  function handleChange(file: File | null) {
+    if (!file) {
+      onPhotoChange(null);
+      onErrorChange("");
+      return;
+    }
+
+    const validationError = validatePhotoFile(file);
+    if (validationError) {
+      onPhotoChange(null);
+      onErrorChange(validationError);
+      return;
+    }
+
+    onPhotoChange(file);
+    onErrorChange("");
+  }
+
+  return (
+    <div className="mt-3">
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed px-4 py-4 text-sm font-bold text-muted-foreground transition hover:border-copper-400">
+        <Upload className="h-5 w-5 text-copper-500" />
+        <span>{photo ? photo.name : "Загрузить фото участка"}</span>
+        <input
+          type="file"
+          accept={IMAGE_ACCEPT}
+          className="sr-only"
+          onChange={(event) => {
+            handleChange(event.target.files?.[0] ?? null);
+            event.currentTarget.value = "";
+          }}
+        />
+      </label>
+      <p className="mt-2 text-xs text-muted-foreground">JPG, PNG или WEBP до {formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ. После загрузки изображение будет оптимизировано в WEBP.</p>
+      {error ? <p className="mt-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</p> : null}
+      {previewUrl ? (
+        <div className="mt-3 overflow-hidden rounded-2xl border bg-muted/40">
+          <Image src={previewUrl} alt="Предпросмотр выбранного фото" width={640} height={360} unoptimized className="max-h-64 w-full object-contain" />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Consent({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
   return (
     <label className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/60 p-4 text-sm leading-6 text-muted-foreground">
@@ -175,6 +260,7 @@ export function QuizCalculator() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<QuizData>(defaultQuizData);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
@@ -201,6 +287,7 @@ export function QuizCalculator() {
       setState("success");
       setData(defaultQuizData);
       setPhoto(null);
+      setPhotoError("");
       setStep(0);
       setConsent(false);
       event.currentTarget.reset();
@@ -253,11 +340,7 @@ export function QuizCalculator() {
                   <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Телефон" type="tel" />
                 </div>
                 <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: адрес, сроки, особенности участка" />
-                <label className="mt-3 flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed px-4 py-4 text-sm font-bold text-muted-foreground transition hover:border-copper-400">
-                  <Upload className="h-5 w-5 text-copper-500" />
-                  <span>{photo ? photo.name : "Загрузить фото участка"}</span>
-                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} />
-                </label>
+                <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
                 <Consent checked={consent} onChange={setConsent} />
               </div>
             )}
@@ -304,6 +387,7 @@ function OptionGrid({ title, options, value, onChange }: { title: string; option
 export function ContactLeadForm() {
   const [data, setData] = useState<ContactFormData>(defaultContactData);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
@@ -321,6 +405,7 @@ export function ContactLeadForm() {
       setState("success");
       setData(defaultContactData);
       setPhoto(null);
+      setPhotoError("");
       setConsent(false);
       event.currentTarget.reset();
     } catch (submitError) {
@@ -338,11 +423,7 @@ export function ContactLeadForm() {
         </div>
         <input value={data.city} onChange={(event) => setData((current) => ({ ...current, city: event.target.value }))} className="mt-3 w-full rounded-2xl border px-4 py-3" placeholder="Город" />
         <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-28 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: что нужно построить, размеры, сроки" />
-        <label className="mt-3 flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed px-4 py-4 text-sm font-bold text-muted-foreground transition hover:border-copper-400">
-          <Upload className="h-5 w-5 text-copper-500" />
-          <span>{photo ? photo.name : "Загрузить фото участка"}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} />
-        </label>
+        <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
         <Consent checked={consent} onChange={setConsent} />
         <Button type="submit" disabled={!consent || state === "loading"} className="mt-4 w-full" variant="copper">
           {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}

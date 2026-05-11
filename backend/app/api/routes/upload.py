@@ -6,18 +6,18 @@ from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.models.upload import Upload
 from app.schemas.upload import UploadRead
-from app.services.upload import save_upload, validate_upload
+from app.services.upload import save_optimized_upload, validate_upload
 
 router = APIRouter(tags=["upload"])
 
 
 def persist_upload(file: UploadFile, data: bytes, db: Session, settings: Settings) -> Upload:
-    filename, url = save_upload(data, file.filename, settings)
+    saved = save_optimized_upload(data, file.filename, settings)
     upload = Upload(
-        filename=filename,
-        url=url,
-        content_type=file.content_type or "application/octet-stream",
-        size_bytes=len(data),
+        filename=saved.filename,
+        url=saved.url,
+        content_type=saved.content_type,
+        size_bytes=saved.size_bytes,
     )
     db.add(upload)
     db.commit()
