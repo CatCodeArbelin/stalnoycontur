@@ -18,7 +18,7 @@ export default function AdminLeadsPage() {
         { key: "utm", label: "UTM JSON", type: "json", placeholder: '{"utm_source":"yandex"}' },
       ]}
       columns={[
-        { key: "created_at", label: "Дата", render: (value) => (value ? new Date(String(value)).toLocaleString("ru-RU") : "—") },
+        { key: "created_at", label: "Дата", format: "dateTime" },
         { key: "name", label: "Имя" },
         { key: "phone", label: "Телефон" },
         { key: "city", label: "Город" },
@@ -28,16 +28,7 @@ export default function AdminLeadsPage() {
         { key: "comment", label: "Комментарий" },
         { key: "source_page", label: "Страница" },
         { key: "utm", label: "UTM" },
-        {
-          key: "telegram_status",
-          label: "Telegram",
-          render: (value) => {
-            if (value === "sent") return "Отправлено";
-            if (value === "failed") return "Ошибка";
-            if (value === "skipped") return "Не настроен";
-            return "Ожидает";
-          },
-        },
+        { key: "telegram_status", label: "Telegram", format: "telegramStatus" },
       ]}
     />
   );

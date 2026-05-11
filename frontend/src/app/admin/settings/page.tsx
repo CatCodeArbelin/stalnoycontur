@@ -16,7 +16,7 @@ export default function AdminSettingsPage() {
         { key: "key", label: "Ключ" },
         { key: "value", label: "Значение" },
         { key: "description", label: "Описание" },
-        { key: "updated_at", label: "Обновлено", render: (value) => (value ? new Date(String(value)).toLocaleString("ru-RU") : "—") },
+        { key: "updated_at", label: "Обновлено", format: "dateTime" },
       ]}
     />
   );

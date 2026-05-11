@@ -20,7 +20,7 @@ type Field = {
 type Column = {
   key: string;
   label: string;
-  render?: (value: unknown, item: Record<string, unknown>) => string;
+  format?: "dateTime" | "telegramStatus";
 };
 
 type AdminResourceProps = {
@@ -103,6 +103,17 @@ function formatCell(value: unknown) {
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+function formatColumnCell(column: Column, value: unknown) {
+  if (column.format === "dateTime") return value ? new Date(String(value)).toLocaleString("ru-RU") : "—";
+  if (column.format === "telegramStatus") {
+    if (value === "sent") return "Отправлено";
+    if (value === "failed") return "Ошибка";
+    if (value === "skipped") return "Не настроен";
+    return "Ожидает";
+  }
+  return formatCell(value);
 }
 
 function toPayload(fields: Field[], form: Record<string, unknown>) {
@@ -362,7 +373,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                   <tbody>
                     {items.map((item) => (
                       <tr className="border-t" key={String(item.id)}>
-                        {columns.map((column) => <td className="max-w-[280px] px-3 py-3 align-top" key={column.key}>{column.render ? column.render(item[column.key], item) : formatCell(item[column.key])}</td>)}
+                        {columns.map((column) => <td className="max-w-[280px] px-3 py-3 align-top" key={column.key}>{formatColumnCell(column, item[column.key])}</td>)}
                         <td className="px-3 py-3">
                           <div className="flex gap-2">
                             <button className="text-copper-700 underline" onClick={() => { setEditingId(Number(item.id)); setForm(Object.fromEntries(fields.map((field) => [field.key, (field.type === "json" || field.type === "image-list") ? JSON.stringify(item[field.key] ?? null, null, 2) : (item[field.key] ?? emptyValue(field))]))); }}>Править</button>
