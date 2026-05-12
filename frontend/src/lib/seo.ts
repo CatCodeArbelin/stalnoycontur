@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { cityContent, contacts, pageContent } from "@/data/site";
+import { cityContent, pageContent } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 export const siteConfig = {
@@ -9,8 +9,6 @@ export const siteConfig = {
   defaultDescription: "Проектирование, производство и монтаж металлических навесов для авто, дома и бизнеса по всему Крыму.",
   phone: fallbackSettings.phones[0]?.label ?? fallbackSettings.phone,
   phones: fallbackSettings.phones.map((phone) => phone.label),
-  telegram: contacts.telegram.href,
-  max: contacts.max.href,
   locale: "ru_RU",
   language: "ru",
   image: "/images/hero-canopy.svg",

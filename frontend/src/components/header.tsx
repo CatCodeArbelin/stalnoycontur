@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { contacts, nav } from "@/data/site";
+import { nav } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +13,8 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
   const [open, setOpen] = useState(false);
   const phones = settings.phones?.length ? settings.phones : fallbackSettings.phones;
   const primaryPhone = phones[0];
-  const telegramHref = settings.telegram || contacts.telegram.href;
-  const maxHref = settings.max || contacts.max.href;
+  const telegramHref = settings.telegram || fallbackSettings.telegram;
+  const maxHref = settings.max || fallbackSettings.max;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 bg-background/85 backdrop-blur-xl">
@@ -43,11 +43,11 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
           </div>
           <a href={telegramHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в Telegram">
             <Send className="h-4 w-4" />
-            {contacts.telegram.label}
+            Telegram
           </a>
           <a href={maxHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-steel-800 transition hover:bg-white hover:text-copper-600 lg:flex" aria-label="Написать в MAX">
             <MessageCircle className="h-4 w-4" />
-            {contacts.max.label}
+            MAX
           </a>
           <Button asChild variant="copper"><a href="#contacts"><Phone className="h-4 w-4" />Заказать замер</a></Button>
         </div>
