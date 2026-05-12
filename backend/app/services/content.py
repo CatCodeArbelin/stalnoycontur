@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.setting import Setting
 from app.schemas.content import CaseItem, FaqItem, GalleryItem, PublicSettings, ReviewItem
+from app.schemas.setting import PUBLIC_SETTING_KEYS
 
 DEFAULT_CASES = [
     CaseItem(
@@ -84,8 +85,6 @@ DEFAULT_SETTINGS = PublicSettings(
     personal_data_consent_text="Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
 )
 
-
-PUBLIC_SETTING_KEYS = set(PublicSettings.model_fields)
 
 
 def normalize_setting_value(value: Any) -> Any:

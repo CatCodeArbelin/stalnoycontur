@@ -25,7 +25,7 @@ from app.schemas.faq import FAQCreate, FAQRead, FAQUpdate
 from app.schemas.gallery_item import GalleryItemCreate, GalleryItemRead, GalleryItemUpdate
 from app.schemas.lead import LeadCreate, LeadRead, LeadUpdate
 from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
-from app.schemas.setting import SettingCreate, SettingRead, SettingUpdate
+from app.schemas.setting import SettingCreate, SettingRead, SettingUpdate, validate_public_setting_value
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 ModelT = TypeVar("ModelT")
@@ -262,6 +262,11 @@ def list_settings(db: Session = Depends(get_db)) -> list[Setting]:
 
 @router.post("/settings", response_model=SettingRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_setting(payload: SettingCreate, db: Session = Depends(get_db)) -> Setting:
+    try:
+        validate_public_setting_value(payload.key, payload.value)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     item = Setting(**payload.model_dump())
     db.add(item)
     db.commit()
@@ -272,6 +277,16 @@ def create_setting(payload: SettingCreate, db: Session = Depends(get_db)) -> Set
 @router.patch("/settings/{item_id}", response_model=SettingRead, dependencies=[Depends(require_admin)])
 def update_setting(item_id: int, payload: SettingUpdate, db: Session = Depends(get_db)) -> Setting:
     item = get_or_404(db, Setting, item_id)
+    updated_fields = payload.model_fields_set
+    if "key" in updated_fields or "value" in updated_fields:
+        next_key = payload.key if "key" in updated_fields else item.key
+        next_value = payload.value if "value" in updated_fields else item.value
+        if next_key is not None:
+            try:
+                validate_public_setting_value(next_key, next_value)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     apply_update(item, payload)
     db.commit()
     db.refresh(item)
