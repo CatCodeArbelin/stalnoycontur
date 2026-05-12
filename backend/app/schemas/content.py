@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CaseItem(BaseModel):
@@ -49,8 +49,8 @@ class FaqItem(BaseModel):
 
 
 class PublicPhone(BaseModel):
-    label: str
-    href: str
+    label: str = Field(..., min_length=1)
+    href: str = Field(..., min_length=1)
 
     model_config = ConfigDict(extra="forbid")
 
@@ -63,5 +63,12 @@ class PublicSettings(BaseModel):
     max: str
     cities: list[str]
     personal_data_consent_text: str
+
+    @field_validator("cities")
+    @classmethod
+    def validate_cities(cls, value: list[str]) -> list[str]:
+        if not all(city.strip() for city in value):
+            raise ValueError("cities must contain only non-empty strings")
+        return value
 
     model_config = ConfigDict(extra="forbid")
