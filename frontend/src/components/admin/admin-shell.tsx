@@ -176,8 +176,12 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
       headers,
     });
     if (!response.ok) {
-      const errorMessage = response.status === 401 || response.status === 403 ? "Сессия истекла, войдите снова" : await formatApiError(response);
-      if (response.status === 401 || response.status === 403) void logout(errorMessage);
+      const isSessionError = response.status === 401 || response.status === 403;
+      const isLoginRequest = path === "/admin/auth/login";
+      const errorMessage = isSessionError && !isLoginRequest ? "Сессия истекла, войдите снова" : await formatApiError(response);
+
+      if (isSessionError && !isLoginRequest && isAuthenticated) void logout(errorMessage);
+
       throw new Error(errorMessage);
     }
     if (response.status === 204) return null;
