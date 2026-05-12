@@ -168,6 +168,23 @@ function parseListField(value: unknown) {
   }
 }
 
+function parseImageListValue(value: unknown) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && Boolean(item.trim())).map((item) => item.trim());
+
+  const text = String(value).trim();
+  if (!text) return [];
+
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) return parsed.filter((item): item is string => typeof item === "string" && Boolean(item.trim())).map((item) => item.trim());
+  } catch {
+    // Plain newline-separated URL lists are supported for easier manual editing.
+  }
+
+  return parseLineList(text);
+}
+
 function toPayload(fields: Field[], form: Record<string, unknown>) {
   return Object.fromEntries(
     fields.map((field) => {
@@ -175,7 +192,8 @@ function toPayload(fields: Field[], form: Record<string, unknown>) {
       if (field.type === "number") return [field.key, Number(value || 0)];
       if (field.type === "checkbox") return [field.key, Boolean(value)];
       if (field.type === "json") return [field.key, parseJsonField(field, value)];
-      if (field.type === "string-list" || field.type === "image-list") return [field.key, parseListField(value)];
+      if (field.type === "string-list") return [field.key, parseListField(value)];
+      if (field.type === "image-list") return [field.key, parseImageListValue(value)];
       return [field.key, value || null];
     }),
   );
@@ -322,9 +340,8 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
         urls.push(data.url);
       }
       setForm((current) => {
-        const currentValue = String(current[fieldKey] ?? "").trim();
-        const prefix = currentValue ? `${currentValue}\n` : "";
-        return { ...current, [fieldKey]: `${prefix}${urls.join("\n")}` };
+        const currentUrls = parseImageListValue(current[fieldKey]);
+        return { ...current, [fieldKey]: JSON.stringify([...currentUrls, ...urls], null, 2) };
       });
     } catch (error) {
       showMessage(await formatApiError(error), "error");
