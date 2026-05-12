@@ -97,9 +97,13 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 После запуска доступны:
 
+- предпочтительный путь для админки через nginx: <http://localhost/admin>
+- альтернативный путь для админки через Next.js dev server: <http://localhost:3000/admin>; локальный rewrite `/api/*` проксирует запросы в backend
 - frontend dev server: <http://localhost:3000>
-- backend API напрямую: <http://localhost:8000/api/health>
+- backend API напрямую для healthcheck/диагностики: <http://localhost:8000/api/health>
 - полный стек через nginx: <http://localhost>
+
+Для админки не задавайте `NEXT_PUBLIC_API_URL=http://localhost:8000/api`: браузерные запросы админ-интерфейса используют cookie-based auth с `credentials: "same-origin"`, поэтому API должен оставаться same-origin относительно открытой страницы — либо `http://localhost/admin` через nginx и относительный `/api`, либо `http://localhost:3000/admin` через Next.js rewrite `/api/*` → backend.
 
 ### Запуск в фоне
 
@@ -246,7 +250,7 @@ curl -I http://127.0.0.1/
 | `TELEGRAM_API_BASE_URL` | `https://api.telegram.org` | Базовый URL Telegram Bot API. |
 | `TELEGRAM_TIMEOUT_SECONDS` | `8` | Timeout запросов к Telegram API. |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost` | Публичный URL сайта, доступный в frontend bundle. |
-| `NEXT_PUBLIC_API_URL` | `/api` | Browser-facing URL API, доступный в frontend bundle; на VPS используйте `/api` или публичный домен, но не `http://localhost/api`. |
+| `NEXT_PUBLIC_API_URL` | `/api` | Browser-facing URL API, доступный в frontend bundle; для админки оставляйте same-origin `/api` и не используйте `http://localhost:8000/api` вместе с cookie-based auth. На VPS используйте `/api` или публичный домен, но не `http://localhost/api`. |
 | `INTERNAL_API_URL` | `http://backend:8000/api` | Server-only URL API для SSR-запросов frontend-контейнера внутри docker-сети. |
 
 ## Docker commands
@@ -558,10 +562,14 @@ docker compose up -d --force-recreate nginx
 
 ### CORS ошибки в браузере
 
+Для штатного режима админки CORS не нужен: открывайте админку same-origin через <http://localhost/admin> или <http://localhost:3000/admin>, где Next.js rewrite проксирует `/api/*` в backend.
+
+Если осознанно нужен cross-origin режим для админки, одного `NEXT_PUBLIC_API_URL` на `http://localhost:8000/api` недостаточно: сначала измените fetch-запросы админки с `credentials: "same-origin"` на `credentials: "include"`, затем настройте backend CORS и cookie attributes. Для HTTPS cross-site cookies должны выставляться с `SameSite=None; Secure`.
+
 Добавьте реальные origins в `CORS_ORIGINS` через запятую:
 
 ```dotenv
-CORS_ORIGINS=https://example.com,https://www.example.com,http://localhost
+CORS_ORIGINS=https://example.com,https://www.example.com,http://localhost,http://localhost:3000
 ```
 
 После изменения:
