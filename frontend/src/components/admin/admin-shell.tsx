@@ -20,6 +20,7 @@ type BaseField = {
   key: string;
   label: string;
   placeholder?: string;
+  defaultValue?: unknown;
 };
 
 type JsonField = BaseField & {
@@ -61,6 +62,7 @@ type AdminResourceProps = AdminResourceConfig;
 export const adminNav = [
   ["/admin/leads", "Заявки"],
   ["/admin/cases", "Кейсы"],
+  ["/admin/gallery", "Галерея"],
   ["/admin/reviews", "Отзывы"],
   ["/admin/faq", "FAQ"],
   ["/admin/settings", "Настройки"],
@@ -140,6 +142,7 @@ async function formatApiError(error: unknown) {
 }
 
 function emptyValue(field: Field) {
+  if (field.defaultValue !== undefined) return field.defaultValue;
   if (field.type === "checkbox") return false;
   if (field.type === "number") return 0;
   if (

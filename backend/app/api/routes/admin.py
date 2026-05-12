@@ -16,11 +16,13 @@ from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.models.case import Case
 from app.models.faq import FAQ
+from app.models.gallery_item import GalleryItem
 from app.models.lead import Lead
 from app.models.review import Review
 from app.models.setting import Setting
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.faq import FAQCreate, FAQRead, FAQUpdate
+from app.schemas.gallery_item import GalleryItemCreate, GalleryItemRead, GalleryItemUpdate
 from app.schemas.lead import LeadCreate, LeadRead, LeadUpdate
 from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
 from app.schemas.setting import SettingCreate, SettingRead, SettingUpdate
@@ -159,6 +161,36 @@ def update_case(item_id: int, payload: CaseUpdate, db: Session = Depends(get_db)
 @router.delete("/cases/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
 def delete_case(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, Case, item_id)
+    db.delete(item)
+    db.commit()
+
+
+@router.get("/gallery", response_model=list[GalleryItemRead], dependencies=[Depends(require_admin)])
+def list_gallery_items(db: Session = Depends(get_db)) -> list[GalleryItem]:
+    return list(db.scalars(select(GalleryItem).order_by(GalleryItem.sort_order.asc(), GalleryItem.id.desc())))
+
+
+@router.post("/gallery", response_model=GalleryItemRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
+def create_gallery_item(payload: GalleryItemCreate, db: Session = Depends(get_db)) -> GalleryItem:
+    item = GalleryItem(**payload.model_dump())
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.patch("/gallery/{item_id}", response_model=GalleryItemRead, dependencies=[Depends(require_admin)])
+def update_gallery_item(item_id: int, payload: GalleryItemUpdate, db: Session = Depends(get_db)) -> GalleryItem:
+    item = get_or_404(db, GalleryItem, item_id)
+    apply_update(item, payload)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/gallery/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+def delete_gallery_item(item_id: int, db: Session = Depends(get_db)) -> None:
+    item = get_or_404(db, GalleryItem, item_id)
     db.delete(item)
     db.commit()
 

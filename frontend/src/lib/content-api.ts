@@ -12,6 +12,16 @@ export type PublicCase = {
   created_at?: string | null;
 };
 
+export type PublicGalleryItem = {
+  id?: number | null;
+  title: string;
+  description?: string | null;
+  category: string;
+  image?: string | null;
+  sort_order?: number | null;
+  created_at?: string | null;
+};
+
 export type PublicReview = {
   id?: number | null;
   author: string;
@@ -44,6 +54,7 @@ export type PublicSettings = {
 
 export type ManagedContent = {
   cases: PublicCase[];
+  gallery: PublicGalleryItem[];
   reviews: PublicReview[];
   faq: PublicFaq[];
   settings: PublicSettings;
@@ -67,6 +78,25 @@ export const fallbackPublicCases: PublicCase[] = fallbackCases.map((item, index)
   cover_image: item.image,
   gallery: [item.image],
 }));
+
+export const fallbackGalleryItems: PublicGalleryItem[] = [
+  { title: "Парковка на 1–2 авто", category: "popular_solution", sort_order: 10 },
+  { title: "Терраса у дома", category: "popular_solution", sort_order: 20 },
+  { title: "Входная группа", category: "popular_solution", sort_order: 30 },
+  { title: "Коммерческий навес", category: "popular_solution", sort_order: 40 },
+  {
+    title: "Производство",
+    description:
+      "Режем металл, варим фермы на стапелях, грунтуем и окрашиваем порошковой или атмосферостойкой эмалью. На объект приезжают готовые элементы — монтаж проходит быстро и чисто.",
+    category: "production",
+    image: "/images/hero-canopy.svg",
+    sort_order: 10,
+  },
+  { title: "Заявка и замер", category: "work_step", sort_order: 10 },
+  { title: "Проект и смета", category: "work_step", sort_order: 20 },
+  { title: "Производство", category: "work_step", sort_order: 30 },
+  { title: "Монтаж и сдача", category: "work_step", sort_order: 40 },
+];
 
 export const fallbackReviews: PublicReview[] = [
   { author: "Алексей", text: "Сделали навес для двух машин, помогли выбрать цвет под забор. Монтаж занял два дня, участок оставили чистым." },
@@ -123,6 +153,10 @@ export async function getPublicCases(): Promise<PublicCase[]> {
   return fetchPublic("/cases", fallbackPublicCases);
 }
 
+export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
+  return fetchPublic("/gallery", fallbackGalleryItems);
+}
+
 export async function getPublicReviews(): Promise<PublicReview[]> {
   return fetchPublic("/reviews", fallbackReviews);
 }
@@ -136,12 +170,13 @@ export async function getPublicSettings(): Promise<PublicSettings> {
 }
 
 export async function getManagedContent(): Promise<ManagedContent> {
-  const [cases, reviews, faq, settings] = await Promise.all([
+  const [cases, gallery, reviews, faq, settings] = await Promise.all([
     getPublicCases(),
+    getPublicGallery(),
     getPublicReviews(),
     getPublicFaq(),
     getPublicSettings(),
   ]);
 
-  return { cases, reviews, faq, settings };
+  return { cases, gallery, reviews, faq, settings };
 }

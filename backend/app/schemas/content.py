@@ -17,6 +17,18 @@ class CaseItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class GalleryItem(BaseModel):
+    id: int | None = None
+    title: str
+    description: str | None = None
+    category: str
+    image: str | None = None
+    sort_order: int | None = None
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ReviewItem(BaseModel):
     id: int | None = None
     author: str
