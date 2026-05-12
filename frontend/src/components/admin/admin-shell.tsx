@@ -127,8 +127,11 @@ function emptyValue(field: Field) {
 
 function formatCell(value: unknown) {
   if (value == null || value === "") return "—";
-  if (Array.isArray(value)) return value.join(", ");
-  if (typeof value === "object") return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    const hasObjectItems = value.some((item) => item && typeof item === "object");
+    return hasObjectItems ? JSON.stringify(value, null, 2) : value.join(", ");
+  }
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
   return String(value);
 }
 
