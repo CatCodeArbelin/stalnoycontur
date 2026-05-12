@@ -19,7 +19,7 @@ export default async function Home() {
       <Advantages />
       <QuizCalculator settings={content.settings} />
       <Types />
-      <SolutionsProductionSteps />
+      <SolutionsProductionSteps gallery={content.gallery} />
       <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
     </>
   );

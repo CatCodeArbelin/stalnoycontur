@@ -10,11 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { advantages, canopyTypes } from "@/data/site";
 import {
   fallbackFaq,
+  fallbackGalleryItems,
   fallbackPublicCases,
   fallbackReviews,
   fallbackSettings,
   type PublicCase,
   type PublicFaq,
+  type PublicGalleryItem,
   type PublicReview,
   type PublicSettings,
 } from "@/lib/content-api";
@@ -69,15 +71,31 @@ export function Types() {
   );
 }
 
-export function SolutionsProductionSteps() {
-  const solutions = ["Парковка на 1–2 авто", "Терраса у дома", "Входная группа", "Коммерческий навес"];
-  const steps = ["Заявка и замер", "Проект и смета", "Производство", "Монтаж и сдача"];
+type SolutionsProductionStepsProps = {
+  gallery?: PublicGalleryItem[];
+};
+
+function itemsByCategory(items: PublicGalleryItem[], category: string) {
+  return items
+    .filter((item) => item.category === category)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+}
+
+export function SolutionsProductionSteps({ gallery = fallbackGalleryItems }: SolutionsProductionStepsProps) {
+  const solutions = itemsByCategory(gallery, "popular_solution");
+  const productionItems = itemsByCategory(gallery, "production");
+  const steps = itemsByCategory(gallery, "work_step");
+  const fallbackProduction = fallbackGalleryItems.find((item) => item.category === "production");
+  const visibleSolutions = solutions.length ? solutions : itemsByCategory(fallbackGalleryItems, "popular_solution");
+  const production = productionItems[0] ?? fallbackProduction;
+  const visibleSteps = steps.length ? steps : itemsByCategory(fallbackGalleryItems, "work_step");
+
   return (
     <section className="section-padding bg-steel-900 text-white">
       <div className="container grid gap-10 lg:grid-cols-3">
-        <div><Badge className="border-white/20 bg-white/10 text-copper-400">Популярные решения</Badge><h2 className="mt-4 text-3xl font-black">От идеи до готового навеса</h2><div className="mt-6 grid gap-3">{solutions.map((s) => <div key={s} className="flex items-center gap-3 rounded-2xl bg-white/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{s}</div>)}</div></div>
-        <div><h3 className="text-2xl font-black">Производство</h3><p className="mt-4 leading-7 text-white/70">Режем металл, варим фермы на стапелях, грунтуем и окрашиваем порошковой или атмосферостойкой эмалью. На объект приезжают готовые элементы — монтаж проходит быстро и чисто.</p></div>
-        <div><h3 className="text-2xl font-black">Этапы работ</h3><div className="mt-5 grid gap-3">{steps.map((s, i) => <div key={s} className="rounded-2xl border border-white/10 p-4"><span className="text-copper-400">0{i + 1}</span> <b>{s}</b></div>)}</div></div>
+        <div><Badge className="border-white/20 bg-white/10 text-copper-400">Популярные решения</Badge><h2 className="mt-4 text-3xl font-black">От идеи до готового навеса</h2><div className="mt-6 grid gap-3">{visibleSolutions.map((item) => <div key={item.id ?? item.title} className="flex items-center gap-3 rounded-2xl bg-white/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{item.title}</div>)}</div></div>
+        <div><h3 className="text-2xl font-black">{production?.title ?? "Производство"}</h3>{production?.image ? <Image src={production.image} alt={production.title} width={520} height={320} loading="lazy" sizes="(min-width: 1024px) 33vw, 100vw" className="mt-5 h-40 w-full rounded-[1.5rem] object-cover" /> : null}<p className="mt-4 leading-7 text-white/70">{production?.description}</p></div>
+        <div><h3 className="text-2xl font-black">Этапы работ</h3><div className="mt-5 grid gap-3">{visibleSteps.map((item, i) => <div key={item.id ?? item.title} className="rounded-2xl border border-white/10 p-4"><span className="text-copper-400">0{i + 1}</span> <b>{item.title}</b>{item.description ? <p className="mt-2 text-sm text-white/60">{item.description}</p> : null}</div>)}</div></div>
       </div>
     </section>
   );

@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.setting import Setting
-from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
+from app.schemas.content import CaseItem, FaqItem, GalleryItem, PublicSettings, ReviewItem
 
 DEFAULT_CASES = [
     CaseItem(
@@ -35,6 +35,29 @@ DEFAULT_CASES = [
         gallery=["/images/case-3.svg"],
     ),
 ]
+
+DEFAULT_GALLERY_ITEMS = [
+    GalleryItem(title="Парковка на 1–2 авто", category="popular_solution", sort_order=10),
+    GalleryItem(title="Терраса у дома", category="popular_solution", sort_order=20),
+    GalleryItem(title="Входная группа", category="popular_solution", sort_order=30),
+    GalleryItem(title="Коммерческий навес", category="popular_solution", sort_order=40),
+    GalleryItem(
+        title="Производство",
+        description=(
+            "Режем металл, варим фермы на стапелях, грунтуем и окрашиваем порошковой "
+            "или атмосферостойкой эмалью. На объект приезжают готовые элементы — монтаж "
+            "проходит быстро и чисто."
+        ),
+        category="production",
+        image="/images/hero-canopy.svg",
+        sort_order=10,
+    ),
+    GalleryItem(title="Заявка и замер", category="work_step", sort_order=10),
+    GalleryItem(title="Проект и смета", category="work_step", sort_order=20),
+    GalleryItem(title="Производство", category="work_step", sort_order=30),
+    GalleryItem(title="Монтаж и сдача", category="work_step", sort_order=40),
+]
+
 
 DEFAULT_REVIEWS = [
     ReviewItem(author="Алексей", text="Сделали навес для двух машин за три дня, аккуратно покрасили каркас."),

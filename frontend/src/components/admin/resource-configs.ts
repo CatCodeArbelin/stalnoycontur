@@ -68,12 +68,44 @@ export const faqResource: AdminResourceConfig = {
     { key: "question", label: "Вопрос" },
     { key: "answer", label: "Ответ", type: "textarea" },
     { key: "sort_order", label: "Порядок", type: "number" },
-    { key: "is_active", label: "Активен", type: "checkbox" },
+    { key: "is_active", label: "Активен", type: "checkbox", defaultValue: true },
   ],
   columns: [
     { key: "id", label: "ID" },
     { key: "question", label: "Вопрос" },
     { key: "answer", label: "Ответ" },
+    { key: "sort_order", label: "Порядок" },
+    { key: "is_active", label: "Активен" },
+  ],
+};
+
+export const galleryResource: AdminResourceConfig = {
+  title: "Галерея / работы",
+  description:
+    "Управляемые элементы для публичных блоков. Категории: popular_solution — популярные решения, production — производство, work_step — этапы работ, gallery — галерея.",
+  endpoint: "/admin/gallery",
+  fields: [
+    { key: "title", label: "Название" },
+    { key: "description", label: "Описание", type: "textarea" },
+    {
+      key: "category",
+      label: "Категория",
+      placeholder: "popular_solution, production, work_step или gallery",
+    },
+    {
+      key: "image",
+      label: "Изображение",
+      type: "image",
+      uploadCategory: "gallery",
+    },
+    { key: "sort_order", label: "Порядок", type: "number" },
+    { key: "is_active", label: "Активен", type: "checkbox", defaultValue: true },
+  ],
+  columns: [
+    { key: "id", label: "ID" },
+    { key: "title", label: "Название" },
+    { key: "category", label: "Категория" },
+    { key: "image", label: "Изображение" },
     { key: "sort_order", label: "Порядок" },
     { key: "is_active", label: "Активен" },
   ],

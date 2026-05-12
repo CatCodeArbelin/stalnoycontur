@@ -5,9 +5,10 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.case import Case
 from app.models.faq import FAQ
+from app.models.gallery_item import GalleryItem
 from app.models.review import Review
-from app.schemas.content import CaseItem, FaqItem, PublicSettings, ReviewItem
-from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_REVIEWS, assemble_public_settings
+from app.schemas.content import CaseItem, FaqItem, GalleryItem as GalleryItemSchema, PublicSettings, ReviewItem
+from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_GALLERY_ITEMS, DEFAULT_REVIEWS, assemble_public_settings
 
 router = APIRouter(tags=["content"])
 
@@ -16,6 +17,23 @@ router = APIRouter(tags=["content"])
 def get_cases(db: Session = Depends(get_db)) -> list[Case | CaseItem]:
     cases = list(db.scalars(select(Case).order_by(Case.created_at.desc(), Case.id.desc())))
     return cases or DEFAULT_CASES
+
+
+@router.get("/gallery", response_model=list[GalleryItemSchema])
+def get_gallery(db: Session = Depends(get_db)) -> list[GalleryItem | GalleryItemSchema]:
+    gallery_items = list(
+        db.scalars(
+            select(GalleryItem)
+            .where(GalleryItem.is_active.is_(True))
+            .order_by(GalleryItem.sort_order.asc(), GalleryItem.id.asc())
+        )
+    )
+    return gallery_items or DEFAULT_GALLERY_ITEMS
+
+
+@router.get("/works", response_model=list[GalleryItemSchema])
+def get_works(db: Session = Depends(get_db)) -> list[GalleryItem | GalleryItemSchema]:
+    return get_gallery(db)
 
 
 @router.get("/reviews", response_model=list[ReviewItem])
