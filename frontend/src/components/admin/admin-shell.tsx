@@ -82,6 +82,13 @@ async function formatApiError(error: unknown) {
       const data = JSON.parse(text) as { detail?: unknown; message?: unknown; error?: unknown };
       return detailToMessage(data.detail ?? data.message ?? data.error) || fallback;
     } catch {
+      const contentType = error.headers.get("Content-Type")?.toLowerCase() ?? "";
+      if (contentType.includes("text/html")) {
+        const message = "API недоступен или настроен неверно: получена HTML-страница вместо JSON";
+        if (error.status === 404) return `${message}. Проверьте proxy/rewrite для /api/*.`;
+        return message;
+      }
+
       return text;
     }
   }
