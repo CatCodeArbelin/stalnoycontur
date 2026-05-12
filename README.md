@@ -85,6 +85,53 @@
 - API login: `/api/admin/auth/login`.
 - Default dev credentials: `admin / change-me`.
 
+## Где вручную редактировать публичные данные
+
+Динамические публичные данные предпочтительно менять через админ-панель `/admin/settings`: такие значения сохраняются в backend и используются сайтом без правки исходного кода. Если нужного поля нет в настройках, если требуется изменить fallback-значение для случая недоступности API или если элемент статический, редактируйте соответствующие файлы в коде.
+
+| Что изменить | Где редактировать | Ключи в `/admin/settings` | Примечание |
+| --- | --- | --- | --- |
+| Лого/название в шапке | `frontend/src/components/header.tsx`; fallback `company_name` в `frontend/src/lib/content-api.ts` и `backend/app/services/content.py` | `company_name` | В админке меняйте название компании, а разметку/логотип шапки — в компоненте frontend. |
+| Телефоны | `frontend/src/data/site.ts`; `backend/app/services/content.py` | `phone`, `phones` | `phone` — основной номер строкой, `phones` — список номеров для блоков с несколькими контактами. |
+| Telegram/MAX | `frontend/src/data/site.ts`; `backend/app/services/content.py` | `telegram`, `max` | Используйте полные ссылки или значения в формате, который ожидают компоненты контактов. |
+| Города | `frontend/src/data/site.ts`; `backend/app/services/content.py` | `cities` | Для динамического списка городов обновляйте массив `cities` в настройках. |
+| Hero/изображения | `frontend/public/images/`; `frontend/src/components/landing-page.tsx`; `frontend/src/components/sections/home-sections.tsx` | — | Статические изображения кладите в `frontend/public/images/`, пути и использование меняйте в компонентах. |
+| SEO defaults | `frontend/src/lib/seo.ts` | — | Базовые SEO-значения задаются в коде и используются как defaults для страниц. |
+
+Пример JSON для `/admin/settings`:
+
+```json
+{
+  "company_name": "Стальной Контур",
+  "phone": "+7 (900) 000-00-00",
+  "phones": [
+    "+7 (900) 000-00-00",
+    "+7 (901) 111-11-11"
+  ],
+  "telegram": "https://t.me/stalnoycontur",
+  "max": "https://max.ru/stalnoycontur",
+  "cities": [
+    "Москва",
+    "Санкт-Петербург",
+    "Казань"
+  ]
+}
+```
+
+Минимальный пример, если нужно поменять только контакты и города:
+
+```json
+{
+  "phone": "+7 (900) 000-00-00",
+  "phones": ["+7 (900) 000-00-00", "+7 (901) 111-11-11"],
+  "telegram": "https://t.me/stalnoycontur",
+  "max": "https://max.ru/stalnoycontur",
+  "cities": ["Москва", "Санкт-Петербург", "Казань"]
+}
+```
+
+После изменения frontend-кода или файлов в `frontend/public/images/` нужен rebuild/restart frontend-контейнера. После изменения fallback-данных backend в `backend/app/services/content.py` нужен rebuild/restart backend-контейнера. Изменения, внесенные через `/admin/settings`, применяются как данные приложения и обычно не требуют пересборки образов.
+
 ## Development mode
 
 Рекомендуемый режим разработки — через базовый `docker-compose.yml` и dev override `docker-compose.dev.yml`. Dev override включает hot reload, монтирует исходники в контейнеры и публикует сервисы напрямую на портах `3000` и `8000`.
