@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.admin_auth import require_admin
@@ -39,6 +40,15 @@ async def upload_public_image(
 ) -> Upload:
     data = await validate_upload(file, settings)
     return persist_upload(file, data, db, settings, UploadCategory.UPLOADS)
+
+
+@router.get(
+    "/admin/uploads",
+    response_model=list[UploadRead],
+    dependencies=[Depends(require_admin)],
+)
+def list_admin_uploads(db: Session = Depends(get_db)) -> list[Upload]:
+    return list(db.scalars(select(Upload).order_by(Upload.id.desc())))
 
 
 @router.post(
