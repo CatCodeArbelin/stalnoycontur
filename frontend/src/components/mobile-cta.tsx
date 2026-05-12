@@ -1,12 +1,11 @@
 import { MessageCircle, Phone, Send } from "lucide-react";
 
-import { contacts } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 export function MobileCta({ settings = fallbackSettings }: { settings?: PublicSettings }) {
   const primaryPhone = settings.phones?.[0] ?? fallbackSettings.phones[0];
-  const telegramHref = settings.telegram || contacts.telegram.href;
-  const maxHref = settings.max || contacts.max.href;
+  const telegramHref = settings.telegram || fallbackSettings.telegram;
+  const maxHref = settings.max || fallbackSettings.max;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-white/95 p-3 shadow-soft backdrop-blur md:hidden">

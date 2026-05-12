@@ -39,6 +39,7 @@ const geo = {
 
 export function LocalBusinessJsonLd({ settings }: { settings?: PublicSettings }) {
   const telephone = publicSettingsTelephone(settings);
+  const sameAs = [settings?.telegram, settings?.max].filter((url): url is string => Boolean(url));
 
   return (
     <JsonLd
@@ -54,7 +55,7 @@ export function LocalBusinessJsonLd({ settings }: { settings?: PublicSettings })
         address,
         geo,
         areaServed: ["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч", "Крым"],
-        sameAs: [siteConfig.telegram, siteConfig.max],
+        ...(sameAs.length ? { sameAs } : {}),
       }}
     />
   );

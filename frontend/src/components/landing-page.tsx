@@ -6,8 +6,11 @@ import { CasesMapReviewsFaqContacts, Types } from "@/components/sections/home-se
 import { BreadcrumbListJsonLd, FAQPageJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getManagedContent } from "@/lib/content-api";
 
-export function LandingPage({ badge, title, description, points, path }: { badge: string; title: string; description: string; points: string[]; path: string }) {
+export async function LandingPage({ badge, title, description, points, path }: { badge: string; title: string; description: string; points: string[]; path: string }) {
+  const content = await getManagedContent();
+
   return (
     <>
       <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: title, url: path }]} />
@@ -26,9 +29,9 @@ export function LandingPage({ badge, title, description, points, path }: { badge
           <Image src="/images/hero-canopy.svg" alt={title} width={780} height={560} priority sizes="(min-width: 1024px) 50vw, 100vw" className="rounded-[2.5rem] bg-white/10 p-3" />
         </div>
       </section>
-      <QuizCalculator />
+      <QuizCalculator settings={content.settings} />
       <Types />
-      <CasesMapReviewsFaqContacts />
+      <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
     </>
   );
 }

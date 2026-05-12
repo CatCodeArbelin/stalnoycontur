@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
+import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 
 const API_URL = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -225,7 +226,7 @@ function PhotoPicker({ photo, onPhotoChange, error, onErrorChange }: { photo: Fi
   );
 }
 
-function Consent({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+function Consent({ checked, onChange, text }: { checked: boolean; onChange: (checked: boolean) => void; text: string }) {
   return (
     <label className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/60 p-4 text-sm leading-6 text-muted-foreground">
       <input
@@ -235,12 +236,12 @@ function Consent({ checked, onChange }: { checked: boolean; onChange: (checked: 
         className="mt-1 h-4 w-4 rounded border-border accent-copper-500"
         required
       />
-      <span>Даю согласие на обработку персональных данных и получение ответа по заявке.</span>
+      <span>{text}</span>
     </label>
   );
 }
 
-export function QuizCalculator() {
+export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text"> }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<QuizData>(defaultQuizData);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -248,6 +249,7 @@ export function QuizCalculator() {
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
+  const consentText = settings.personal_data_consent_text || fallbackSettings.personal_data_consent_text;
 
   const steps = ["Тип навеса", "Размер", "Кровля", "Город", "Контакты"];
   const progress = ((step + 1) / steps.length) * 100;
@@ -324,7 +326,7 @@ export function QuizCalculator() {
                 </div>
                 <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: адрес, сроки, особенности участка" />
                 <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
-                <Consent checked={consent} onChange={setConsent} />
+                <Consent checked={consent} onChange={setConsent} text={consentText} />
               </div>
             )}
 
@@ -367,13 +369,14 @@ function OptionGrid({ title, options, value, onChange }: { title: string; option
   );
 }
 
-export function ContactLeadForm() {
+export function ContactLeadForm({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text"> }) {
   const [data, setData] = useState<ContactFormData>(defaultContactData);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
+  const consentText = settings.personal_data_consent_text || fallbackSettings.personal_data_consent_text;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -406,7 +409,7 @@ export function ContactLeadForm() {
         <input value={data.city} onChange={(event) => setData((current) => ({ ...current, city: event.target.value }))} className="mt-3 w-full rounded-2xl border px-4 py-3" placeholder="Город" />
         <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-28 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: что нужно построить, размеры, сроки" />
         <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
-        <Consent checked={consent} onChange={setConsent} />
+        <Consent checked={consent} onChange={setConsent} text={consentText} />
         <Button type="submit" disabled={!consent || state === "loading"} className="mt-4 w-full" variant="copper">
           {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           Отправить заявку
