@@ -8,7 +8,7 @@ export default function AdminSettingsPage() {
       endpoint="/admin/settings"
       fields={[
         { key: "key", label: "Ключ" },
-        { key: "value", label: "Значение JSON", type: "json" },
+        { key: "value", label: "Значение JSON", type: "json", placeholder: '"Строка"\n["a", "b"]\n{"value":"..."}' },
         { key: "description", label: "Описание", type: "textarea" },
       ]}
       columns={[

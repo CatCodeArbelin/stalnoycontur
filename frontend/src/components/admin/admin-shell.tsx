@@ -9,13 +9,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
 import { cn } from "@/lib/utils";
 
-type Field = {
+type UploadCategory = "uploads" | "cases" | "gallery" | "reviews" | "production";
+
+type BaseField = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "checkbox" | "json" | "image" | "image-list";
   placeholder?: string;
-  uploadCategory?: "uploads" | "cases" | "gallery" | "reviews" | "production";
 };
+
+type JsonField = BaseField & {
+  type: "json";
+};
+
+type StringListField = BaseField & {
+  type: "string-list";
+};
+
+type ImageListField = BaseField & {
+  type: "image-list";
+  uploadCategory?: UploadCategory;
+};
+
+type Field =
+  | (BaseField & { type?: "text" | "textarea" | "number" | "checkbox" })
+  | (BaseField & { type: "image"; uploadCategory?: UploadCategory })
+  | JsonField
+  | StringListField
+  | ImageListField;
 
 type Column = {
   key: string;
@@ -101,7 +121,7 @@ async function formatApiError(error: unknown) {
 function emptyValue(field: Field) {
   if (field.type === "checkbox") return false;
   if (field.type === "number") return 0;
-  if (field.type === "json" || field.type === "image-list") return "";
+  if (field.type === "json" || field.type === "string-list" || field.type === "image-list") return "";
   return "";
 }
 
@@ -123,20 +143,39 @@ function formatColumnCell(column: Column, value: unknown) {
   return formatCell(value);
 }
 
+function parseJsonField(field: Field, value: unknown) {
+  try {
+    return JSON.parse(String(value));
+  } catch {
+    throw new Error(`Поле «${field.label}» содержит невалидный JSON.`);
+  }
+}
+
+function parseLineList(value: unknown) {
+  return String(value)
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseListField(value: unknown) {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(String(value));
+    return Array.isArray(parsed) ? parsed : parseLineList(value);
+  } catch {
+    return parseLineList(value);
+  }
+}
+
 function toPayload(fields: Field[], form: Record<string, unknown>) {
   return Object.fromEntries(
     fields.map((field) => {
       const value = form[field.key];
       if (field.type === "number") return [field.key, Number(value || 0)];
       if (field.type === "checkbox") return [field.key, Boolean(value)];
-      if (field.type === "json" || field.type === "image-list") {
-        if (!value) return [field.key, null];
-        try {
-          return [field.key, JSON.parse(String(value))];
-        } catch {
-          return [field.key, String(value).split("\n").map((item) => item.trim()).filter(Boolean)];
-        }
-      }
+      if (field.type === "json") return [field.key, parseJsonField(field, value)];
+      if (field.type === "string-list" || field.type === "image-list") return [field.key, parseListField(value)];
       return [field.key, value || null];
     }),
   );
@@ -243,7 +282,9 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
   }
 
   function uploadCategory(fieldKey: string) {
-    return fields.find((field) => field.key === fieldKey)?.uploadCategory ?? "uploads";
+    const field = fields.find((item) => item.key === fieldKey);
+    if (field?.type === "image" || field?.type === "image-list") return field.uploadCategory ?? "uploads";
+    return "uploads";
   }
 
   async function uploadImage(fieldKey: string, file: File | null) {
@@ -357,7 +398,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                   {fields.map((field) => (
                     <label className="grid gap-1 text-sm font-semibold text-steel-700" key={field.key}>
                       {field.label}
-                      {field.type === "textarea" || field.type === "json" || field.type === "image-list" ? (
+                      {field.type === "textarea" || field.type === "json" || field.type === "string-list" || field.type === "image-list" ? (
                         <textarea className="min-h-24 rounded-2xl border p-3 font-normal" value={String(form[field.key] ?? "")} onChange={(e) => setForm((current) => ({ ...current, [field.key]: e.target.value }))} placeholder={field.placeholder} />
                       ) : field.type === "checkbox" ? (
                         <input className="h-5 w-5" checked={Boolean(form[field.key])} onChange={(e) => setForm((current) => ({ ...current, [field.key]: e.target.checked }))} type="checkbox" />
@@ -387,7 +428,7 @@ export function AdminResource({ title, description, endpoint, fields, columns }:
                         {columns.map((column) => <td className="max-w-[280px] px-3 py-3 align-top" key={column.key}>{formatColumnCell(column, item[column.key])}</td>)}
                         <td className="px-3 py-3">
                           <div className="flex gap-2">
-                            <button className="text-copper-700 underline" onClick={() => { setEditingId(Number(item.id)); setForm(Object.fromEntries(fields.map((field) => [field.key, (field.type === "json" || field.type === "image-list") ? JSON.stringify(item[field.key] ?? null, null, 2) : (item[field.key] ?? emptyValue(field))]))); }}>Править</button>
+                            <button className="text-copper-700 underline" onClick={() => { setEditingId(Number(item.id)); setForm(Object.fromEntries(fields.map((field) => [field.key, (field.type === "json" || field.type === "string-list" || field.type === "image-list") ? JSON.stringify(item[field.key] ?? (field.type === "json" ? null : []), null, 2) : (item[field.key] ?? emptyValue(field))]))); }}>Править</button>
                             <button className="text-red-700 underline" onClick={() => removeItem(item.id)}>Удалить</button>
                           </div>
                         </td>
