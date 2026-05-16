@@ -1,33 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="960" y2="640" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#cfdbe2"/>
-      <stop offset="1" stop-color="#7b94a4"/>
+      <stop stop-color="#22313b"/>
+      <stop offset="1" stop-color="#526979"/>
     </linearGradient>
     <linearGradient id="sheet" x1="170" y1="245" x2="830" y2="410" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#f8fbff" stop-opacity="0.84"/>
-      <stop offset="0.52" stop-color="#d9f0ff" stop-opacity="0.62"/>
-      <stop offset="1" stop-color="#f4d28b" stop-opacity="0.72"/>
+      <stop stop-color="#eef9ff" stop-opacity="0.72"/>
+      <stop offset="0.52" stop-color="#bfe9ff" stop-opacity="0.56"/>
+      <stop offset="1" stop-color="#75b8d4" stop-opacity="0.46"/>
     </linearGradient>
     <filter id="glow" x="90" y="175" width="820" height="430" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="0" stdDeviation="26" flood-color="#fff7d6" flood-opacity="0.45"/>
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.16"/>
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.24"/>
     </filter>
   </defs>
   <rect width="960" height="640" rx="48" fill="url(#bg)"/>
-  <circle cx="725" cy="190" r="104" fill="#fff7d6" opacity="0.44"/>
-  <circle cx="725" cy="190" r="64" fill="#fff" opacity="0.3"/>
+  <circle cx="725" cy="190" r="104" fill="#7dd3fc" opacity="0.09"/>
+  <circle cx="725" cy="190" r="58" fill="#bfecff" opacity="0.06"/>
   <g filter="url(#glow)">
     <path d="M135 385L260 250H765L835 385H135Z" fill="url(#sheet)"/>
     <path d="M135 385L260 250H765L835 385H135Z" stroke="white" stroke-width="8" stroke-linejoin="round" opacity="0.72"/>
-    <path d="M212 385L329 250M289 385L397 250M366 385L465 250M443 385L533 250M520 385L601 250M597 385L669 250M674 385L737 250" stroke="#8fd3f4" stroke-width="4" opacity="0.48"/>
-    <path d="M187 330H806M231 290H786M154 368H825" stroke="#8fd3f4" stroke-width="4" opacity="0.42"/>
+    <path d="M212 385L329 250M289 385L397 250M366 385L465 250M443 385L533 250M520 385L601 250M597 385L669 250M674 385L737 250" stroke="#9be4ff" stroke-width="4.5" opacity="0.68"/>
+    <path d="M187 330H806M231 290H786M154 368H825" stroke="#9be4ff" stroke-width="4.5" opacity="0.62"/>
+    <path d="M268 271L470 271L430 327L217 327Z" fill="#7dd3fc" opacity="0.16"/>
+    <path d="M498 265L665 265L635 319L458 319Z" fill="#e0f7ff" opacity="0.13"/>
+    <path d="M568 338L790 338L811 377L545 377Z" fill="#7dd3fc" opacity="0.14"/>
+    <path d="M322 355L524 355L505 385H294Z" fill="#e0f7ff" opacity="0.11"/>
     <path d="M280 385L220 318L280 250M405 385L346 318L405 250M530 385L472 318L530 250M655 385L598 318L655 250M780 385L724 318L765 250" stroke="white" stroke-width="3" opacity="0.38"/>
     <path d="M160 385H815" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.78"/>
     <path d="M210 385V555M480 385V555M765 385V555" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.72"/>
     <path d="M210 555H765" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
   </g>
-  <path d="M705 245C682 295 674 338 690 386" stroke="#fff7d6" stroke-width="20" stroke-linecap="round" opacity="0.26"/>
+  <path d="M705 245C682 295 674 338 690 386" stroke="#9be4ff" stroke-width="16" stroke-linecap="round" opacity="0.12"/>
   <text x="70" y="110" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800">Поликарбонат</text>
   <text x="72" y="160" fill="white" opacity="0.72" font-family="Arial, sans-serif" font-size="24">Светлая полупрозрачная кровля с ячейками</text>
 </svg>
