@@ -1,4 +1,8 @@
-import { cases as fallbackCases, contacts as fallbackContacts, phone as fallbackPhone } from "@/data/site";
+import {
+  cases as fallbackCases,
+  contacts as fallbackContacts,
+  phone as fallbackPhone,
+} from "@/data/site";
 
 export type PublicCase = {
   id?: number | null;
@@ -49,9 +53,11 @@ export type CalculatorConfig = {
   canopyOptions: CalculatorCanopyOption[];
   sizeOptions: CalculatorSizeOption[];
   materialOptions: CalculatorMaterialOption[];
+  allowCustomSize: boolean;
 };
 
 export const fallbackCalculatorConfig: CalculatorConfig = {
+  allowCustomSize: false,
   canopyOptions: [
     { label: "Для авто", value: "Навес для авто", multiplier: 1 },
     { label: "К дому / терраса", value: "Навес к дому", multiplier: 1.08 },
@@ -96,21 +102,28 @@ export const fallbackSettings: PublicSettings = {
   telegram: fallbackContacts.telegram.href,
   max: fallbackContacts.max.href,
   avito: fallbackContacts.avito.href,
-  personal_data_consent_text: "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
+  personal_data_consent_text:
+    "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
   calculator_config: fallbackCalculatorConfig,
 };
 
-export const fallbackPublicCases: PublicCase[] = fallbackCases.map((item, index) => ({
-  id: index + 1,
-  title: item.title,
-  city: item.place,
-  description: item.price,
-  cover_image: item.image,
-  gallery: [item.image],
-}));
+export const fallbackPublicCases: PublicCase[] = fallbackCases.map(
+  (item, index) => ({
+    id: index + 1,
+    title: item.title,
+    city: item.place,
+    description: item.price,
+    cover_image: item.image,
+    gallery: [item.image],
+  }),
+);
 
 export const fallbackGalleryItems: PublicGalleryItem[] = [
-  { title: "Парковка на 1–2 авто", category: "popular_solution", sort_order: 10 },
+  {
+    title: "Парковка на 1–2 авто",
+    category: "popular_solution",
+    sort_order: 10,
+  },
   { title: "Терраса у дома", category: "popular_solution", sort_order: 20 },
   { title: "Входная группа", category: "popular_solution", sort_order: 30 },
   { title: "Коммерческий навес", category: "popular_solution", sort_order: 40 },
@@ -133,7 +146,8 @@ function trimTrailingSlashes(value: string) {
 }
 
 function getSsrApiBase() {
-  const apiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
+  const apiBase =
+    process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
   if (!apiBase) {
     return null;
   }
@@ -158,7 +172,9 @@ async function fetchPublic<T>(path: string, fallback: T): Promise<T> {
   }
 
   try {
-    const response = await fetch(`${apiBase}${path}`, { next: { revalidate: 60 } });
+    const response = await fetch(`${apiBase}${path}`, {
+      next: { revalidate: 60 },
+    });
     if (!response.ok) {
       return fallback;
     }

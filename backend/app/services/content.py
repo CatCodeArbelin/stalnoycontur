@@ -67,6 +67,7 @@ DEFAULT_FAQ = [
 ]
 
 DEFAULT_CALCULATOR_CONFIG = {
+    "allowCustomSize": False,
     "canopyOptions": [
         {"label": "Для авто", "value": "Навес для авто", "multiplier": 1},
         {"label": "К дому / терраса", "value": "Навес к дому", "multiplier": 1.08},
