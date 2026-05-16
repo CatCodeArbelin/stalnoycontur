@@ -1,10 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none">
-  <rect width="960" height="640" rx="48" fill="#647887"/>
-  <path d="M80 430L210 250H760L880 430H80Z" fill="#d9872f" opacity="0.9"/>
-  <path d="M150 430H810" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.85"/>
-  <path d="M220 430V560M740 430V560M480 300V560" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.78"/>
-  <path d="M275 510C285 470 320 445 365 445H560C610 445 648 474 660 510" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.45"/>
-  <circle cx="335" cy="530" r="28" fill="white" opacity="0.55"/><circle cx="610" cy="530" r="28" fill="white" opacity="0.55"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="960" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#556f7e"/>
+      <stop offset="1" stop-color="#17232d"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="150" y1="245" x2="805" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f3b65e"/>
+      <stop offset="1" stop-color="#d9872f"/>
+    </linearGradient>
+    <filter id="shadow" x="60" y="170" width="840" height="430" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10Z" fill="#7dd3fc"/>
+    </marker>
+  </defs>
+  <rect width="960" height="640" rx="48" fill="url(#bg)"/>
+  <circle cx="780" cy="140" r="86" fill="#f7c873" opacity="0.18"/>
+  <g filter="url(#shadow)">
+    <path d="M130 350L745 235L835 292L205 414Z" fill="url(#roof)"/>
+    <path d="M130 350L745 235L835 292L205 414Z" stroke="#fff7ed" stroke-width="8" stroke-linejoin="round" opacity="0.65"/>
+    <path d="M174 363L790 248" stroke="#7a3f15" stroke-width="5" opacity="0.24"/>
+    <path d="M224 396L838 281" stroke="#7a3f15" stroke-width="5" opacity="0.22"/>
+    <path d="M205 414L835 292" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.82"/>
+    <path d="M215 414V555M505 359V555M820 292V555" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.78"/>
+    <path d="M205 555H835" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
+  </g>
+  <path d="M724 315C760 346 805 363 858 365" stroke="#7dd3fc" stroke-width="12" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M722 315L828 294" stroke="#7dd3fc" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
   <text x="70" y="110" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800">Односкатный навес</text>
-  <text x="72" y="160" fill="white" opacity="0.65" font-family="Arial, sans-serif" font-size="24">Стальной Контур • Крым</text>
+  <text x="72" y="160" fill="white" opacity="0.68" font-family="Arial, sans-serif" font-size="24">Разная высота стоек • водоотвод по скату</text>
 </svg>

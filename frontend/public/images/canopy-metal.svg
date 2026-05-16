@@ -1,10 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none">
-  <rect width="960" height="640" rx="48" fill="#344653"/>
-  <path d="M80 430L210 250H760L880 430H80Z" fill="#b76622" opacity="0.9"/>
-  <path d="M150 430H810" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.85"/>
-  <path d="M220 430V560M740 430V560M480 300V560" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.78"/>
-  <path d="M275 510C285 470 320 445 365 445H560C610 445 648 474 660 510" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.45"/>
-  <circle cx="335" cy="530" r="28" fill="white" opacity="0.55"/><circle cx="610" cy="530" r="28" fill="white" opacity="0.55"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="960" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#344653"/>
+      <stop offset="1" stop-color="#17232d"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="150" y1="248" x2="825" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c8752d"/>
+      <stop offset="0.5" stop-color="#b76622"/>
+      <stop offset="1" stop-color="#7a3f15"/>
+    </linearGradient>
+    <filter id="shadow" x="90" y="180" width="820" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="960" height="640" rx="48" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <path d="M130 380L250 250H765L835 380H130Z" fill="url(#metal)"/>
+    <path d="M130 380L250 250H765L835 380H130Z" stroke="#f3b65e" stroke-width="7" stroke-linejoin="round" opacity="0.78"/>
+    <path d="M166 380L286 250M226 380L346 250M286 380L406 250M346 380L466 250M406 380L526 250M466 380L586 250M526 380L646 250M586 380L706 250M646 380L766 250M706 380L806 286" stroke="#f3b65e" stroke-width="9" stroke-linecap="round" opacity="0.68"/>
+    <path d="M138 360H825M165 327H807M195 294H789" stroke="#5c2e10" stroke-width="5" stroke-linecap="round" opacity="0.26"/>
+    <path d="M160 380H815" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.72"/>
+    <path d="M210 380V555M480 380V555M765 380V555" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.68"/>
+    <path d="M210 555H765" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.16"/>
+  </g>
+  <path d="M245 250L765 250" stroke="#fff7ed" stroke-width="5" stroke-linecap="round" opacity="0.33"/>
   <text x="70" y="110" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800">Профнастил</text>
-  <text x="72" y="160" fill="white" opacity="0.65" font-family="Arial, sans-serif" font-size="24">Стальной Контур • Крым</text>
+  <text x="72" y="160" fill="white" opacity="0.68" font-family="Arial, sans-serif" font-size="24">Плотная непрозрачная кровля с волнами листа</text>
 </svg>

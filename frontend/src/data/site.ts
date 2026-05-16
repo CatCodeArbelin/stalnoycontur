@@ -29,6 +29,7 @@ export const canopyTypes = [
   { href: "/navesy-dlya-avto", title: "Навесы для авто", image: "/images/canopy-auto.svg", icon: Car },
   { href: "/odnoskatnye-navesy", title: "Односкатные", image: "/images/canopy-single.svg", icon: Home },
   { href: "/dvuskatnye-navesy", title: "Двускатные", image: "/images/canopy-double.svg", icon: Home },
+  { href: "/arochnye-navesy", title: "Арочные", image: "/images/canopy-arched.svg", icon: Sparkles },
   { href: "/navesy-iz-polikarbonata", title: "Из поликарбоната", image: "/images/canopy-poly.svg", icon: Sparkles },
   { href: "/navesy-iz-profnastila", title: "Из профнастила", image: "/images/canopy-metal.svg", icon: Factory },
   { href: "/navesy-k-domu", title: "Навесы к дому", image: "/images/canopy-home.svg", icon: Home },
@@ -60,6 +61,12 @@ export const pageContent: Record<string, { title: string; description: string; b
     title: "Двускатные навесы для дома и бизнеса",
     description: "Симметричная кровля выдерживает ветровые нагрузки и гармонично смотрится рядом с домами классической архитектуры.",
     points: ["усиленные фермы", "кровля профнастилом или металлочерепицей", "декоративные элементы и покраска RAL"],
+  },
+  "arochnye-navesy": {
+    badge: "Плавная дуга",
+    title: "Арочные навесы под ключ",
+    description: "Изготавливаем арочные навесы с гнутыми фермами для парковок, дворов, террас и входных групп. Такая форма аккуратно отводит осадки и выглядит легче прямых скатов.",
+    points: ["радиус арки под размеры площадки", "поликарбонат или профнастил на усиленном каркасе", "поперечные ребра и надежное крепление кровли"],
   },
   "navesy-iz-polikarbonata": {
     badge: "Светлая кровля",

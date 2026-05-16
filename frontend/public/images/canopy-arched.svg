@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="960" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22313b"/>
+      <stop offset="1" stop-color="#526979"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="170" y1="238" x2="790" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7c873" stop-opacity="0.94"/>
+      <stop offset="0.48" stop-color="#e5a24a" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#d9872f" stop-opacity="0.92"/>
+    </linearGradient>
+    <filter id="shadow" x="110" y="180" width="740" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.26"/>
+    </filter>
+  </defs>
+  <rect width="960" height="640" rx="48" fill="url(#bg)"/>
+  <circle cx="250" cy="210" r="110" fill="#7dd3fc" opacity="0.11"/>
+  <g filter="url(#shadow)">
+    <path d="M160 400C255 220 705 220 800 400L764 430C684 300 276 300 196 430Z" fill="url(#roof)"/>
+    <path d="M160 400C255 220 705 220 800 400" stroke="#fff7ed" stroke-width="14" stroke-linecap="round" opacity="0.84"/>
+    <path d="M196 430C276 300 684 300 764 430" stroke="#fff7ed" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+    <path d="M250 350C295 282 665 282 710 350" stroke="#7a3f15" stroke-width="5" stroke-linecap="round" opacity="0.23"/>
+    <path d="M300 315C345 268 615 268 660 315" stroke="#7a3f15" stroke-width="5" stroke-linecap="round" opacity="0.2"/>
+    <path d="M355 290C400 260 560 260 605 290" stroke="#7a3f15" stroke-width="5" stroke-linecap="round" opacity="0.18"/>
+    <path d="M200 430V555M350 322V555M480 285V555M610 322V555M760 430V555" stroke="white" stroke-width="15" stroke-linecap="round" opacity="0.76"/>
+    <path d="M200 555H760" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
+  </g>
+  <text x="70" y="110" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="800">Арочный навес</text>
+  <text x="72" y="160" fill="white" opacity="0.68" font-family="Arial, sans-serif" font-size="24">Дуга кровли и поперечные ребра жесткости</text>
+</svg>
