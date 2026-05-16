@@ -47,6 +47,7 @@ type SiteSettingsFormState = {
   phones: PhoneRow[];
   telegram: string;
   max: string;
+  avito: string;
   cities: string;
   personal_data_consent_text: string;
   calculator_config: CalculatorConfig;
@@ -77,6 +78,7 @@ const siteSettingsFields: SiteSettingsField[] = [
   },
   { key: "telegram", description: "Ссылка на Telegram" },
   { key: "max", description: "Ссылка на MAX" },
+  { key: "avito", description: "Ссылка на Avito" },
   { key: "cities", description: "Города обслуживания" },
   {
     key: "personal_data_consent_text",
@@ -94,6 +96,7 @@ const emptyForm: SiteSettingsFormState = {
   phones: [],
   telegram: "",
   max: "",
+  avito: "",
   cities: "",
   personal_data_consent_text: "",
   calculator_config: fallbackCalculatorConfig,
@@ -115,7 +118,7 @@ const dashboardTabs: {
   {
     key: "contacts",
     title: "Контакты",
-    description: "Телефоны, Telegram, MAX и название компании",
+    description: "Телефоны, Telegram, MAX, Avito и название компании",
   },
   {
     key: "cities",
@@ -891,6 +894,21 @@ export function SiteSettingsForm() {
                           }))
                         }
                         placeholder="https://max.ru/..."
+                      />
+                    </label>
+
+                    <label className="grid gap-1 text-sm font-semibold text-steel-700">
+                      Avito-ссылка
+                      <input
+                        className="rounded-2xl border p-3 font-normal"
+                        value={form.avito}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            avito: event.target.value,
+                          }))
+                        }
+                        placeholder="https://www.avito.ru/..."
                       />
                     </label>
 

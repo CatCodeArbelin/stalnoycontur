@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu, MessageCircle, Phone, Send, X } from "lucide-react";
+import { ChevronDown, Menu, MessageCircle, Phone, Send, ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
   const primaryPhone = phones[0];
   const telegramHref = settings.telegram || fallbackSettings.telegram;
   const maxHref = settings.max || fallbackSettings.max;
+  const avitoHref = settings.avito || fallbackSettings.avito;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-card/85 backdrop-blur-xl">
@@ -65,6 +66,10 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
                 <MessageCircle className="h-4 w-4 shrink-0" />
                 <span className="truncate">MAX</span>
               </a>
+              <a href={avitoHref} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-black transition hover:bg-muted hover:text-copper-500" aria-label="Открыть профиль на Avito">
+                <ShoppingBag className="h-4 w-4 shrink-0" />
+                <span className="truncate">Avito</span>
+              </a>
             </div>
           </details>
 
@@ -73,6 +78,9 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
           </a>
           <a href={maxHref} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-foreground transition hover:bg-muted hover:text-copper-500 2xl:hidden" aria-label="Написать в MAX">
             <MessageCircle className="h-4 w-4" />
+          </a>
+          <a href={avitoHref} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-foreground transition hover:bg-muted hover:text-copper-500 2xl:hidden" aria-label="Открыть профиль на Avito">
+            <ShoppingBag className="h-4 w-4" />
           </a>
           <ViewModeSwitcher className="shrink-0" />
           <ThemeToggle className="shrink-0" />
@@ -96,7 +104,7 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
           <div className="mt-2 flex justify-end">
             <ThemeToggle />
           </div>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-4">
             <a href={primaryPhone.href} onClick={() => setOpen(false)} className="flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-steel-900 px-3 py-3 text-sm font-black text-white">
               <Phone className="h-4 w-4 shrink-0" />
               <span className="truncate">Позвонить</span>
@@ -108,6 +116,10 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
             <a href={maxHref} onClick={() => setOpen(false)} className="flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-copper-500 px-3 py-3 text-sm font-black text-steel-900">
               <MessageCircle className="h-4 w-4 shrink-0" />
               <span className="truncate">MAX</span>
+            </a>
+            <a href={avitoHref} onClick={() => setOpen(false)} className="flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-lime-400 px-3 py-3 text-sm font-black text-steel-900">
+              <ShoppingBag className="h-4 w-4 shrink-0" />
+              <span className="truncate">Avito</span>
             </a>
           </div>
           <Button asChild className="mt-2 w-full" variant="copper"><a href="#contacts" onClick={() => setOpen(false)}>Получить расчет</a></Button>
