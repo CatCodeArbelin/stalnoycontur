@@ -7,12 +7,34 @@ import { BreadcrumbListJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getManagedContent } from "@/lib/content-api";
-import { metadataForPath } from "@/lib/seo";
-
-export const metadata: Metadata = metadataForPath("/naves-dlya-avto-v-krymu");
+import {
+  fallbackAutoCanopyLandingPage,
+  getManagedContent,
+  getPublicLandingPage,
+  type LandingPageSection,
+  type PublicLandingPage,
+} from "@/lib/content-api";
+import { createPageMetadata } from "@/lib/seo";
 
 const path = "/naves-dlya-avto-v-krymu";
+const landingSlug = "naves-dlya-avto-v-krymu";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const landingPage = await getPublicLandingPage(
+    landingSlug,
+    fallbackAutoCanopyLandingPage,
+  );
+
+  return createPageMetadata({
+    path,
+    title: landingPage.meta_title || landingPage.title,
+    description:
+      landingPage.meta_description ||
+      fallbackAutoCanopyLandingPage.meta_description ||
+      "Навес для авто в Крыму под ключ",
+    image: "/images/canopy-auto.svg",
+  });
+}
 
 const benefits = [
   {
@@ -70,13 +92,42 @@ const cities = [
   "Алушта",
 ];
 
+
+function landingSections(
+  sections: PublicLandingPage["sections"],
+): Record<string, LandingPageSection> {
+  if (!sections) return {};
+  if (Array.isArray(sections)) {
+    return Object.fromEntries(
+      sections
+        .filter((section) => section.key)
+        .map((section) => [String(section.key), section]),
+    );
+  }
+  return sections;
+}
+
+function sectionText(
+  sections: Record<string, LandingPageSection>,
+  key: string,
+  field: "title" | "description",
+  fallback: string,
+) {
+  const value = sections[key]?.[field];
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
 function isAutoCanopyCase(title: string, description?: string | null) {
   const text = `${title} ${description ?? ""}`.toLowerCase();
   return text.includes("авто") || text.includes("машин") || text.includes("парков");
 }
 
 export default async function AutoCanopyCrimeaPage() {
-  const content = await getManagedContent();
+  const [content, landingPage] = await Promise.all([
+    getManagedContent(),
+    getPublicLandingPage(landingSlug, fallbackAutoCanopyLandingPage),
+  ]);
+  const sections = landingSections(landingPage.sections);
   const autoCases = content.cases.filter((item) =>
     isAutoCanopyCase(item.title, item.description),
   );
@@ -87,29 +138,26 @@ export default async function AutoCanopyCrimeaPage() {
       <BreadcrumbListJsonLd
         items={[
           { name: "Главная", url: "/" },
-          { name: "Навес для авто в Крыму под ключ", url: path },
+          { name: landingPage.title, url: path },
         ]}
       />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container grid items-center gap-10 lg:grid-cols-2">
           <div>
             <Badge className="border-border/40 bg-card/10 text-copper-400">
-              Автонавесы под ключ
+              {landingPage.hero_badge || fallbackAutoCanopyLandingPage.hero_badge}
             </Badge>
             <h1 className="mt-5 text-4xl font-black tracking-tight md:text-6xl">
-              Навес для авто в Крыму под ключ
+              {landingPage.hero_title}
             </h1>
             <p className="mt-5 text-lg leading-8 text-white/70">
-              Проектируем, производим и монтируем металлические навесы для
-              автомобилей с учетом крымского солнца, ветра, соли и особенностей
-              участка.
+              {landingPage.hero_description || fallbackAutoCanopyLandingPage.hero_description}
             </p>
             <div className="mt-7 grid gap-3">
-              {[
-                "индивидуальный размер под один или два автомобиля",
-                "кровля из поликарбоната, профнастила или металлочерепицы",
-                "замер, смета, производство, монтаж и гарантия в одном договоре",
-              ].map((point) => (
+              {(landingPage.points?.length
+                ? landingPage.points
+                : fallbackAutoCanopyLandingPage.points ?? []
+              ).map((point) => (
                 <div key={point} className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-copper-400" />
                   <span>{point}</span>
@@ -135,7 +183,7 @@ export default async function AutoCanopyCrimeaPage() {
       <section className="surface-section section-padding">
         <div className="container">
           <Badge>Преимущества</Badge>
-          <h2 className="section-title mt-4">Берем автонавес под контроль от замера до гарантии</h2>
+          <h2 className="section-title mt-4">{sectionText(sections, "benefits", "title", "Берем автонавес под контроль от замера до гарантии")}</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((item) => (
               <Card key={item.title} className="h-full p-6">
@@ -155,7 +203,7 @@ export default async function AutoCanopyCrimeaPage() {
       <section className="section-effects section-padding">
         <div className="container relative z-10">
           <Badge>Размеры и материалы</Badge>
-          <h2 className="section-title mt-4">Типовые решения для автонавесов</h2>
+          <h2 className="section-title mt-4">{sectionText(sections, "sizes", "title", "Типовые решения для автонавесов")}</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-2">
             {sizeOptions.map((item) => (
               <Card key={item.size} className="interactive-card h-full p-6">
@@ -179,7 +227,7 @@ export default async function AutoCanopyCrimeaPage() {
       <section className="cases-section section-effects section-padding">
         <div className="container relative z-10">
           <Badge>Кейсы</Badge>
-          <h2 className="section-title mt-4">Автонавесы, которые уже защищают машины клиентов</h2>
+          <h2 className="section-title mt-4">{sectionText(sections, "cases", "title", "Автонавесы, которые уже защищают машины клиентов")}</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {visibleCases.map((item) => (
               <Card key={item.slug ?? item.title} className="interactive-card h-full overflow-hidden">
@@ -222,10 +270,14 @@ export default async function AutoCanopyCrimeaPage() {
         <div className="container grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <div>
             <Badge>География</Badge>
-            <h2 className="section-title mt-4">Монтируем навесы для авто по всему Крыму</h2>
+            <h2 className="section-title mt-4">{sectionText(sections, "geo", "title", "Монтируем навесы для авто по всему Крыму")}</h2>
             <p className="section-lead">
-              Организуем замер, доставку металлокаркаса и монтажную бригаду в
-              крупные города и ближайшие поселки.
+              {sectionText(
+                sections,
+                "geo",
+                "description",
+                "Организуем замер, доставку металлокаркаса и монтажную бригаду в крупные города и ближайшие поселки.",
+              )}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -243,10 +295,14 @@ export default async function AutoCanopyCrimeaPage() {
         <div className="container relative z-10 grid gap-8 lg:grid-cols-[1fr_0.8fr]">
           <div>
             <Badge>Заявка и контакты</Badge>
-            <h2 className="section-title mt-4">Получите расчет автонавеса под ваш участок</h2>
+            <h2 className="section-title mt-4">{sectionText(sections, "contacts", "title", "Получите расчет автонавеса под ваш участок")}</h2>
             <p className="section-lead">
-              Оставьте телефон, размеры площадки или фото заезда — подскажем
-              оптимальную форму, материал и ориентировочную стоимость.
+              {sectionText(
+                sections,
+                "contacts",
+                "description",
+                "Оставьте телефон, размеры площадки или фото заезда — подскажем оптимальную форму, материал и ориентировочную стоимость.",
+              )}
             </p>
             <div className="mt-6 grid gap-3 text-sm text-muted-foreground">
               {content.settings.phones.map((phone) => (

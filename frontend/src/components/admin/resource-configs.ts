@@ -65,3 +65,43 @@ export const galleryResource: AdminResourceConfig = {
     { key: "is_active", label: "Активен" },
   ],
 };
+
+
+export const landingPagesResource: AdminResourceConfig = {
+  title: "Лендинги",
+  description:
+    "CRUD для SEO и текстового контента посадочных страниц. Points — список строк, sections — JSON-массив или объект с ключами секций (benefits, sizes, cases, geo, contacts).",
+  endpoint: "/admin/landing-pages",
+  fields: [
+    { key: "slug", label: "Slug", placeholder: "naves-dlya-avto-v-krymu" },
+    { key: "title", label: "Название" },
+    { key: "meta_title", label: "Meta title" },
+    { key: "meta_description", label: "Meta description", type: "textarea" },
+    { key: "hero_badge", label: "Hero badge" },
+    { key: "hero_title", label: "Hero title" },
+    { key: "hero_description", label: "Hero description", type: "textarea" },
+    { key: "points", label: "Hero points", type: "string-list" },
+    {
+      key: "sections",
+      label: "Sections JSON",
+      type: "json",
+      defaultValue: "[]",
+      placeholder:
+        '[{"key":"geo","title":"Монтируем по всему Крыму","description":"Описание блока"}]',
+    },
+    {
+      key: "is_published",
+      label: "Опубликован",
+      type: "checkbox",
+      defaultValue: false,
+    },
+  ],
+  columns: [
+    { key: "id", label: "ID" },
+    { key: "slug", label: "Slug" },
+    { key: "title", label: "Название" },
+    { key: "hero_title", label: "Hero title" },
+    { key: "is_published", label: "Опубликован" },
+    { key: "updated_at", label: "Обновлен", format: "dateTime" },
+  ],
+};

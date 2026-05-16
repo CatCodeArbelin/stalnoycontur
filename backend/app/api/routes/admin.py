@@ -3,6 +3,7 @@ from typing import TypeVar
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.admin_auth import (
@@ -17,13 +18,28 @@ from app.core.database import get_db
 from app.models.case import Case
 from app.models.faq import FAQ
 from app.models.gallery_item import GalleryItem
+from app.models.landing_page_content import LandingPageContent
 from app.models.lead import Lead
 from app.models.setting import Setting
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.faq import FAQCreate, FAQRead, FAQUpdate
-from app.schemas.gallery_item import GalleryItemCreate, GalleryItemRead, GalleryItemUpdate
+from app.schemas.gallery_item import (
+    GalleryItemCreate,
+    GalleryItemRead,
+    GalleryItemUpdate,
+)
+from app.schemas.landing_page import (
+    LandingPageCreate,
+    LandingPageRead,
+    LandingPageUpdate,
+)
 from app.schemas.lead import LeadCreate, LeadRead, LeadUpdate
-from app.schemas.setting import SettingCreate, SettingRead, SettingUpdate, validate_public_setting_value
+from app.schemas.setting import (
+    SettingCreate,
+    SettingRead,
+    SettingUpdate,
+    validate_public_setting_value,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 ModelT = TypeVar("ModelT")
@@ -44,8 +60,14 @@ def login(
     response: Response,
     settings: Settings = Depends(get_settings),
 ) -> AdminLoginResponse:
-    if payload.username != settings.admin_username or payload.password != settings.admin_password:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверные данные администратора")
+    if (
+        payload.username != settings.admin_username
+        or payload.password != settings.admin_password
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверные данные администратора",
+        )
 
     csrf_token = create_csrf_token()
     session_token = create_admin_token(
@@ -75,7 +97,9 @@ def login(
 
 
 @router.get("/auth/csrf", response_model=AdminLoginResponse)
-def csrf_token(session: dict[str, object] = Depends(require_admin)) -> AdminLoginResponse:
+def csrf_token(
+    session: dict[str, object] = Depends(require_admin),
+) -> AdminLoginResponse:
     csrf = session.get("csrf")
     if not isinstance(csrf, str) or not csrf:
         raise HTTPException(
@@ -87,14 +111,20 @@ def csrf_token(session: dict[str, object] = Depends(require_admin)) -> AdminLogi
 
 @router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(response: Response) -> None:
-    response.delete_cookie(ADMIN_SESSION_COOKIE, path="/", secure=True, httponly=True, samesite="strict")
-    response.delete_cookie(ADMIN_CSRF_COOKIE, path="/", secure=True, httponly=False, samesite="strict")
+    response.delete_cookie(
+        ADMIN_SESSION_COOKIE, path="/", secure=True, httponly=True, samesite="strict"
+    )
+    response.delete_cookie(
+        ADMIN_CSRF_COOKIE, path="/", secure=True, httponly=False, samesite="strict"
+    )
 
 
 def get_or_404(db: Session, model: type[ModelT], item_id: int) -> ModelT:
     item = db.get(model, item_id)
     if item is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Запись не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Запись не найдена"
+        )
     return item
 
 
@@ -103,12 +133,88 @@ def apply_update(item: object, payload: BaseModel) -> None:
         setattr(item, key, value)
 
 
-@router.get("/leads", response_model=list[LeadRead], dependencies=[Depends(require_admin)])
+def commit_or_slug_conflict(db: Session) -> None:
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Slug уже используется"
+        ) from exc
+
+
+@router.get(
+    "/landing-pages",
+    response_model=list[LandingPageRead],
+    dependencies=[Depends(require_admin)],
+)
+def list_landing_pages(db: Session = Depends(get_db)) -> list[LandingPageContent]:
+    return list(
+        db.scalars(
+            select(LandingPageContent).order_by(
+                LandingPageContent.updated_at.desc(), LandingPageContent.id.desc()
+            )
+        )
+    )
+
+
+@router.post(
+    "/landing-pages",
+    response_model=LandingPageRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
+def create_landing_page(
+    payload: LandingPageCreate, db: Session = Depends(get_db)
+) -> LandingPageContent:
+    item = LandingPageContent(**payload.model_dump())
+    db.add(item)
+    commit_or_slug_conflict(db)
+    db.refresh(item)
+    return item
+
+
+@router.patch(
+    "/landing-pages/{item_id}",
+    response_model=LandingPageRead,
+    dependencies=[Depends(require_admin)],
+)
+def update_landing_page(
+    item_id: int, payload: LandingPageUpdate, db: Session = Depends(get_db)
+) -> LandingPageContent:
+    item = get_or_404(db, LandingPageContent, item_id)
+    apply_update(item, payload)
+    commit_or_slug_conflict(db)
+    db.refresh(item)
+    return item
+
+
+@router.delete(
+    "/landing-pages/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
+def delete_landing_page(item_id: int, db: Session = Depends(get_db)) -> None:
+    item = get_or_404(db, LandingPageContent, item_id)
+    db.delete(item)
+    db.commit()
+
+
+@router.get(
+    "/leads", response_model=list[LeadRead], dependencies=[Depends(require_admin)]
+)
 def list_leads(db: Session = Depends(get_db)) -> list[Lead]:
-    return list(db.scalars(select(Lead).order_by(Lead.created_at.desc(), Lead.id.desc())))
+    return list(
+        db.scalars(select(Lead).order_by(Lead.created_at.desc(), Lead.id.desc()))
+    )
 
 
-@router.post("/leads", response_model=LeadRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
+@router.post(
+    "/leads",
+    response_model=LeadRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_lead(payload: LeadCreate, db: Session = Depends(get_db)) -> Lead:
     item = Lead(**payload.model_dump())
     db.add(item)
@@ -117,8 +223,12 @@ def create_lead(payload: LeadCreate, db: Session = Depends(get_db)) -> Lead:
     return item
 
 
-@router.patch("/leads/{item_id}", response_model=LeadRead, dependencies=[Depends(require_admin)])
-def update_lead(item_id: int, payload: LeadUpdate, db: Session = Depends(get_db)) -> Lead:
+@router.patch(
+    "/leads/{item_id}", response_model=LeadRead, dependencies=[Depends(require_admin)]
+)
+def update_lead(
+    item_id: int, payload: LeadUpdate, db: Session = Depends(get_db)
+) -> Lead:
     item = get_or_404(db, Lead, item_id)
     apply_update(item, payload)
     db.commit()
@@ -126,19 +236,32 @@ def update_lead(item_id: int, payload: LeadUpdate, db: Session = Depends(get_db)
     return item
 
 
-@router.delete("/leads/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/leads/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_lead(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, Lead, item_id)
     db.delete(item)
     db.commit()
 
 
-@router.get("/cases", response_model=list[CaseRead], dependencies=[Depends(require_admin)])
+@router.get(
+    "/cases", response_model=list[CaseRead], dependencies=[Depends(require_admin)]
+)
 def list_cases(db: Session = Depends(get_db)) -> list[Case]:
-    return list(db.scalars(select(Case).order_by(Case.created_at.desc(), Case.id.desc())))
+    return list(
+        db.scalars(select(Case).order_by(Case.created_at.desc(), Case.id.desc()))
+    )
 
 
-@router.post("/cases", response_model=CaseRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
+@router.post(
+    "/cases",
+    response_model=CaseRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_case(payload: CaseCreate, db: Session = Depends(get_db)) -> Case:
     item = Case(**payload.model_dump())
     db.add(item)
@@ -147,8 +270,12 @@ def create_case(payload: CaseCreate, db: Session = Depends(get_db)) -> Case:
     return item
 
 
-@router.patch("/cases/{item_id}", response_model=CaseRead, dependencies=[Depends(require_admin)])
-def update_case(item_id: int, payload: CaseUpdate, db: Session = Depends(get_db)) -> Case:
+@router.patch(
+    "/cases/{item_id}", response_model=CaseRead, dependencies=[Depends(require_admin)]
+)
+def update_case(
+    item_id: int, payload: CaseUpdate, db: Session = Depends(get_db)
+) -> Case:
     item = get_or_404(db, Case, item_id)
     apply_update(item, payload)
     db.commit()
@@ -156,20 +283,41 @@ def update_case(item_id: int, payload: CaseUpdate, db: Session = Depends(get_db)
     return item
 
 
-@router.delete("/cases/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/cases/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_case(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, Case, item_id)
     db.delete(item)
     db.commit()
 
 
-@router.get("/gallery", response_model=list[GalleryItemRead], dependencies=[Depends(require_admin)])
+@router.get(
+    "/gallery",
+    response_model=list[GalleryItemRead],
+    dependencies=[Depends(require_admin)],
+)
 def list_gallery_items(db: Session = Depends(get_db)) -> list[GalleryItem]:
-    return list(db.scalars(select(GalleryItem).order_by(GalleryItem.sort_order.asc(), GalleryItem.id.desc())))
+    return list(
+        db.scalars(
+            select(GalleryItem).order_by(
+                GalleryItem.sort_order.asc(), GalleryItem.id.desc()
+            )
+        )
+    )
 
 
-@router.post("/gallery", response_model=GalleryItemRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
-def create_gallery_item(payload: GalleryItemCreate, db: Session = Depends(get_db)) -> GalleryItem:
+@router.post(
+    "/gallery",
+    response_model=GalleryItemRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
+def create_gallery_item(
+    payload: GalleryItemCreate, db: Session = Depends(get_db)
+) -> GalleryItem:
     item = GalleryItem(**payload.model_dump())
     db.add(item)
     db.commit()
@@ -177,8 +325,14 @@ def create_gallery_item(payload: GalleryItemCreate, db: Session = Depends(get_db
     return item
 
 
-@router.patch("/gallery/{item_id}", response_model=GalleryItemRead, dependencies=[Depends(require_admin)])
-def update_gallery_item(item_id: int, payload: GalleryItemUpdate, db: Session = Depends(get_db)) -> GalleryItem:
+@router.patch(
+    "/gallery/{item_id}",
+    response_model=GalleryItemRead,
+    dependencies=[Depends(require_admin)],
+)
+def update_gallery_item(
+    item_id: int, payload: GalleryItemUpdate, db: Session = Depends(get_db)
+) -> GalleryItem:
     item = get_or_404(db, GalleryItem, item_id)
     apply_update(item, payload)
     db.commit()
@@ -186,7 +340,11 @@ def update_gallery_item(item_id: int, payload: GalleryItemUpdate, db: Session = 
     return item
 
 
-@router.delete("/gallery/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/gallery/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_gallery_item(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, GalleryItem, item_id)
     db.delete(item)
@@ -198,7 +356,12 @@ def list_faq(db: Session = Depends(get_db)) -> list[FAQ]:
     return list(db.scalars(select(FAQ).order_by(FAQ.sort_order.asc(), FAQ.id.desc())))
 
 
-@router.post("/faq", response_model=FAQRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
+@router.post(
+    "/faq",
+    response_model=FAQRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_faq(payload: FAQCreate, db: Session = Depends(get_db)) -> FAQ:
     item = FAQ(**payload.model_dump())
     db.add(item)
@@ -207,7 +370,9 @@ def create_faq(payload: FAQCreate, db: Session = Depends(get_db)) -> FAQ:
     return item
 
 
-@router.patch("/faq/{item_id}", response_model=FAQRead, dependencies=[Depends(require_admin)])
+@router.patch(
+    "/faq/{item_id}", response_model=FAQRead, dependencies=[Depends(require_admin)]
+)
 def update_faq(item_id: int, payload: FAQUpdate, db: Session = Depends(get_db)) -> FAQ:
     item = get_or_404(db, FAQ, item_id)
     apply_update(item, payload)
@@ -216,19 +381,30 @@ def update_faq(item_id: int, payload: FAQUpdate, db: Session = Depends(get_db)) 
     return item
 
 
-@router.delete("/faq/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/faq/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_faq(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, FAQ, item_id)
     db.delete(item)
     db.commit()
 
 
-@router.get("/settings", response_model=list[SettingRead], dependencies=[Depends(require_admin)])
+@router.get(
+    "/settings", response_model=list[SettingRead], dependencies=[Depends(require_admin)]
+)
 def list_settings(db: Session = Depends(get_db)) -> list[Setting]:
     return list(db.scalars(select(Setting).order_by(Setting.key.asc())))
 
 
-@router.post("/settings", response_model=SettingRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
+@router.post(
+    "/settings",
+    response_model=SettingRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 def create_setting(payload: SettingCreate, db: Session = Depends(get_db)) -> Setting:
     try:
         validate_public_setting_value(payload.key, payload.value)
@@ -242,8 +418,14 @@ def create_setting(payload: SettingCreate, db: Session = Depends(get_db)) -> Set
     return item
 
 
-@router.patch("/settings/{item_id}", response_model=SettingRead, dependencies=[Depends(require_admin)])
-def update_setting(item_id: int, payload: SettingUpdate, db: Session = Depends(get_db)) -> Setting:
+@router.patch(
+    "/settings/{item_id}",
+    response_model=SettingRead,
+    dependencies=[Depends(require_admin)],
+)
+def update_setting(
+    item_id: int, payload: SettingUpdate, db: Session = Depends(get_db)
+) -> Setting:
     item = get_or_404(db, Setting, item_id)
     updated_fields = payload.model_fields_set
     if "key" in updated_fields or "value" in updated_fields:
@@ -261,7 +443,11 @@ def update_setting(item_id: int, payload: SettingUpdate, db: Session = Depends(g
     return item
 
 
-@router.delete("/settings/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/settings/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_setting(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, Setting, item_id)
     db.delete(item)
