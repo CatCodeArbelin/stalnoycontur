@@ -67,6 +67,37 @@ body.dark,
 ::selection { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
 
 @layer components {
+  .motion-reveal {
+    --reveal-delay: 0s;
+    --reveal-offset: 12px;
+    --reveal-start-x: 0;
+    --reveal-start-y: var(--reveal-offset);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition:
+      opacity 350ms ease-out var(--reveal-delay),
+      transform 350ms ease-out var(--reveal-delay);
+  }
+
+  .motion-reveal[data-reveal-direction="down"] {
+    --reveal-start-y: calc(var(--reveal-offset) * -1);
+  }
+
+  .motion-reveal[data-reveal-direction="left"] {
+    --reveal-start-x: var(--reveal-offset);
+    --reveal-start-y: 0;
+  }
+
+  .motion-reveal[data-reveal-direction="right"] {
+    --reveal-start-x: calc(var(--reveal-offset) * -1);
+    --reveal-start-y: 0;
+  }
+
+  .motion-reveal[data-reveal-state="hidden"] {
+    opacity: 0;
+    transform: translate3d(var(--reveal-start-x), var(--reveal-start-y), 0);
+  }
+
   .section-padding { @apply py-14 md:py-20 lg:py-24; }
   .section-title { @apply text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl; }
   .section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }

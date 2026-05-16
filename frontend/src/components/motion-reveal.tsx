@@ -1,7 +1,4 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 type MotionRevealDirection = "up" | "down" | "left" | "right";
 
@@ -12,30 +9,19 @@ type MotionRevealProps = {
   direction?: MotionRevealDirection;
 };
 
-const directionOffset: Record<MotionRevealDirection, { x: number; y: number }> = {
-  up: { x: 0, y: 12 },
-  down: { x: 0, y: -12 },
-  left: { x: 12, y: 0 },
-  right: { x: -12, y: 0 },
+type RevealStyle = CSSProperties & {
+  "--reveal-delay"?: string;
 };
 
 export function MotionReveal({ children, className, delay = 0, direction = "up" }: MotionRevealProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const offset = directionOffset[direction];
-
-  if (shouldReduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
+  const revealClassName = className ? `motion-reveal ${className}` : "motion-reveal";
+  const revealStyle: RevealStyle = {
+    "--reveal-delay": `${delay}s`,
+  };
 
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, ...offset }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: "-48px" }}
-      transition={{ duration: 0.35, ease: "easeOut", delay }}
-    >
+    <div className={revealClassName} data-reveal-direction={direction} style={revealStyle}>
       {children}
-    </motion.div>
+    </div>
   );
 }
