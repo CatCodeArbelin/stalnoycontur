@@ -76,7 +76,6 @@ body {
   pointer-events: none;
   z-index: 0;
   border-radius: 9999px;
-  will-change: transform, opacity;
 }
 
 .section-effects::before {
@@ -88,7 +87,6 @@ body {
     radial-gradient(circle, hsl(var(--foreground) / 0.14), transparent 68%);
   filter: blur(2px);
   opacity: 0.72;
-  animation: decorative-orbit 18s ease-in-out infinite alternate;
 }
 
 .section-effects::after {
@@ -100,7 +98,6 @@ body {
     radial-gradient(circle, hsl(var(--accent) / 0.24), transparent 58%),
     radial-gradient(circle at 70% 24%, hsl(var(--card) / 0.45), transparent 18%);
   opacity: 0.58;
-  animation: decorative-drift 22s ease-in-out infinite alternate;
 }
 
 .section-effects-dark::before {
@@ -128,7 +125,6 @@ body {
   filter: blur(18px);
   opacity: 0.45;
   transform: translateX(-18%) rotate(8deg);
-  animation: metal-sheen 8s ease-in-out infinite;
 }
 
 .section-effects .container::after {
@@ -147,7 +143,6 @@ body {
     1.8rem 1.1rem 0 -0.15rem rgba(217, 135, 47, 0.62),
     -2.2rem 3.1rem 0 -0.2rem rgba(229, 162, 74, 0.56),
     3.1rem -1.7rem 0 -0.22rem rgba(217, 135, 47, 0.48);
-  animation: copper-spark 3.8s ease-in-out infinite;
 }
 
 @keyframes decorative-orbit {
@@ -170,6 +165,33 @@ body {
   0%, 100% { opacity: 0.16; transform: translate3d(0, 0, 0) scale(0.88); }
   18% { opacity: 0.9; transform: translate3d(0.35rem, -0.18rem, 0) scale(1); }
   34% { opacity: 0.32; transform: translate3d(0.7rem, -0.36rem, 0) scale(0.82); }
+}
+
+@media (min-width: 1024px) {
+  .section-effects::before {
+    animation: decorative-orbit 18s ease-in-out infinite alternate;
+  }
+
+  .section-effects::after {
+    animation: decorative-drift 22s ease-in-out infinite alternate;
+  }
+
+  .section-effects .container::before {
+    animation: metal-sheen 8s ease-in-out infinite;
+  }
+
+  .section-effects .container::after {
+    animation: copper-spark 3.8s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 767px) {
+  .section-effects::before,
+  .section-effects::after,
+  .section-effects .container::before,
+  .section-effects .container::after {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
