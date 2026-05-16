@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { FormEvent } from "react";
+import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -37,12 +37,22 @@ type ImageListField = BaseField & {
   uploadCategory?: UploadCategory;
 };
 
+type SectionListField = BaseField & {
+  type: "section-list";
+  sections: {
+    key: string;
+    label: string;
+    placeholder?: string;
+  }[];
+};
+
 export type Field =
   | (BaseField & { type?: "text" | "textarea" | "number" | "checkbox" })
   | (BaseField & { type: "image"; uploadCategory?: UploadCategory })
   | JsonField
   | StringListField
-  | ImageListField;
+  | ImageListField
+  | SectionListField;
 
 export type Column = {
   key: string;
@@ -148,7 +158,8 @@ function emptyValue(field: Field) {
   if (
     field.type === "json" ||
     field.type === "string-list" ||
-    field.type === "image-list"
+    field.type === "image-list" ||
+    field.type === "section-list"
   )
     return "";
   return "";
@@ -284,6 +295,109 @@ function parseImageListValue(value: unknown) {
   return parseLineList(text);
 }
 
+type SectionListFormValue = {
+  titles: Record<string, string>;
+  advancedJson: string;
+  useAdvancedJson: boolean;
+};
+
+function sectionListItems(value: unknown): Record<string, unknown>[] {
+  if (!value) return [];
+  if (Array.isArray(value))
+    return value.filter(
+      (item): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === "object" && !Array.isArray(item),
+    );
+  if (value && typeof value === "object")
+    return Object.entries(value as Record<string, unknown>)
+      .filter(
+        (entry): entry is [string, Record<string, unknown>] =>
+          Boolean(entry[1]) &&
+          typeof entry[1] === "object" &&
+          !Array.isArray(entry[1]),
+      )
+      .map(([key, section]) => ({ key, ...section }));
+  return [];
+}
+
+function parseSectionListSource(value: unknown) {
+  if (typeof value !== "string") return sectionListItems(value);
+  const text = value.trim();
+  if (!text) return [];
+  try {
+    return sectionListItems(JSON.parse(text));
+  } catch {
+    return [];
+  }
+}
+
+function isSectionListFormValue(value: unknown): value is SectionListFormValue {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "titles" in value &&
+    "advancedJson" in value &&
+    "useAdvancedJson" in value
+  );
+}
+
+function sectionListFormValue(field: SectionListField, value: unknown) {
+  if (isSectionListFormValue(value)) return value;
+
+  const sections = parseSectionListSource(value ?? field.defaultValue);
+  const titles = Object.fromEntries(
+    field.sections.map((section) => {
+      const matched = sections.find((item) => item.key === section.key);
+      const title = matched?.["title"];
+      return [section.key, typeof title === "string" ? title : ""];
+    }),
+  );
+
+  return {
+    titles,
+    advancedJson: JSON.stringify(sections, null, 2),
+    useAdvancedJson: false,
+  };
+}
+
+function sectionListBaseSections(value: SectionListFormValue) {
+  try {
+    return sectionListItems(JSON.parse(value.advancedJson || "[]"));
+  } catch {
+    return [];
+  }
+}
+
+function parseSectionListField(field: SectionListField, value: unknown) {
+  const sectionValue = sectionListFormValue(field, value);
+  if (sectionValue.useAdvancedJson)
+    return parseJsonField(field, sectionValue.advancedJson);
+
+  const byKey = new Map(
+    sectionListBaseSections(sectionValue)
+      .filter((section) => typeof section.key === "string")
+      .map((section) => [String(section.key), section]),
+  );
+
+  for (const section of field.sections) {
+    const title = sectionValue.titles[section.key]?.trim();
+    const existing: Record<string, unknown> = byKey.get(section.key) ?? {
+      key: section.key,
+    };
+    if (title) byKey.set(section.key, { ...existing, key: section.key, title });
+    else if (Object.keys(existing).length > 1) {
+      const rest = { ...existing };
+      delete rest.title;
+      byKey.set(section.key, rest);
+    } else byKey.delete(section.key);
+  }
+
+  return Array.from(byKey.values()).filter(
+    (section) => Object.keys(section).length > 1,
+  );
+}
+
 function toPayload(fields: Field[], form: Record<string, unknown>) {
   return Object.fromEntries(
     fields.map((field) => {
@@ -296,8 +410,196 @@ function toPayload(fields: Field[], form: Record<string, unknown>) {
         return [field.key, parseListField(value)];
       if (field.type === "image-list")
         return [field.key, parseImageListValue(value)];
+      if (field.type === "section-list")
+        return [field.key, parseSectionListField(field, value)];
       return [field.key, value || null];
     }),
+  );
+}
+
+function formValueForEdit(field: Field, item: Record<string, unknown>) {
+  if (field.type === "section-list")
+    return sectionListFormValue(field, item[field.key] ?? field.defaultValue);
+  if (
+    field.type === "json" ||
+    field.type === "string-list" ||
+    field.type === "image-list"
+  )
+    return JSON.stringify(
+      item[field.key] ?? (field.type === "json" ? null : []),
+      null,
+      2,
+    );
+  return item[field.key] ?? emptyValue(field);
+}
+
+type AdminFieldInputProps = {
+  endpoint: string;
+  field: Field;
+  form: Record<string, unknown>;
+  setForm: Dispatch<SetStateAction<Record<string, unknown>>>;
+  uploadImage: (fieldKey: string, file: File | null) => void;
+  uploadImageList: (fieldKey: string, files: FileList | null) => void;
+};
+
+function AdminFieldInput({
+  endpoint,
+  field,
+  form,
+  setForm,
+  uploadImage,
+  uploadImageList,
+}: AdminFieldInputProps) {
+  if (field.type === "section-list") {
+    const value = sectionListFormValue(field, form[field.key]);
+
+    return (
+      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-normal">
+        <div className="grid gap-3">
+          {field.sections.map((section) => (
+            <label
+              className="grid gap-1 text-sm font-semibold text-steel-700"
+              key={section.key}
+            >
+              {section.label}
+              <input
+                className="rounded-2xl border bg-white p-3 font-normal"
+                value={value.titles[section.key] ?? ""}
+                onChange={(event) => {
+                  const title = event.target.value;
+                  setForm((current) => {
+                    const currentValue = sectionListFormValue(
+                      field,
+                      current[field.key],
+                    );
+                    return {
+                      ...current,
+                      [field.key]: {
+                        ...currentValue,
+                        titles: {
+                          ...currentValue.titles,
+                          [section.key]: title,
+                        },
+                      },
+                    };
+                  });
+                }}
+                placeholder={section.placeholder}
+              />
+            </label>
+          ))}
+        </div>
+        <label className="flex items-start gap-2 text-xs font-semibold text-steel-600">
+          <input
+            className="mt-0.5 h-4 w-4"
+            checked={value.useAdvancedJson}
+            onChange={(event) => {
+              const useAdvancedJson = event.target.checked;
+              setForm((current) => {
+                const currentValue = sectionListFormValue(
+                  field,
+                  current[field.key],
+                );
+                return {
+                  ...current,
+                  [field.key]: { ...currentValue, useAdvancedJson },
+                };
+              });
+            }}
+            type="checkbox"
+          />
+          Расширенный JSON-режим для разработчика
+        </label>
+        {value.useAdvancedJson ? (
+          <textarea
+            className="min-h-36 rounded-2xl border bg-white p-3 font-mono text-xs font-normal"
+            value={value.advancedJson}
+            onChange={(event) => {
+              const advancedJson = event.target.value;
+              setForm((current) => {
+                const currentValue = sectionListFormValue(
+                  field,
+                  current[field.key],
+                );
+                return {
+                  ...current,
+                  [field.key]: { ...currentValue, advancedJson },
+                };
+              });
+            }}
+            placeholder={field.placeholder}
+          />
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {field.type === "textarea" ||
+      field.type === "json" ||
+      field.type === "string-list" ||
+      field.type === "image-list" ? (
+        <textarea
+          className="min-h-24 rounded-2xl border p-3 font-normal"
+          value={String(form[field.key] ?? "")}
+          onChange={(e) =>
+            setForm((current) => ({
+              ...current,
+              [field.key]: e.target.value,
+            }))
+          }
+          placeholder={field.placeholder}
+        />
+      ) : field.type === "checkbox" ? (
+        <input
+          className="h-5 w-5"
+          checked={Boolean(form[field.key])}
+          onChange={(e) =>
+            setForm((current) => ({
+              ...current,
+              [field.key]: e.target.checked,
+            }))
+          }
+          type="checkbox"
+        />
+      ) : (
+        <input
+          className="rounded-2xl border p-3 font-normal"
+          value={String(form[field.key] ?? "")}
+          onChange={(e) =>
+            setForm((current) => ({
+              ...current,
+              [field.key]: e.target.value,
+            }))
+          }
+          placeholder={field.placeholder}
+          type={field.type === "number" ? "number" : "text"}
+        />
+      )}
+      {field.type === "image" ? (
+        <input
+          className="text-xs"
+          type="file"
+          accept={IMAGE_ACCEPT}
+          onChange={(e) => uploadImage(field.key, e.target.files?.[0] ?? null)}
+        />
+      ) : null}
+      {field.type === "image-list" ? (
+        <input
+          className="text-xs"
+          type="file"
+          accept={IMAGE_ACCEPT}
+          multiple
+          onChange={(e) => uploadImageList(field.key, e.target.files)}
+        />
+      ) : null}
+      {shouldShowLandingSlugPreview(endpoint, field) ? (
+        <span className="text-xs font-normal text-steel-500">
+          Итоговая ссылка: {landingSlugPreview(form[field.key])}
+        </span>
+      ) : null}
+    </>
   );
 }
 
@@ -464,73 +766,14 @@ export function AdminCrudPanel({
                   key={field.key}
                 >
                   {field.label}
-                  {field.type === "textarea" ||
-                  field.type === "json" ||
-                  field.type === "string-list" ||
-                  field.type === "image-list" ? (
-                    <textarea
-                      className="min-h-24 rounded-2xl border p-3 font-normal"
-                      value={String(form[field.key] ?? "")}
-                      onChange={(e) =>
-                        setForm((current) => ({
-                          ...current,
-                          [field.key]: e.target.value,
-                        }))
-                      }
-                      placeholder={field.placeholder}
-                    />
-                  ) : field.type === "checkbox" ? (
-                    <input
-                      className="h-5 w-5"
-                      checked={Boolean(form[field.key])}
-                      onChange={(e) =>
-                        setForm((current) => ({
-                          ...current,
-                          [field.key]: e.target.checked,
-                        }))
-                      }
-                      type="checkbox"
-                    />
-                  ) : (
-                    <input
-                      className="rounded-2xl border p-3 font-normal"
-                      value={String(form[field.key] ?? "")}
-                      onChange={(e) =>
-                        setForm((current) => ({
-                          ...current,
-                          [field.key]: e.target.value,
-                        }))
-                      }
-                      placeholder={field.placeholder}
-                      type={field.type === "number" ? "number" : "text"}
-                    />
-                  )}
-                  {field.type === "image" ? (
-                    <input
-                      className="text-xs"
-                      type="file"
-                      accept={IMAGE_ACCEPT}
-                      onChange={(e) =>
-                        uploadImage(field.key, e.target.files?.[0] ?? null)
-                      }
-                    />
-                  ) : null}
-                  {field.type === "image-list" ? (
-                    <input
-                      className="text-xs"
-                      type="file"
-                      accept={IMAGE_ACCEPT}
-                      multiple
-                      onChange={(e) =>
-                        uploadImageList(field.key, e.target.files)
-                      }
-                    />
-                  ) : null}
-                  {shouldShowLandingSlugPreview(endpoint, field) ? (
-                    <span className="text-xs font-normal text-steel-500">
-                      Итоговая ссылка: {landingSlugPreview(form[field.key])}
-                    </span>
-                  ) : null}
+                  <AdminFieldInput
+                    endpoint={endpoint}
+                    field={field}
+                    form={form}
+                    setForm={setForm}
+                    uploadImage={uploadImage}
+                    uploadImageList={uploadImageList}
+                  />
                 </label>
               ))}
               <div className="flex gap-2">
@@ -589,16 +832,7 @@ export function AdminCrudPanel({
                               Object.fromEntries(
                                 fields.map((field) => [
                                   field.key,
-                                  field.type === "json" ||
-                                  field.type === "string-list" ||
-                                  field.type === "image-list"
-                                    ? JSON.stringify(
-                                        item[field.key] ??
-                                          (field.type === "json" ? null : []),
-                                        null,
-                                        2,
-                                      )
-                                    : (item[field.key] ?? emptyValue(field)),
+                                  formValueForEdit(field, item),
                                 ]),
                               ),
                             );
@@ -945,73 +1179,14 @@ export function AdminResource({
                       key={field.key}
                     >
                       {field.label}
-                      {field.type === "textarea" ||
-                      field.type === "json" ||
-                      field.type === "string-list" ||
-                      field.type === "image-list" ? (
-                        <textarea
-                          className="min-h-24 rounded-2xl border p-3 font-normal"
-                          value={String(form[field.key] ?? "")}
-                          onChange={(e) =>
-                            setForm((current) => ({
-                              ...current,
-                              [field.key]: e.target.value,
-                            }))
-                          }
-                          placeholder={field.placeholder}
-                        />
-                      ) : field.type === "checkbox" ? (
-                        <input
-                          className="h-5 w-5"
-                          checked={Boolean(form[field.key])}
-                          onChange={(e) =>
-                            setForm((current) => ({
-                              ...current,
-                              [field.key]: e.target.checked,
-                            }))
-                          }
-                          type="checkbox"
-                        />
-                      ) : (
-                        <input
-                          className="rounded-2xl border p-3 font-normal"
-                          value={String(form[field.key] ?? "")}
-                          onChange={(e) =>
-                            setForm((current) => ({
-                              ...current,
-                              [field.key]: e.target.value,
-                            }))
-                          }
-                          placeholder={field.placeholder}
-                          type={field.type === "number" ? "number" : "text"}
-                        />
-                      )}
-                      {field.type === "image" ? (
-                        <input
-                          className="text-xs"
-                          type="file"
-                          accept={IMAGE_ACCEPT}
-                          onChange={(e) =>
-                            uploadImage(field.key, e.target.files?.[0] ?? null)
-                          }
-                        />
-                      ) : null}
-                      {field.type === "image-list" ? (
-                        <input
-                          className="text-xs"
-                          type="file"
-                          accept={IMAGE_ACCEPT}
-                          multiple
-                          onChange={(e) =>
-                            uploadImageList(field.key, e.target.files)
-                          }
-                        />
-                      ) : null}
-                      {shouldShowLandingSlugPreview(endpoint, field) ? (
-                        <span className="text-xs font-normal text-steel-500">
-                          Итоговая ссылка: {landingSlugPreview(form[field.key])}
-                        </span>
-                      ) : null}
+                      <AdminFieldInput
+                        endpoint={endpoint}
+                        field={field}
+                        form={form}
+                        setForm={setForm}
+                        uploadImage={uploadImage}
+                        uploadImageList={uploadImageList}
+                      />
                       {field.description ? (
                         <span className="text-xs font-normal text-steel-500">
                           {field.description}
@@ -1075,19 +1250,7 @@ export function AdminResource({
                                   Object.fromEntries(
                                     fields.map((field) => [
                                       field.key,
-                                      field.type === "json" ||
-                                      field.type === "string-list" ||
-                                      field.type === "image-list"
-                                        ? JSON.stringify(
-                                            item[field.key] ??
-                                              (field.type === "json"
-                                                ? null
-                                                : []),
-                                            null,
-                                            2,
-                                          )
-                                        : (item[field.key] ??
-                                          emptyValue(field)),
+                                      formValueForEdit(field, item),
                                     ]),
                                   ),
                                 );
