@@ -91,15 +91,7 @@ class PublicSettings(BaseModel):
     telegram: str
     max: str
     avito: str
-    cities: list[str]
     personal_data_consent_text: str
     calculator_config: CalculatorConfig
-
-    @field_validator("cities")
-    @classmethod
-    def validate_cities(cls, value: list[str]) -> list[str]:
-        if not all(city.strip() for city in value):
-            raise ValueError("cities must contain only non-empty strings")
-        return value
 
     model_config = ConfigDict(extra="forbid")

@@ -16,7 +16,6 @@ export const nav = [
   { href: "/cases", label: "Кейсы" },
   { href: "/navesy-dlya-avto", label: "Для авто" },
   { href: "/navesy-k-domu", label: "К дому" },
-  { href: "/simferopol", label: "Города" },
 ];
 
 export const advantages = [
@@ -41,8 +40,6 @@ export const cases = [
   { title: "Терраса с поликарбонатом", place: "Ялта", price: "от 184 000 ₽", image: "/images/case-2.svg" },
   { title: "Двускатный навес для двора", place: "Севастополь", price: "от 315 000 ₽", image: "/images/case-3.svg" },
 ];
-
-export const cities = ["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч"];
 
 export const pageContent: Record<string, { title: string; description: string; badge: string; points: string[] }> = {
   "navesy-dlya-avto": {
