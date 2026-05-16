@@ -38,3 +38,125 @@ body {
 .section-title { @apply text-3xl font-black tracking-tight text-steel-900 sm:text-4xl lg:text-5xl; }
 .section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
 .glass { @apply border border-white/20 bg-white/80 shadow-soft backdrop-blur-xl; }
+
+.section-effects {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.section-effects::before,
+.section-effects::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 9999px;
+  will-change: transform, opacity;
+}
+
+.section-effects::before {
+  inset: 12% auto auto -8rem;
+  width: 22rem;
+  height: 22rem;
+  background:
+    radial-gradient(circle at 34% 34%, rgba(217, 135, 47, 0.2), transparent 34%),
+    radial-gradient(circle, rgba(183, 196, 204, 0.22), transparent 68%);
+  filter: blur(2px);
+  opacity: 0.72;
+  animation: decorative-orbit 18s ease-in-out infinite alternate;
+}
+
+.section-effects::after {
+  right: -7rem;
+  bottom: 8%;
+  width: 18rem;
+  height: 18rem;
+  background:
+    radial-gradient(circle, rgba(229, 162, 74, 0.24), transparent 58%),
+    radial-gradient(circle at 70% 24%, rgba(255, 255, 255, 0.28), transparent 18%);
+  opacity: 0.58;
+  animation: decorative-drift 22s ease-in-out infinite alternate;
+}
+
+.section-effects-dark::before {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(229, 162, 74, 0.2), transparent 32%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 66%);
+}
+
+.section-effects-dark::after {
+  background:
+    radial-gradient(circle, rgba(217, 135, 47, 0.22), transparent 58%),
+    radial-gradient(circle at 70% 24%, rgba(255, 255, 255, 0.16), transparent 18%);
+}
+
+.section-effects .container::before {
+  content: "";
+  position: absolute;
+  inset: 6% 8% auto auto;
+  z-index: -1;
+  width: min(30rem, 62vw);
+  height: 14rem;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 22%, rgba(255, 255, 255, 0.2) 42%, rgba(183, 196, 204, 0.18) 50%, transparent 68%);
+  border-radius: 9999px;
+  filter: blur(18px);
+  opacity: 0.45;
+  transform: translateX(-18%) rotate(8deg);
+  animation: metal-sheen 8s ease-in-out infinite;
+}
+
+.section-effects .container::after {
+  content: "";
+  position: absolute;
+  right: 10%;
+  top: 18%;
+  z-index: -1;
+  width: 0.45rem;
+  height: 0.45rem;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: #e5a24a;
+  box-shadow:
+    0 0 14px rgba(229, 162, 74, 0.72),
+    1.8rem 1.1rem 0 -0.15rem rgba(217, 135, 47, 0.62),
+    -2.2rem 3.1rem 0 -0.2rem rgba(229, 162, 74, 0.56),
+    3.1rem -1.7rem 0 -0.22rem rgba(217, 135, 47, 0.48);
+  animation: copper-spark 3.8s ease-in-out infinite;
+}
+
+@keyframes decorative-orbit {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(2.2rem, -1.4rem, 0) scale(1.08); }
+}
+
+@keyframes decorative-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-1.8rem, 1.6rem, 0) scale(1.06); }
+}
+
+@keyframes metal-sheen {
+  0%, 52% { transform: translateX(-38%) rotate(8deg); opacity: 0; }
+  62% { opacity: 0.72; }
+  88%, 100% { transform: translateX(38%) rotate(8deg); opacity: 0; }
+}
+
+@keyframes copper-spark {
+  0%, 100% { opacity: 0.16; transform: translate3d(0, 0, 0) scale(0.88); }
+  18% { opacity: 0.9; transform: translate3d(0.35rem, -0.18rem, 0) scale(1); }
+  34% { opacity: 0.32; transform: translate3d(0.7rem, -0.36rem, 0) scale(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

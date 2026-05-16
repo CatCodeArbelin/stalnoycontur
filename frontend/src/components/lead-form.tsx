@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Upload } from "lucide-rea
 import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import { MotionReveal } from "@/components/motion-reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -285,7 +286,7 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
   return (
     <section id="quiz" className="section-padding bg-white">
       <div className="container grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-        <div>
+        <MotionReveal delay={0.05} direction="right">
           <Badge>Квиз-калькулятор</Badge>
           <h2 className="section-title mt-4">Получите ориентировочную смету за 2 минуты</h2>
           <p className="section-lead">Ответьте на 5 шагов — менеджер уточнит детали, предложит материалы и пришлет точный расчет.</p>
@@ -294,9 +295,10 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
             <p className="mt-3 text-3xl font-black">от {formatPrice(estimatedPrice)}</p>
             <p className="mt-3 text-sm leading-6 text-white/65">Итоговая стоимость зависит от фундамента, высоты, окраски, водостока и условий монтажа.</p>
           </div>
-        </div>
+        </MotionReveal>
 
-        <Card className="p-6">
+        <MotionReveal delay={0.16} direction="left">
+          <Card className="p-6">
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm font-bold text-muted-foreground">
               <span>Шаг {step + 1} из {steps.length}</span>
@@ -347,7 +349,8 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
             </div>
             <div className="mt-4"><StatusMessage state={state} error={error} /></div>
           </form>
-        </Card>
+          </Card>
+        </MotionReveal>
       </div>
     </section>
   );
