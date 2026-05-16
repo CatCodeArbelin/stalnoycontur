@@ -42,8 +42,8 @@ export function ViewModeSwitcher({ className }: { className?: string }) {
   const activeLabel = useMemo(() => modes.find((item) => item.value === mode)?.label ?? "Сайт", [mode]);
 
   return (
-    <div className={cn("flex items-center gap-1 rounded-full border border-steel-100 bg-white/85 p-1 shadow-card backdrop-blur", className)} aria-label={`Режим отображения: ${activeLabel}`}>
-      <MonitorSmartphone className="hidden h-4 w-4 shrink-0 text-steel-500 xl:block" aria-hidden="true" />
+    <div className={cn("flex items-center gap-1 rounded-full border border-border bg-card/85 p-1 shadow-card backdrop-blur", className)} aria-label={`Режим отображения: ${activeLabel}`}>
+      <MonitorSmartphone className="hidden h-4 w-4 shrink-0 text-muted-foreground xl:block" aria-hidden="true" />
       {modes.map((item) => {
         const active = item.value === mode;
 
@@ -52,7 +52,7 @@ export function ViewModeSwitcher({ className }: { className?: string }) {
             key={item.value}
             type="button"
             className={cn(
-              "rounded-full px-2 py-1.5 text-[11px] font-black leading-none text-steel-600 transition hover:bg-muted hover:text-steel-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-500 sm:text-xs",
+              "rounded-full px-2 py-1.5 text-[11px] font-black leading-none text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-500 sm:text-xs",
               active && "bg-steel-900 text-white shadow-card hover:bg-steel-900 hover:text-white",
             )}
             aria-pressed={active}

@@ -19,11 +19,31 @@ const manrope = Manrope({
 
 export const metadata: Metadata = createPageMetadata(homeSeo);
 
+const themeInitScript = `
+(function() {
+  try {
+    var savedTheme = window.localStorage.getItem("stalnoycontur:theme");
+    var mode = savedTheme === "light" || savedTheme === "dark" || savedTheme === "system" ? savedTheme : "system";
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var shouldUseDark = mode === "dark" || (mode === "system" && prefersDark);
+
+    document.documentElement.classList.toggle("dark", shouldUseDark);
+    document.documentElement.style.colorScheme = shouldUseDark ? "dark" : "light";
+  } catch (error) {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+  }
+})();
+`;
+
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const settings = await getPublicSettings();
 
   return (
-    <html lang="ru" className={manrope.variable} data-view-mode="site">
+    <html lang="ru" className={manrope.variable} data-view-mode="site" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="font-sans antialiased">
         <LocalBusinessJsonLd settings={settings} />
         <ConstructionBusinessJsonLd settings={settings} />

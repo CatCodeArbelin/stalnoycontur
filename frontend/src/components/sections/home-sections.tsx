@@ -27,23 +27,23 @@ export function Hero() {
       <div className="absolute inset-0 z-0 bg-grid bg-[length:38px_38px] opacity-40" />
       <div className="container relative z-10 grid min-h-[680px] items-center gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr]">
         <MotionReveal>
-          <Badge className="border-white/20 bg-white/10 text-copper-400">Производство и монтаж</Badge>
+          <Badge className="border-border/40 bg-card/10 text-copper-400">Производство и монтаж</Badge>
           <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl lg:text-7xl">Навесы под ключ в Крыму за 7–14 дней</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70">Проектируем, изготавливаем и монтируем металлические навесы для авто, дома, террас и бизнеса. Фиксируем смету, показываем 3D-эскиз и работаем по договору.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" variant="copper"><a href="#quiz">Рассчитать стоимость <ArrowRight className="h-5 w-5" /></a></Button>
-            <Button asChild size="lg" variant="outline" className="border-white/25 bg-white/10 text-white hover:bg-white/20"><Link href="/cases">Смотреть кейсы</Link></Button>
+            <Button asChild size="lg" variant="outline" className="border-border/40 bg-card/10 text-white hover:bg-card/20"><Link href="/cases">Смотреть кейсы</Link></Button>
           </div>
           <div className="mt-8 grid grid-cols-3 gap-3 text-center">
             {["580+ объектов", "до 7 лет гарантии", "0 ₽ за замер"].map((item, index) => (
               <MotionReveal key={item} delay={0.1 + index * 0.08} direction="up">
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-3 text-sm font-bold">{item}</div>
+                <div className="rounded-2xl border border-border/30 bg-card/10 p-3 text-sm font-bold">{item}</div>
               </MotionReveal>
             ))}
           </div>
         </MotionReveal>
         <MotionReveal className="relative" delay={0.12} direction="left">
-          <div className="glass relative overflow-hidden rounded-[2.5rem] p-4">
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-border/70 bg-card/80 p-4 shadow-soft backdrop-blur-xl">
             <Image src="/images/hero-canopy.svg" alt="Металлический навес для автомобиля" width={820} height={620} priority sizes="(min-width: 1024px) 46vw, 100vw" className="h-auto w-full rounded-[2rem]" />
           </div>
         </MotionReveal>
@@ -83,7 +83,7 @@ export function Types() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {canopyTypes.map((item, index) => (
             <MotionReveal key={item.href} delay={index * 0.07} direction={index % 3 === 0 ? "right" : "up"}>
-              <Link href={item.href} className="group block overflow-hidden rounded-[2rem] bg-white shadow-card">
+              <Link href={item.href} className="group block overflow-hidden rounded-[2rem] bg-card shadow-card">
                 <Image src={item.image} alt={item.title} width={520} height={320} loading="lazy" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="h-48 w-full object-cover transition group-hover:scale-105" />
                 <div className="flex items-center justify-between p-5"><span className="text-lg font-black">{item.title}</span><ArrowRight className="h-5 w-5 text-copper-500" /></div>
               </Link>
@@ -118,12 +118,12 @@ export function SolutionsProductionSteps({ gallery = fallbackGalleryItems }: Sol
     <section className="section-effects section-effects-dark section-padding bg-steel-900 text-white">
       <div className="container relative z-10 grid gap-10 lg:grid-cols-3">
         <MotionReveal direction="right">
-          <Badge className="border-white/20 bg-white/10 text-copper-400">Популярные решения</Badge>
+          <Badge className="border-border/40 bg-card/10 text-copper-400">Популярные решения</Badge>
           <h2 className="mt-4 text-3xl font-black">От идеи до готового навеса</h2>
           <div className="mt-6 grid gap-3">
             {visibleSolutions.map((item, index) => (
               <MotionReveal key={item.id ?? item.title} delay={0.08 + index * 0.06} direction="right">
-                <div className="flex items-center gap-3 rounded-2xl bg-white/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{item.title}</div>
+                <div className="flex items-center gap-3 rounded-2xl bg-card/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{item.title}</div>
               </MotionReveal>
             ))}
           </div>
@@ -169,7 +169,7 @@ export function CasesMapReviewsFaqContacts({
   return (
     <>
       <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item, index) => <MotionReveal key={item.slug ?? item.title} delay={index * 0.08} direction={index % 2 === 0 ? "up" : "left"}><Card className="h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600">{item.materials.join(" · ")}</p> : null}</CardContent></Card></MotionReveal>)}</div></div></section>
-      <section className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
+      <section className="section-padding bg-card"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding">
         <div className="container grid gap-8 lg:grid-cols-2">
           <div>
@@ -178,7 +178,7 @@ export function CasesMapReviewsFaqContacts({
             {visibleReviews.length ? (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleReviews.map((review) => (
-                  <article key={review.id ?? `${review.author}-${review.text}`} className="flex h-full flex-col overflow-hidden rounded-[2rem] bg-white shadow-card">
+                  <article key={review.id ?? `${review.author}-${review.text}`} className="flex h-full flex-col overflow-hidden rounded-[2rem] bg-card shadow-card">
                     {review.image ? (
                       <Image
                         src={review.image}
@@ -203,16 +203,16 @@ export function CasesMapReviewsFaqContacts({
                 ))}
               </div>
             ) : (
-              <div className="mt-6 rounded-[2rem] bg-white p-6 shadow-card">
+              <div className="mt-6 rounded-[2rem] bg-card p-6 shadow-card">
                 <p className="font-black">Отзывы скоро появятся</p>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">Мы уже собираем публичные отзывы клиентов и скоро добавим их на главную.</p>
               </div>
             )}
           </div>
-          <div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="rounded-2xl bg-white p-5 shadow-card"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div></div>
+          <div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="rounded-2xl bg-card p-5 shadow-card"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div></div>
         </div>
       </section>
-      <section id="contacts" className="section-padding bg-white"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={primaryPhone.href}><Phone className="h-5 w-5" /> {primaryPhone.label}</a></Button><Button asChild size="lg" variant="outline"><a href={telegramHref}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={maxHref}><MessageCircle className="h-5 w-5" /> MAX</a></Button></div></div><ContactLeadForm settings={settings} /></div></section>
+      <section id="contacts" className="section-padding bg-card"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={primaryPhone.href}><Phone className="h-5 w-5" /> {primaryPhone.label}</a></Button><Button asChild size="lg" variant="outline"><a href={telegramHref}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={maxHref}><MessageCircle className="h-5 w-5" /> MAX</a></Button></div></div><ContactLeadForm settings={settings} /></div></section>
     </>
   );
 }
