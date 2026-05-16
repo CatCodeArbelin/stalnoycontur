@@ -42,6 +42,51 @@ export type PublicPhone = {
   href: string;
 };
 
+export type CalculatorCanopyOption = {
+  label: string;
+  value: string;
+  multiplier: number;
+};
+
+export type CalculatorSizeOption = {
+  label: string;
+  value: string;
+  area: number;
+};
+
+export type CalculatorMaterialOption = {
+  label: string;
+  value: string;
+  pricePerMeter: number;
+};
+
+export type CalculatorConfig = {
+  canopyOptions: CalculatorCanopyOption[];
+  sizeOptions: CalculatorSizeOption[];
+  materialOptions: CalculatorMaterialOption[];
+};
+
+export const fallbackCalculatorConfig: CalculatorConfig = {
+  canopyOptions: [
+    { label: "Для авто", value: "Навес для авто", multiplier: 1 },
+    { label: "К дому / терраса", value: "Навес к дому", multiplier: 1.08 },
+    { label: "Односкатный", value: "Односкатный навес", multiplier: 0.95 },
+    { label: "Двускатный", value: "Двускатный навес", multiplier: 1.18 },
+  ],
+  sizeOptions: [
+    { label: "3×4 м", value: "3×4 м", area: 12 },
+    { label: "4×6 м", value: "4×6 м", area: 24 },
+    { label: "6×6 м", value: "6×6 м", area: 36 },
+    { label: "6×8 м", value: "6×8 м", area: 48 },
+  ],
+  materialOptions: [
+    { label: "Поликарбонат", value: "Поликарбонат", pricePerMeter: 7600 },
+    { label: "Профнастил", value: "Профнастил", pricePerMeter: 6900 },
+    { label: "Металлочерепица", value: "Металлочерепица", pricePerMeter: 8400 },
+    { label: "Мягкая кровля", value: "Мягкая кровля", pricePerMeter: 9200 },
+  ],
+};
+
 export type PublicSettings = {
   company_name: string;
   phone: string;
@@ -50,6 +95,7 @@ export type PublicSettings = {
   max?: string;
   cities: string[];
   personal_data_consent_text: string;
+  calculator_config: CalculatorConfig;
 };
 
 export type ManagedContent = {
@@ -68,6 +114,7 @@ export const fallbackSettings: PublicSettings = {
   max: fallbackContacts.max.href,
   cities: fallbackCities,
   personal_data_consent_text: "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
+  calculator_config: fallbackCalculatorConfig,
 };
 
 export const fallbackPublicCases: PublicCase[] = fallbackCases.map((item, index) => ({

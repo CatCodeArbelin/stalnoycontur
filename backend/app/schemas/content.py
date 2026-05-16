@@ -55,6 +55,45 @@ class PublicPhone(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class CalculatorCanopyOption(BaseModel):
+    label: str = Field(..., min_length=1)
+    value: str = Field(..., min_length=1)
+    multiplier: float = Field(..., gt=0)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CalculatorSizeOption(BaseModel):
+    label: str = Field(..., min_length=1)
+    value: str = Field(..., min_length=1)
+    area: float = Field(..., gt=0)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CalculatorMaterialOption(BaseModel):
+    label: str = Field(..., min_length=1)
+    value: str = Field(..., min_length=1)
+    pricePerMeter: float = Field(..., gt=0)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CalculatorConfig(BaseModel):
+    canopyOptions: list[CalculatorCanopyOption]
+    sizeOptions: list[CalculatorSizeOption]
+    materialOptions: list[CalculatorMaterialOption]
+
+    @field_validator("canopyOptions", "sizeOptions", "materialOptions")
+    @classmethod
+    def validate_options_are_not_empty(cls, value: list[BaseModel]) -> list[BaseModel]:
+        if not value:
+            raise ValueError("calculator option groups must not be empty")
+        return value
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class PublicSettings(BaseModel):
     company_name: str
     phone: str
@@ -63,6 +102,7 @@ class PublicSettings(BaseModel):
     max: str
     cities: list[str]
     personal_data_consent_text: str
+    calculator_config: CalculatorConfig
 
     @field_validator("cities")
     @classmethod

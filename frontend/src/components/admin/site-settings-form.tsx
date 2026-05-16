@@ -17,12 +17,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
+import { fallbackCalculatorConfig, type CalculatorConfig } from "@/lib/content-api";
 import { cn } from "@/lib/utils";
 
 type MessageType = "success" | "error";
 type SettingsTab =
   | "contacts"
   | "cities"
+  | "calculator"
   | "cases"
   | "reviews"
   | "faq"
@@ -49,9 +51,11 @@ type SiteSettingsFormState = {
   max: string;
   cities: string;
   personal_data_consent_text: string;
+  calculator_config: CalculatorConfig;
 };
 
 type SiteSettingsKey = keyof SiteSettingsFormState;
+type CalculatorOptionGroup = keyof CalculatorConfig;
 
 type SiteSettingsField = {
   key: SiteSettingsKey;
@@ -80,6 +84,10 @@ const siteSettingsFields: SiteSettingsField[] = [
     key: "personal_data_consent_text",
     description: "Текст согласия на обработку персональных данных",
   },
+  {
+    key: "calculator_config",
+    description: "Настройки квиз-калькулятора: типы, размеры, материалы, коэффициенты и цены",
+  },
 ];
 
 const emptyForm: SiteSettingsFormState = {
@@ -90,6 +98,7 @@ const emptyForm: SiteSettingsFormState = {
   max: "",
   cities: "",
   personal_data_consent_text: "",
+  calculator_config: fallbackCalculatorConfig,
 };
 
 const apiBase = getBrowserApiBase();
@@ -115,6 +124,11 @@ const dashboardTabs: {
     key: "cities",
     title: "Города",
     description: "Список городов обслуживания",
+  },
+  {
+    key: "calculator",
+    title: "Калькулятор",
+    description: "Типы навесов, размеры, материалы и цены",
   },
   {
     key: "cases",
@@ -218,9 +232,61 @@ function splitCities(value: string) {
     .filter(Boolean);
 }
 
+function normalizePositiveNumber(value: unknown, fallback: number) {
+  const numberValue = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : fallback;
+}
+
+function normalizeCalculatorConfig(value: unknown): CalculatorConfig {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return fallbackCalculatorConfig;
+
+  const source = value as Partial<Record<CalculatorOptionGroup, unknown>>;
+  return {
+    canopyOptions: normalizeCalculatorOptions(
+      source.canopyOptions,
+      fallbackCalculatorConfig.canopyOptions,
+      "multiplier",
+    ),
+    sizeOptions: normalizeCalculatorOptions(
+      source.sizeOptions,
+      fallbackCalculatorConfig.sizeOptions,
+      "area",
+    ),
+    materialOptions: normalizeCalculatorOptions(
+      source.materialOptions,
+      fallbackCalculatorConfig.materialOptions,
+      "pricePerMeter",
+    ),
+  };
+}
+
+function normalizeCalculatorOptions<Metric extends "multiplier" | "area" | "pricePerMeter">(
+  value: unknown,
+  fallback: Array<{ label: string; value: string } & Record<Metric, number>>,
+  metric: Metric,
+) {
+  if (!Array.isArray(value)) return fallback;
+  const normalized = value
+    .filter(
+      (item): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === "object" && !Array.isArray(item),
+    )
+    .map((item, index) => ({
+      label: normalizeString(item.label),
+      value: normalizeString(item.value),
+      [metric]: normalizePositiveNumber(item[metric], fallback[index]?.[metric] ?? 1),
+    }))
+    .filter((item) => item.label && item.value);
+  return (normalized.length ? normalized : fallback) as Array<
+    { label: string; value: string } & Record<Metric, number>
+  >;
+}
+
 function settingValueToFormValue(key: SiteSettingsKey, value: unknown) {
   if (key === "phones") return normalizePhones(value);
   if (key === "cities") return normalizeCities(value);
+  if (key === "calculator_config") return normalizeCalculatorConfig(value);
   return normalizeString(value);
 }
 
@@ -234,6 +300,31 @@ function formValueToSettingValue(
       .filter((item) => item.label || item.href);
   }
   if (key === "cities") return splitCities(form.cities);
+  if (key === "calculator_config") {
+    return {
+      canopyOptions: form.calculator_config.canopyOptions
+        .map((item) => ({
+          label: item.label.trim(),
+          value: item.value.trim(),
+          multiplier: item.multiplier,
+        }))
+        .filter((item) => item.label && item.value),
+      sizeOptions: form.calculator_config.sizeOptions
+        .map((item) => ({
+          label: item.label.trim(),
+          value: item.value.trim(),
+          area: item.area,
+        }))
+        .filter((item) => item.label && item.value),
+      materialOptions: form.calculator_config.materialOptions
+        .map((item) => ({
+          label: item.label.trim(),
+          value: item.value.trim(),
+          pricePerMeter: item.pricePerMeter,
+        }))
+        .filter((item) => item.label && item.value),
+    };
+  }
   return String(form[key] ?? "").trim();
 }
 
@@ -423,6 +514,135 @@ export function SiteSettingsForm() {
       ...current,
       phones: current.phones.filter((_, phoneIndex) => phoneIndex !== index),
     }));
+  }
+
+  function updateCalculatorOption(
+    group: CalculatorOptionGroup,
+    index: number,
+    key: "label" | "value" | "multiplier" | "area" | "pricePerMeter",
+    value: string,
+  ) {
+    setForm((current) => ({
+      ...current,
+      calculator_config: {
+        ...current.calculator_config,
+        [group]: current.calculator_config[group].map((item, itemIndex) =>
+          itemIndex === index
+            ? {
+                ...item,
+                [key]: key === "label" || key === "value" ? value : Number(value),
+              }
+            : item,
+        ),
+      },
+    }));
+  }
+
+  function addCalculatorOption(group: CalculatorOptionGroup) {
+    setForm((current) => {
+      const fallbackItem = fallbackCalculatorConfig[group][0];
+      return {
+        ...current,
+        calculator_config: {
+          ...current.calculator_config,
+          [group]: [
+            ...current.calculator_config[group],
+            { ...fallbackItem, label: "", value: "" },
+          ],
+        },
+      };
+    });
+  }
+
+  function removeCalculatorOption(group: CalculatorOptionGroup, index: number) {
+    setForm((current) => ({
+      ...current,
+      calculator_config: {
+        ...current.calculator_config,
+        [group]: current.calculator_config[group].filter(
+          (_, itemIndex) => itemIndex !== index,
+        ),
+      },
+    }));
+  }
+
+  function renderCalculatorGroup(
+    group: CalculatorOptionGroup,
+    title: string,
+    metricKey: "multiplier" | "area" | "pricePerMeter",
+    metricLabel: string,
+    metricStep = "1",
+  ) {
+    return (
+      <div className="grid gap-3 rounded-2xl border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-steel-700">{title}</p>
+            <p className="text-xs text-steel-500">
+              Label видит пользователь, value уходит в заявку.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => addCalculatorOption(group)}
+          >
+            Добавить
+          </Button>
+        </div>
+        <div className="grid gap-3">
+          {form.calculator_config[group].map((option, index) => (
+            <div
+              className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_1fr_160px_auto]"
+              key={`${group}-${index}`}
+            >
+              <input
+                className="rounded-2xl border p-3"
+                value={option.label}
+                onChange={(event) =>
+                  updateCalculatorOption(group, index, "label", event.target.value)
+                }
+                placeholder="Label"
+              />
+              <input
+                className="rounded-2xl border p-3"
+                value={option.value}
+                onChange={(event) =>
+                  updateCalculatorOption(group, index, "value", event.target.value)
+                }
+                placeholder="Value"
+              />
+              <label className="grid gap-1 text-xs font-semibold text-steel-600">
+                {metricLabel}
+                <input
+                  className="rounded-2xl border p-3 font-normal"
+                  min="0.01"
+                  step={metricStep}
+                  type="number"
+                  value={String(option[metricKey as keyof typeof option] ?? "")}
+                  onChange={(event) =>
+                    updateCalculatorOption(
+                      group,
+                      index,
+                      metricKey,
+                      event.target.value,
+                    )
+                  }
+                />
+              </label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => removeCalculatorOption(group, index)}
+              >
+                Удалить
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   useEffect(() => {
@@ -740,6 +960,56 @@ export function SiteSettingsForm() {
                     <div className="flex flex-wrap gap-2">
                       <Button type="submit" disabled={isSaving}>
                         {isSaving ? "Сохранение..." : "Сохранить города"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={loadSettings}
+                      >
+                        Отменить изменения
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {activeTab === "calculator" ? (
+              <Card>
+                <CardHeader className="flex-row items-center justify-between gap-4">
+                  <CardTitle>Калькулятор</CardTitle>
+                  <Button variant="outline" size="sm" onClick={loadSettings}>
+                    Обновить
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <form className="grid gap-5" onSubmit={saveSettings}>
+                    <p className="rounded-2xl bg-copper-50 p-4 text-sm text-steel-700">
+                      Эти значения используются в публичном квиз-калькуляторе для
+                      вариантов навеса, площади и ориентировочной цены за м².
+                    </p>
+                    {renderCalculatorGroup(
+                      "canopyOptions",
+                      "Типы навесов",
+                      "multiplier",
+                      "Коэффициент",
+                      "0.01",
+                    )}
+                    {renderCalculatorGroup(
+                      "sizeOptions",
+                      "Размеры",
+                      "area",
+                      "Площадь, м²",
+                    )}
+                    {renderCalculatorGroup(
+                      "materialOptions",
+                      "Материалы",
+                      "pricePerMeter",
+                      "Цена за м²",
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="submit" disabled={isSaving}>
+                        {isSaving ? "Сохранение..." : "Сохранить калькулятор"}
                       </Button>
                       <Button
                         type="button"

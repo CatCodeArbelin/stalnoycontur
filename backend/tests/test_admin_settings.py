@@ -62,6 +62,11 @@ def _admin_client(tmp_path) -> Iterator[tuple[TestClient, sessionmaker, dict[str
         ("max", "https://max.ru/stalnoycontur"),
         ("cities", ["Симферополь", "Севастополь"]),
         ("personal_data_consent_text", "Согласие на обработку персональных данных."),
+        ("calculator_config", {
+            "canopyOptions": [{"label": "Для авто", "value": "Навес для авто", "multiplier": 1}],
+            "sizeOptions": [{"label": "3×4 м", "value": "3×4 м", "area": 12}],
+            "materialOptions": [{"label": "Поликарбонат", "value": "Поликарбонат", "pricePerMeter": 7600}],
+        }),
     ],
 )
 def test_create_public_setting_accepts_valid_value(tmp_path, key: str, value: Any) -> None:
@@ -88,6 +93,16 @@ def test_create_public_setting_accepts_valid_value(tmp_path, key: str, value: An
         ("cities", ["Симферополь", ""], "Настройка cities должна быть списком непустых строк"),
         ("cities", "Симферополь", "Настройка cities должна быть списком непустых строк"),
         ("personal_data_consent_text", False, "Настройка personal_data_consent_text должна быть строкой"),
+        ("calculator_config", {
+            "canopyOptions": [],
+            "sizeOptions": [{"label": "3×4 м", "value": "3×4 м", "area": 12}],
+            "materialOptions": [{"label": "Поликарбонат", "value": "Поликарбонат", "pricePerMeter": 7600}],
+        }, "Настройка calculator_config должна содержать непустые массивы canopyOptions, sizeOptions и materialOptions с корректными label, value, коэффициентами и ценами"),
+        ("calculator_config", {
+            "canopyOptions": [{"label": "Для авто", "value": "Навес для авто", "multiplier": 0}],
+            "sizeOptions": [{"label": "3×4 м", "value": "3×4 м", "area": 12}],
+            "materialOptions": [{"label": "Поликарбонат", "value": "Поликарбонат", "pricePerMeter": 7600}],
+        }, "Настройка calculator_config должна содержать непустые массивы canopyOptions, sizeOptions и materialOptions с корректными label, value, коэффициентами и ценами"),
     ],
 )
 def test_create_public_setting_rejects_invalid_value(
