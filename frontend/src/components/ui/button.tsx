@@ -13,7 +13,7 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-steel-100",
         outline: "border border-border bg-background/80 hover:bg-muted",
         ghost: "hover:bg-muted",
-        copper: "bg-copper-500 text-white shadow-card hover:-translate-y-0.5 hover:bg-copper-600",
+        copper: "bg-copper-500 text-steel-900 shadow-card hover:-translate-y-0.5 hover:bg-copper-400",
       },
       size: {
         default: "h-11 px-5 py-2",

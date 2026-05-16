@@ -38,16 +38,16 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
         <div className="hidden items-center gap-3 md:flex">
           <div className="hidden flex-col items-end leading-tight xl:flex">
             {phones.map((phone) => (
-              <a key={phone.href} href={phone.href} className="text-sm font-black text-foreground transition hover:text-copper-600">
+              <a key={phone.href} href={phone.href} className="text-sm font-black text-foreground transition hover:text-copper-500">
                 {phone.label}
               </a>
             ))}
           </div>
-          <a href={telegramHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-foreground transition hover:bg-muted hover:text-copper-600 lg:flex" aria-label="Написать в Telegram">
+          <a href={telegramHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-foreground transition hover:bg-muted hover:text-copper-500 lg:flex" aria-label="Написать в Telegram">
             <Send className="h-4 w-4" />
             Telegram
           </a>
-          <a href={maxHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-foreground transition hover:bg-muted hover:text-copper-600 lg:flex" aria-label="Написать в MAX">
+          <a href={maxHref} className="hidden items-center gap-1 rounded-full px-3 py-2 text-sm font-black text-foreground transition hover:bg-muted hover:text-copper-500 lg:flex" aria-label="Написать в MAX">
             <MessageCircle className="h-4 w-4" />
             MAX
           </a>
@@ -57,13 +57,13 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
         </div>
         <div className="flex items-center gap-2 lg:hidden">
           <ViewModeSwitcher className="max-w-[calc(100vw-7rem)] overflow-x-auto" />
-          <button className="grid h-11 w-11 shrink-0 place-items-center rounded-full border bg-card" onClick={() => setOpen(!open)} aria-label="Открыть меню" aria-expanded={open}>
+          <button className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground" onClick={() => setOpen(!open)} aria-label="Открыть меню" aria-expanded={open}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
       <div className={cn("container grid overflow-hidden transition-all lg:hidden", open ? "max-h-[38rem] pb-4" : "max-h-0")}>
-        <div className="rounded-[1.5rem] border bg-card p-3 shadow-card">
+        <div className="rounded-[1.5rem] border border-border bg-card p-3 text-card-foreground shadow-card">
           {nav.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="block rounded-2xl px-4 py-3 font-bold text-foreground hover:bg-muted">
               {item.label}
@@ -77,11 +77,11 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
               <Phone className="h-4 w-4" />
               Позвонить
             </a>
-            <a href={telegramHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-sky-500 px-3 py-3 text-sm font-black text-white">
+            <a href={telegramHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-sky-500 px-3 py-3 text-sm font-black text-steel-900">
               <Send className="h-4 w-4" />
               Telegram
             </a>
-            <a href={maxHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-copper-500 px-3 py-3 text-sm font-black text-white">
+            <a href={maxHref} onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 rounded-2xl bg-copper-500 px-3 py-3 text-sm font-black text-steel-900">
               <MessageCircle className="h-4 w-4" />
               MAX
             </a>

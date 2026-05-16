@@ -54,11 +54,14 @@ body {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
-::selection { background: #d9872f; color: white; }
+::selection { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
 
-.section-padding { @apply py-14 md:py-20 lg:py-24; }
-.section-title { @apply text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl; }
-.section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
+@layer components {
+  .section-padding { @apply py-14 md:py-20 lg:py-24; }
+  .section-title { @apply text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl; }
+  .section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
+  .glass { @apply border border-border bg-card/75 text-card-foreground shadow-card backdrop-blur-xl; }
+}
 
 .section-effects {
   position: relative;
@@ -81,8 +84,8 @@ body {
   width: 22rem;
   height: 22rem;
   background:
-    radial-gradient(circle at 34% 34%, rgba(217, 135, 47, 0.2), transparent 34%),
-    radial-gradient(circle, rgba(183, 196, 204, 0.22), transparent 68%);
+    radial-gradient(circle at 34% 34%, hsl(var(--accent) / 0.2), transparent 34%),
+    radial-gradient(circle, hsl(var(--foreground) / 0.14), transparent 68%);
   filter: blur(2px);
   opacity: 0.72;
   animation: decorative-orbit 18s ease-in-out infinite alternate;
@@ -94,22 +97,22 @@ body {
   width: 18rem;
   height: 18rem;
   background:
-    radial-gradient(circle, rgba(229, 162, 74, 0.24), transparent 58%),
-    radial-gradient(circle at 70% 24%, rgba(255, 255, 255, 0.28), transparent 18%);
+    radial-gradient(circle, hsl(var(--accent) / 0.24), transparent 58%),
+    radial-gradient(circle at 70% 24%, hsl(var(--card) / 0.45), transparent 18%);
   opacity: 0.58;
   animation: decorative-drift 22s ease-in-out infinite alternate;
 }
 
 .section-effects-dark::before {
   background:
-    radial-gradient(circle at 30% 30%, rgba(229, 162, 74, 0.2), transparent 32%),
-    radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 66%);
+    radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.2), transparent 32%),
+    radial-gradient(circle, hsl(var(--card) / 0.12), transparent 66%);
 }
 
 .section-effects-dark::after {
   background:
-    radial-gradient(circle, rgba(217, 135, 47, 0.22), transparent 58%),
-    radial-gradient(circle at 70% 24%, rgba(255, 255, 255, 0.16), transparent 18%);
+    radial-gradient(circle, hsl(var(--accent) / 0.22), transparent 58%),
+    radial-gradient(circle at 70% 24%, hsl(var(--card) / 0.16), transparent 18%);
 }
 
 .section-effects .container::before {
@@ -120,7 +123,7 @@ body {
   width: min(30rem, 62vw);
   height: 14rem;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 22%, rgba(255, 255, 255, 0.2) 42%, rgba(183, 196, 204, 0.18) 50%, transparent 68%);
+  background: linear-gradient(115deg, transparent 22%, hsl(var(--card) / 0.24) 42%, hsl(var(--foreground) / 0.14) 50%, transparent 68%);
   border-radius: 9999px;
   filter: blur(18px);
   opacity: 0.45;
@@ -239,7 +242,7 @@ html[data-view-mode="compact"] .container {
     z-index: 30;
     display: block;
     padding: 0.55rem 1rem;
-    border-bottom: 1px solid rgba(23, 35, 45, 0.1);
+    border-bottom: 1px solid hsl(var(--border));
     background: hsl(var(--card) / 0.92);
     color: hsl(var(--muted-foreground));
     font-size: 0.72rem;
