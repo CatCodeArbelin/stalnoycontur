@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -9,13 +15,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
-import { fallbackCalculatorConfig, fallbackSettings, type CalculatorConfig, type PublicSettings } from "@/lib/content-api";
+import {
+  fallbackCalculatorConfig,
+  fallbackSettings,
+  type CalculatorConfig,
+  type PublicSettings,
+} from "@/lib/content-api";
 
 const API_URL = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
-
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 type LeadSource = "quiz" | "contact_form";
@@ -24,20 +34,20 @@ type QuizData = {
   canopyType: string;
   size: string;
   material: string;
-  city: string;
-  name: string;
   phone: string;
   comment: string;
 };
 
 type ContactFormData = {
-  name: string;
+  canopyType: string;
+  size: string;
   phone: string;
-  city: string;
   comment: string;
 };
 
-function getCalculatorConfig(settings?: Pick<PublicSettings, "calculator_config">): CalculatorConfig {
+function getCalculatorConfig(
+  settings?: Pick<PublicSettings, "calculator_config">,
+): CalculatorConfig {
   return {
     canopyOptions: settings?.calculator_config?.canopyOptions?.length
       ? settings.calculator_config.canopyOptions
@@ -53,31 +63,42 @@ function getCalculatorConfig(settings?: Pick<PublicSettings, "calculator_config"
 
 function makeDefaultQuizData(config = fallbackCalculatorConfig): QuizData {
   return {
-    canopyType: config.canopyOptions[0]?.value ?? fallbackCalculatorConfig.canopyOptions[0].value,
-    size: config.sizeOptions[1]?.value ?? config.sizeOptions[0]?.value ?? fallbackCalculatorConfig.sizeOptions[1].value,
-    material: config.materialOptions[0]?.value ?? fallbackCalculatorConfig.materialOptions[0].value,
-    city: cityOptions[0],
-    name: "",
+    canopyType:
+      config.canopyOptions[0]?.value ??
+      fallbackCalculatorConfig.canopyOptions[0].value,
+    size:
+      config.sizeOptions[1]?.value ??
+      config.sizeOptions[0]?.value ??
+      fallbackCalculatorConfig.sizeOptions[1].value,
+    material:
+      config.materialOptions[0]?.value ??
+      fallbackCalculatorConfig.materialOptions[0].value,
     phone: "",
     comment: "",
   };
 }
 
-const cityOptions = ["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керчь", "Другой город"];
-
 const defaultContactData: ContactFormData = {
-  name: "",
+  canopyType: fallbackCalculatorConfig.canopyOptions[0].value,
+  size:
+    fallbackCalculatorConfig.sizeOptions[1]?.value ??
+    fallbackCalculatorConfig.sizeOptions[0].value,
   phone: "",
-  city: "",
   comment: "",
 };
 
 function formatPrice(value: number) {
-  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0, style: "currency", currency: "RUB" }).format(value);
+  return new Intl.NumberFormat("ru-RU", {
+    maximumFractionDigits: 0,
+    style: "currency",
+    currency: "RUB",
+  }).format(value);
 }
 
 function formatFileSize(bytes: number) {
-  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024));
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(
+    bytes / (1024 * 1024),
+  );
 }
 
 function validatePhotoFile(file: File) {
@@ -100,7 +121,13 @@ function getSourcePage() {
 function getUtmMarks() {
   if (typeof window === "undefined") return {};
   const params = new URLSearchParams(window.location.search);
-  return ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].reduce<Record<string, string>>((acc, key) => {
+  return [
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+  ].reduce<Record<string, string>>((acc, key) => {
     const value = params.get(key);
     if (value) acc[key] = value;
     return acc;
@@ -115,7 +142,12 @@ async function postLead(payload: Record<string, unknown>, photo?: File | null) {
 
   const formData = new FormData();
   for (const [key, value] of Object.entries(payload)) {
-    formData.append(key, typeof value === "object" ? JSON.stringify(value ?? null) : String(value ?? ""));
+    formData.append(
+      key,
+      typeof value === "object"
+        ? JSON.stringify(value ?? null)
+        : String(value ?? ""),
+    );
   }
 
   if (photo) {
@@ -131,15 +163,25 @@ async function postLead(payload: Record<string, unknown>, photo?: File | null) {
   return response.json();
 }
 
-function makePayload({ source, data, quiz, estimatedPrice }: { source: LeadSource; data: ContactFormData | QuizData; quiz?: QuizData; estimatedPrice?: number }) {
+function makePayload({
+  source,
+  data,
+  quiz,
+  estimatedPrice,
+}: {
+  source: LeadSource;
+  data: ContactFormData | QuizData;
+  quiz?: QuizData;
+  estimatedPrice?: number;
+}) {
   return {
-    name: data.name,
+    name: "",
     phone: data.phone,
-    city: data.city,
+    city: "",
     canopy_type: "canopyType" in data ? data.canopyType : quiz?.canopyType,
     material: "material" in data ? data.material : quiz?.material,
     size: "size" in data ? data.size : quiz?.size,
-    comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}, город ${quiz.city}` : ""),
+    comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}` : ""),
     source_page: getSourcePage(),
     utm: {
       ...getUtmMarks(),
@@ -150,20 +192,44 @@ function makePayload({ source, data, quiz, estimatedPrice }: { source: LeadSourc
   };
 }
 
-function StatusMessage({ state, error }: { state: SubmitState; error: string }) {
+function StatusMessage({
+  state,
+  error,
+}: {
+  state: SubmitState;
+  error: string;
+}) {
   if (state === "success") {
-    return <p className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-300">Заявка отправлена. Мы свяжемся с вами и подготовим точную смету.</p>;
+    return (
+      <p className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+        Заявка отправлена. Мы свяжемся с вами и подготовим точную смету.
+      </p>
+    );
   }
 
   if (state === "error") {
-    return <p className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">{error || "Не удалось отправить заявку. Попробуйте еще раз или позвоните нам."}</p>;
+    return (
+      <p className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">
+        {error ||
+          "Не удалось отправить заявку. Попробуйте еще раз или позвоните нам."}
+      </p>
+    );
   }
 
   return null;
 }
 
-
-function PhotoPicker({ photo, onPhotoChange, error, onErrorChange }: { photo: File | null; onPhotoChange: (photo: File | null) => void; error: string; onErrorChange: (error: string) => void }) {
+function PhotoPicker({
+  photo,
+  onPhotoChange,
+  error,
+  onErrorChange,
+}: {
+  photo: File | null;
+  onPhotoChange: (photo: File | null) => void;
+  error: string;
+  onErrorChange: (error: string) => void;
+}) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -211,18 +277,40 @@ function PhotoPicker({ photo, onPhotoChange, error, onErrorChange }: { photo: Fi
           }}
         />
       </label>
-      <p className="mt-2 text-xs text-muted-foreground">JPG, PNG или WEBP до {formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ. После загрузки изображение будет оптимизировано в WEBP.</p>
-      {error ? <p className="mt-2 rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">{error}</p> : null}
+      <p className="mt-2 text-xs text-muted-foreground">
+        JPG, PNG или WEBP до {formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ. После
+        загрузки изображение будет оптимизировано в WEBP.
+      </p>
+      {error ? (
+        <p className="mt-2 rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">
+          {error}
+        </p>
+      ) : null}
       {previewUrl ? (
         <div className="mt-3 overflow-hidden rounded-2xl border bg-muted/40">
-          <Image src={previewUrl} alt="Предпросмотр выбранного фото" width={640} height={360} unoptimized className="max-h-64 w-full object-contain" />
+          <Image
+            src={previewUrl}
+            alt="Предпросмотр выбранного фото"
+            width={640}
+            height={360}
+            unoptimized
+            className="max-h-64 w-full object-contain"
+          />
         </div>
       ) : null}
     </div>
   );
 }
 
-function Consent({ checked, onChange, text }: { checked: boolean; onChange: (checked: boolean) => void; text: string }) {
+function Consent({
+  checked,
+  onChange,
+  text,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  text: string;
+}) {
   return (
     <label className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/60 p-4 text-sm leading-6 text-muted-foreground">
       <input
@@ -237,22 +325,35 @@ function Consent({ checked, onChange, text }: { checked: boolean; onChange: (che
   );
 }
 
-export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text" | "calculator_config"> }) {
+export function QuizCalculator({
+  settings = fallbackSettings,
+}: {
+  settings?: Pick<
+    PublicSettings,
+    "personal_data_consent_text" | "calculator_config"
+  >;
+}) {
   const calculatorConfig = getCalculatorConfig(settings);
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<QuizData>(() => makeDefaultQuizData(calculatorConfig));
+  const [data, setData] = useState<QuizData>(() =>
+    makeDefaultQuizData(calculatorConfig),
+  );
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
-  const consentText = settings.personal_data_consent_text || fallbackSettings.personal_data_consent_text;
+  const consentText =
+    settings.personal_data_consent_text ||
+    fallbackSettings.personal_data_consent_text;
   const { canopyOptions, materialOptions, sizeOptions } = calculatorConfig;
 
   useEffect(() => {
     setData((current) => ({
       ...current,
-      canopyType: canopyOptions.some((item) => item.value === current.canopyType)
+      canopyType: canopyOptions.some(
+        (item) => item.value === current.canopyType,
+      )
         ? current.canopyType
         : canopyOptions[0].value,
       size: sizeOptions.some((item) => item.value === current.size)
@@ -264,14 +365,26 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
     }));
   }, [canopyOptions, materialOptions, sizeOptions]);
 
-  const steps = ["Тип навеса", "Размер", "Кровля", "Город", "Контакты"];
+  const steps = ["Тип навеса", "Размер", "Контакты"];
   const progress = ((step + 1) / steps.length) * 100;
   const estimatedPrice = useMemo(() => {
-    const canopy = canopyOptions.find((item) => item.value === data.canopyType) ?? canopyOptions[0];
-    const size = sizeOptions.find((item) => item.value === data.size) ?? sizeOptions[0];
-    const material = materialOptions.find((item) => item.value === data.material) ?? materialOptions[0];
+    const canopy =
+      canopyOptions.find((item) => item.value === data.canopyType) ??
+      canopyOptions[0];
+    const size =
+      sizeOptions.find((item) => item.value === data.size) ?? sizeOptions[0];
+    const material =
+      materialOptions.find((item) => item.value === data.material) ??
+      materialOptions[0];
     return Math.round(size.area * material.pricePerMeter * canopy.multiplier);
-  }, [canopyOptions, data.canopyType, data.material, data.size, materialOptions, sizeOptions]);
+  }, [
+    canopyOptions,
+    data.canopyType,
+    data.material,
+    data.size,
+    materialOptions,
+    sizeOptions,
+  ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -281,7 +394,10 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
     setError("");
 
     try {
-      await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice }), photo);
+      await postLead(
+        makePayload({ source: "quiz", data, quiz: data, estimatedPrice }),
+        photo,
+      );
       setState("success");
       setData(makeDefaultQuizData(calculatorConfig));
       setPhoto(null);
@@ -291,7 +407,11 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
       event.currentTarget.reset();
     } catch (submitError) {
       setState("error");
-      setError(submitError instanceof Error ? submitError.message : "Не удалось отправить заявку");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Не удалось отправить заявку",
+      );
     }
   }
 
@@ -300,67 +420,161 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
       <div className="container grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <MotionReveal delay={0.05} direction="right">
           <Badge>Квиз-калькулятор</Badge>
-          <h2 className="section-title mt-4">Получите ориентировочную смету за 2 минуты</h2>
-          <p className="section-lead">Ответьте на 5 шагов — менеджер уточнит детали, предложит материалы и пришлет точный расчет.</p>
+          <h2 className="section-title mt-4">
+            Получите ориентировочную смету за 2 минуты
+          </h2>
+          <p className="section-lead">
+            Выберите тип и размер, оставьте телефон — менеджер быстро уточнит
+            детали и пришлет расчет.
+          </p>
           <div className="mt-6 rounded-[2rem] bg-steel-900 p-6 text-white">
-            <p className="text-sm font-bold uppercase tracking-widest text-copper-400">Ориентировочная цена</p>
-            <p className="mt-3 text-3xl font-black">от {formatPrice(estimatedPrice)}</p>
-            <p className="mt-3 text-sm leading-6 text-white/65">Итоговая стоимость зависит от фундамента, высоты, окраски, водостока и условий монтажа.</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-copper-400">
+              Ориентировочная цена
+            </p>
+            <p className="mt-3 text-3xl font-black">
+              от {formatPrice(estimatedPrice)}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-white/65">
+              Итоговая стоимость зависит от фундамента, высоты, окраски,
+              водостока и условий монтажа.
+            </p>
           </div>
         </MotionReveal>
 
         <MotionReveal delay={0.16} direction="left">
           <Card className="p-6">
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-sm font-bold text-muted-foreground">
-              <span>Шаг {step + 1} из {steps.length}</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-copper-500 transition-all" style={{ width: `${progress}%` }} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {steps.map((item, index) => (
-                <span key={item} className={`rounded-full px-3 py-1 text-xs font-bold ${index <= step ? "bg-copper-500/15 text-copper-600 dark:text-copper-300" : "bg-muted text-muted-foreground"}`}>{item}</span>
-              ))}
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            {step === 0 && <OptionGrid title="Какой навес нужен?" options={canopyOptions} value={data.canopyType} onChange={(value) => setData((current) => ({ ...current, canopyType: value }))} />}
-            {step === 1 && <OptionGrid title="Выберите примерный размер" options={sizeOptions} value={data.size} onChange={(value) => setData((current) => ({ ...current, size: value }))} />}
-            {step === 2 && <OptionGrid title="Материал кровли" options={materialOptions} value={data.material} onChange={(value) => setData((current) => ({ ...current, material: value }))} />}
-            {step === 3 && <OptionGrid title="Город монтажа" options={cityOptions.map((city) => ({ label: city, value: city }))} value={data.city} onChange={(value) => setData((current) => ({ ...current, city: value }))} />}
-            {step === 4 && (
-              <div>
-                <h3 className="text-2xl font-black">Куда отправить точную смету?</h3>
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Ваше имя" />
-                  <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Телефон" type="tel" />
-                </div>
-                <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Комментарий: адрес, сроки, особенности участка" />
-                <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
-                <Consent checked={consent} onChange={setConsent} text={consentText} />
+            <div className="mb-6">
+              <div className="flex items-center justify-between text-sm font-bold text-muted-foreground">
+                <span>
+                  Шаг {step + 1} из {steps.length}
+                </span>
+                <span>{Math.round(progress)}%</span>
               </div>
-            )}
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button type="button" variant="outline" disabled={step === 0 || state === "loading"} onClick={() => setStep((current) => Math.max(0, current - 1))} className="w-full sm:w-auto">
-                <ArrowLeft className="h-4 w-4" /> Назад
-              </Button>
-              {step < steps.length - 1 ? (
-                <Button type="button" variant="copper" onClick={() => setStep((current) => Math.min(steps.length - 1, current + 1))} className="w-full sm:flex-1">
-                  Далее <ArrowRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button type="submit" variant="copper" disabled={!consent || state === "loading"} className="w-full sm:flex-1">
-                  {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  Получить точную смету
-                </Button>
-              )}
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-copper-500 transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {steps.map((item, index) => (
+                  <span
+                    key={item}
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${index <= step ? "bg-copper-500/15 text-copper-600 dark:text-copper-300" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="mt-4"><StatusMessage state={state} error={error} /></div>
-          </form>
+
+            <form onSubmit={handleSubmit}>
+              {step === 0 && (
+                <OptionGrid
+                  title="Какой навес нужен?"
+                  options={canopyOptions}
+                  value={data.canopyType}
+                  onChange={(value) =>
+                    setData((current) => ({ ...current, canopyType: value }))
+                  }
+                />
+              )}
+              {step === 1 && (
+                <OptionGrid
+                  title="Выберите примерный размер"
+                  options={sizeOptions}
+                  value={data.size}
+                  onChange={(value) =>
+                    setData((current) => ({ ...current, size: value }))
+                  }
+                />
+              )}
+              {step === 2 && (
+                <div>
+                  <h3 className="text-2xl font-black">
+                    Куда отправить точную смету?
+                  </h3>
+                  <input
+                    required
+                    value={data.phone}
+                    onChange={(event) =>
+                      setData((current) => ({
+                        ...current,
+                        phone: event.target.value,
+                      }))
+                    }
+                    className="mt-5 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground"
+                    placeholder="Телефон"
+                    type="tel"
+                  />
+                  <textarea
+                    value={data.comment}
+                    onChange={(event) =>
+                      setData((current) => ({
+                        ...current,
+                        comment: event.target.value,
+                      }))
+                    }
+                    className="mt-3 h-24 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground"
+                    placeholder="Комментарий или адрес участка (необязательно)"
+                  />
+                  <PhotoPicker
+                    photo={photo}
+                    onPhotoChange={setPhoto}
+                    error={photoError}
+                    onErrorChange={setPhotoError}
+                  />
+                  <Consent
+                    checked={consent}
+                    onChange={setConsent}
+                    text={consentText}
+                  />
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={step === 0 || state === "loading"}
+                  onClick={() => setStep((current) => Math.max(0, current - 1))}
+                  className="w-full sm:w-auto"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Назад
+                </Button>
+                {step < steps.length - 1 ? (
+                  <Button
+                    type="button"
+                    variant="copper"
+                    onClick={() =>
+                      setStep((current) =>
+                        Math.min(steps.length - 1, current + 1),
+                      )
+                    }
+                    className="w-full sm:flex-1"
+                  >
+                    Далее <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="copper"
+                    disabled={!consent || state === "loading"}
+                    className="w-full sm:flex-1"
+                  >
+                    {state === "loading" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                    Получить точную смету
+                  </Button>
+                )}
+              </div>
+              <div className="mt-4">
+                <StatusMessage state={state} error={error} />
+              </div>
+            </form>
           </Card>
         </MotionReveal>
       </div>
@@ -368,14 +582,34 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
   );
 }
 
-function OptionGrid({ title, options, value, onChange }: { title: string; options: Array<{ label: string; value: string }>; value: string; onChange: (value: string) => void }) {
+function OptionGrid({
+  title,
+  options,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: Array<{ label: string; value: string }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div>
       <h3 className="text-2xl font-black">{title}</h3>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {options.map((option) => (
-          <label key={option.value} className={`cursor-pointer rounded-3xl border p-4 transition ${value === option.value ? "border-copper-500 bg-copper-500/15 text-foreground" : "bg-muted/40 hover:border-copper-300"}`}>
-            <input type="radio" name={title} value={option.value} checked={value === option.value} onChange={() => onChange(option.value)} className="sr-only" />
+          <label
+            key={option.value}
+            className={`cursor-pointer rounded-3xl border p-4 transition ${value === option.value ? "border-copper-500 bg-copper-500/15 text-foreground" : "bg-muted/40 hover:border-copper-300"}`}
+          >
+            <input
+              type="radio"
+              name={title}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              className="sr-only"
+            />
             <span className="font-bold">{option.label}</span>
           </label>
         ))}
@@ -384,14 +618,20 @@ function OptionGrid({ title, options, value, onChange }: { title: string; option
   );
 }
 
-export function ContactLeadForm({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text"> }) {
+export function ContactLeadForm({
+  settings = fallbackSettings,
+}: {
+  settings?: Pick<PublicSettings, "personal_data_consent_text">;
+}) {
   const [data, setData] = useState<ContactFormData>(defaultContactData);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
-  const consentText = settings.personal_data_consent_text || fallbackSettings.personal_data_consent_text;
+  const consentText =
+    settings.personal_data_consent_text ||
+    fallbackSettings.personal_data_consent_text;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -410,7 +650,11 @@ export function ContactLeadForm({ settings = fallbackSettings }: { settings?: Pi
       event.currentTarget.reset();
     } catch (submitError) {
       setState("error");
-      setError(submitError instanceof Error ? submitError.message : "Не удалось отправить заявку");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Не удалось отправить заявку",
+      );
     }
   }
 
@@ -418,18 +662,79 @@ export function ContactLeadForm({ settings = fallbackSettings }: { settings?: Pi
     <Card className="p-6">
       <form onSubmit={handleSubmit}>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Ваше имя" />
-          <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Телефон" type="tel" />
+          <input
+            required
+            value={data.phone}
+            onChange={(event) =>
+              setData((current) => ({ ...current, phone: event.target.value }))
+            }
+            className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground"
+            placeholder="Телефон"
+            type="tel"
+          />
+          <select
+            required
+            value={data.canopyType}
+            onChange={(event) =>
+              setData((current) => ({
+                ...current,
+                canopyType: event.target.value,
+              }))
+            }
+            className="rounded-2xl border bg-background px-4 py-3 text-foreground"
+          >
+            {fallbackCalculatorConfig.canopyOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <input value={data.city} onChange={(event) => setData((current) => ({ ...current, city: event.target.value }))} className="mt-3 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Город" />
-        <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-28 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Комментарий: что нужно построить, размеры, сроки" />
-        <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
+        <select
+          required
+          value={data.size}
+          onChange={(event) =>
+            setData((current) => ({ ...current, size: event.target.value }))
+          }
+          className="mt-3 w-full rounded-2xl border bg-background px-4 py-3 text-foreground"
+        >
+          {fallbackCalculatorConfig.sizeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <textarea
+          value={data.comment}
+          onChange={(event) =>
+            setData((current) => ({ ...current, comment: event.target.value }))
+          }
+          className="mt-3 h-28 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground"
+          placeholder="Размеры, адрес или комментарий (можно заменить фото)"
+        />
+        <PhotoPicker
+          photo={photo}
+          onPhotoChange={setPhoto}
+          error={photoError}
+          onErrorChange={setPhotoError}
+        />
         <Consent checked={consent} onChange={setConsent} text={consentText} />
-        <Button type="submit" disabled={!consent || state === "loading"} className="mt-4 w-full" variant="copper">
-          {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+        <Button
+          type="submit"
+          disabled={!consent || state === "loading"}
+          className="mt-4 w-full"
+          variant="copper"
+        >
+          {state === "loading" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
           Отправить заявку
         </Button>
-        <div className="mt-4"><StatusMessage state={state} error={error} /></div>
+        <div className="mt-4">
+          <StatusMessage state={state} error={error} />
+        </div>
       </form>
     </Card>
   );

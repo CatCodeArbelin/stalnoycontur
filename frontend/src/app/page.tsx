@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-import { Advantages, CasesMapReviewsFaqContacts, Hero, SolutionsProductionSteps, Types } from "@/components/sections/home-sections";
+import {
+  CasesMapReviewsFaqContacts,
+  Hero,
+  Types,
+} from "@/components/sections/home-sections";
 import { QuizCalculator } from "@/components/lead-form";
 import { FAQPageJsonLd } from "@/components/seo";
 import { getManagedContent } from "@/lib/content-api";
@@ -15,11 +19,13 @@ export default async function Home() {
     <>
       <FAQPageJsonLd items={content.faq.slice(0, 2)} />
       <Hero />
-      <Advantages />
       <QuizCalculator settings={content.settings} />
       <Types />
-      <SolutionsProductionSteps gallery={content.gallery} />
-      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts
+        cases={content.cases}
+        faq={content.faq}
+        settings={content.settings}
+      />
     </>
   );
 }
