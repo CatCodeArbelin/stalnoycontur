@@ -9,10 +9,7 @@ import {
   adminNav,
   type UploadCategory,
 } from "@/components/admin/admin-shell";
-import {
-  casesResource,
-  faqResource,
-} from "@/components/admin/resource-configs";
+import { casesResource } from "@/components/admin/resource-configs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
@@ -20,12 +17,7 @@ import { fallbackCalculatorConfig, type CalculatorConfig } from "@/lib/content-a
 import { cn } from "@/lib/utils";
 
 type MessageType = "success" | "error";
-type SettingsTab =
-  | "contacts"
-  | "calculator"
-  | "cases"
-  | "faq"
-  | "images";
+type SettingsTab = "contacts" | "calculator" | "cases" | "images";
 
 type AdminSetting = {
   id: number;
@@ -126,7 +118,6 @@ const dashboardTabs: {
     title: "Кейсы / работы",
     description: "CRUD выполненных работ",
   },
-  { key: "faq", title: "FAQ", description: "CRUD вопросов и ответов" },
   {
     key: "images",
     title: "Изображения",
@@ -971,14 +962,6 @@ export function SiteSettingsForm() {
                 showMessage={showMessage}
               />
             ) : null}
-            {activeTab === "faq" ? (
-              <AdminCrudPanel
-                {...faqResource}
-                request={request}
-                showMessage={showMessage}
-              />
-            ) : null}
-
             {activeTab === "images" ? (
               <Card>
                 <CardHeader className="flex-row items-center justify-between gap-4">

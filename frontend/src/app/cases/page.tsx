@@ -32,7 +32,10 @@ export default async function CasesPage() {
           ))}
         </div>
       </section>
-      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts
+        cases={content.cases}
+        settings={content.settings}
+      />
     </>
   );
 }
