@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone, Send } from "lucide-react";
+import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone, Send, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -152,6 +152,7 @@ export function CasesMapReviewsFaqContacts({
   const primaryPhone = settings.phones?.[0] ?? fallbackSettings.phones[0];
   const telegramHref = settings.telegram || fallbackSettings.telegram;
   const maxHref = settings.max || fallbackSettings.max;
+  const avitoHref = settings.avito || fallbackSettings.avito;
 
   return (
     <>
@@ -163,7 +164,7 @@ export function CasesMapReviewsFaqContacts({
           <div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="interactive-card rounded-2xl p-5 text-card-foreground"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div>
         </div>
       </section>
-      <section id="contacts" className="surface-section section-padding"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={primaryPhone.href}><Phone className="h-5 w-5" /> {primaryPhone.label}</a></Button><Button asChild size="lg" variant="outline"><a href={telegramHref}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={maxHref}><MessageCircle className="h-5 w-5" /> MAX</a></Button></div></div><ContactLeadForm settings={settings} /></div></section>
+      <section id="contacts" className="surface-section section-padding"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={primaryPhone.href}><Phone className="h-5 w-5" /> {primaryPhone.label}</a></Button><Button asChild size="lg" variant="outline"><a href={telegramHref}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={maxHref}><MessageCircle className="h-5 w-5" /> MAX</a></Button><Button asChild size="lg" variant="outline"><a href={avitoHref}><ShoppingBag className="h-5 w-5" /> Avito</a></Button></div></div><ContactLeadForm settings={settings} /></div></section>
     </>
   );
 }

@@ -85,6 +85,7 @@ export type PublicSettings = {
   phones: PublicPhone[];
   telegram?: string;
   max?: string;
+  avito?: string;
   cities: string[];
   personal_data_consent_text: string;
   calculator_config: CalculatorConfig;
@@ -103,6 +104,7 @@ export const fallbackSettings: PublicSettings = {
   phones: fallbackContacts.phones,
   telegram: fallbackContacts.telegram.href,
   max: fallbackContacts.max.href,
+  avito: fallbackContacts.avito.href,
   cities: fallbackCities,
   personal_data_consent_text: "Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
   calculator_config: fallbackCalculatorConfig,

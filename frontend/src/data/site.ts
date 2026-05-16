@@ -9,6 +9,7 @@ export const contacts = {
   ],
   telegram: { label: "Telegram", href: "https://t.me/stalnoycontur" },
   max: { label: "MAX", href: "https://max.ru/stalnoycontur" },
+  avito: { label: "Avito", href: "https://www.avito.ru/user/928fae1559262c1b5f0287a39844d580/profile?src=search_seller_info&iid=7818044615" },
 };
 export const nav = [
   { href: "/", label: "Главная" },

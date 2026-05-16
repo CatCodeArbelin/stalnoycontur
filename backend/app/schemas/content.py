@@ -90,6 +90,7 @@ class PublicSettings(BaseModel):
     phones: list[PublicPhone]
     telegram: str
     max: str
+    avito: str
     cities: list[str]
     personal_data_consent_text: str
     calculator_config: CalculatorConfig

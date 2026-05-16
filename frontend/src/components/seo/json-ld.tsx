@@ -39,7 +39,7 @@ const geo = {
 
 export function LocalBusinessJsonLd({ settings }: { settings?: PublicSettings }) {
   const telephone = publicSettingsTelephone(settings);
-  const sameAs = [settings?.telegram, settings?.max].filter((url): url is string => Boolean(url));
+  const sameAs = [settings?.telegram, settings?.max, settings?.avito].filter((url): url is string => Boolean(url));
 
   return (
     <JsonLd
