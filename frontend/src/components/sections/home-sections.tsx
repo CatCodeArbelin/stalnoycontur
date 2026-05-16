@@ -35,10 +35,8 @@ export function Hero() {
             <Button asChild size="lg" variant="outline" className="border-border/40 bg-card/10 text-white hover:bg-card/20"><Link href="/cases">Смотреть кейсы</Link></Button>
           </div>
           <div className="mt-8 grid grid-cols-3 gap-3 text-center">
-            {["580+ объектов", "до 7 лет гарантии", "0 ₽ за замер"].map((item, index) => (
-              <MotionReveal key={item} delay={0.1 + index * 0.08} direction="up">
-                <div className="rounded-2xl border border-border/30 bg-card/10 p-3 text-sm font-bold">{item}</div>
-              </MotionReveal>
+            {["580+ объектов", "до 7 лет гарантии", "0 ₽ за замер"].map((item) => (
+              <div key={item} className="rounded-2xl border border-border/30 bg-card/10 p-3 text-sm font-bold">{item}</div>
             ))}
           </div>
         </MotionReveal>
@@ -59,14 +57,12 @@ export function Advantages() {
         <Badge>Почему мы</Badge>
         <h2 className="section-title mt-4">Инженерный подход вместо типовых решений</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {advantages.map((item, index) => (
-            <MotionReveal key={item.title} delay={index * 0.08} direction={index % 2 === 0 ? "up" : "down"}>
-              <Card className="h-full p-6">
-                <item.icon className="h-9 w-9 text-copper-500" />
-                <h3 className="mt-5 text-xl font-black">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.text}</p>
-              </Card>
-            </MotionReveal>
+          {advantages.map((item) => (
+            <Card key={item.title} className="h-full p-6">
+              <item.icon className="h-9 w-9 text-copper-500" />
+              <h3 className="mt-5 text-xl font-black">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.text}</p>
+            </Card>
           ))}
         </div>
       </div>
@@ -121,10 +117,8 @@ export function SolutionsProductionSteps({ gallery = fallbackGalleryItems }: Sol
           <Badge className="border-border/40 bg-card/10 text-copper-400">Популярные решения</Badge>
           <h2 className="mt-4 text-3xl font-black">От идеи до готового навеса</h2>
           <div className="mt-6 grid gap-3">
-            {visibleSolutions.map((item, index) => (
-              <MotionReveal key={item.id ?? item.title} delay={0.08 + index * 0.06} direction="right">
-                <div className="flex items-center gap-3 rounded-2xl bg-card/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{item.title}</div>
-              </MotionReveal>
+            {visibleSolutions.map((item) => (
+              <div key={item.id ?? item.title} className="flex items-center gap-3 rounded-2xl bg-card/10 p-4"><CheckCircle2 className="h-5 w-5 text-copper-400" />{item.title}</div>
             ))}
           </div>
         </MotionReveal>
@@ -137,9 +131,7 @@ export function SolutionsProductionSteps({ gallery = fallbackGalleryItems }: Sol
           <h3 className="text-2xl font-black">Этапы работ</h3>
           <div className="mt-5 grid gap-3">
             {visibleSteps.map((item, i) => (
-              <MotionReveal key={item.id ?? item.title} delay={0.14 + i * 0.06} direction="left">
-                <div className="rounded-2xl border border-white/10 p-4"><span className="text-copper-400">0{i + 1}</span> <b>{item.title}</b>{item.description ? <p className="mt-2 text-sm text-white/60">{item.description}</p> : null}</div>
-              </MotionReveal>
+              <div key={item.id ?? item.title} className="rounded-2xl border border-white/10 p-4"><span className="text-copper-400">0{i + 1}</span> <b>{item.title}</b>{item.description ? <p className="mt-2 text-sm text-white/60">{item.description}</p> : null}</div>
             ))}
           </div>
         </MotionReveal>
@@ -168,7 +160,7 @@ export function CasesMapReviewsFaqContacts({
 
   return (
     <>
-      <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item, index) => <MotionReveal key={item.slug ?? item.title} delay={index * 0.08} direction={index % 2 === 0 ? "up" : "left"}><Card className="h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600 dark:text-copper-400">{item.materials.join(" · ")}</p> : null}</CardContent></Card></MotionReveal>)}</div></div></section>
+      <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item) => <Card key={item.slug ?? item.title} className="h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600 dark:text-copper-400">{item.materials.join(" · ")}</p> : null}</CardContent></Card>)}</div></div></section>
       <section className="section-padding bg-card"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding">
         <div className="container grid gap-8 lg:grid-cols-2">
