@@ -46,6 +46,7 @@ type ContactFormData = {
   size: string;
   phone: string;
   comment: string;
+  custom_area?: number;
 };
 
 function getCalculatorConfig(
@@ -84,14 +85,21 @@ function makeDefaultQuizData(config = fallbackCalculatorConfig): QuizData {
   };
 }
 
-const defaultContactData: ContactFormData = {
-  canopyType: fallbackCalculatorConfig.canopyOptions[0].value,
-  size:
-    fallbackCalculatorConfig.sizeOptions[1]?.value ??
-    fallbackCalculatorConfig.sizeOptions[0].value,
-  phone: "",
-  comment: "",
-};
+function makeDefaultContactData(
+  config = fallbackCalculatorConfig,
+): ContactFormData {
+  return {
+    canopyType:
+      config.canopyOptions[0]?.value ??
+      fallbackCalculatorConfig.canopyOptions[0].value,
+    size:
+      config.sizeOptions[1]?.value ??
+      config.sizeOptions[0]?.value ??
+      fallbackCalculatorConfig.sizeOptions[1].value,
+    phone: "",
+    comment: "",
+  };
+}
 
 function formatPrice(value: number) {
   return new Intl.NumberFormat("ru-RU", {
@@ -130,14 +138,20 @@ function formatArea(value: number) {
   );
 }
 
-function getQuizSizePayload(data: QuizData) {
+function getReadableSize(
+  data: Pick<ContactFormData | QuizData, "size" | "custom_area">,
+) {
   if (data.size !== CUSTOM_SIZE_VALUE || !data.custom_area) {
-    return data;
+    return data.size;
   }
 
+  return `Свой размер: ${formatArea(data.custom_area)} м²`;
+}
+
+function getQuizSizePayload(data: QuizData) {
   return {
     ...data,
-    size: `Свой размер: ${formatArea(data.custom_area)} м²`,
+    size: getReadableSize(data),
   };
 }
 
@@ -208,7 +222,12 @@ function makePayload({
     city: "",
     canopy_type: "canopyType" in data ? data.canopyType : quiz?.canopyType,
     material: "material" in data ? data.material : quiz?.material,
-    size: "size" in data ? data.size : quiz?.size,
+    size:
+      "size" in data
+        ? getReadableSize(data)
+        : quiz
+          ? getReadableSize(quiz)
+          : undefined,
     comment: data.comment || (quiz ? `Квиз: размер ${quiz.size}` : ""),
     source_page: getSourcePage(),
     utm: {
@@ -709,17 +728,52 @@ function OptionGrid({
 export function ContactLeadForm({
   settings = fallbackSettings,
 }: {
-  settings?: Pick<PublicSettings, "personal_data_consent_text">;
+  settings?: Pick<
+    PublicSettings,
+    "personal_data_consent_text" | "calculator_config"
+  >;
 }) {
-  const [data, setData] = useState<ContactFormData>(defaultContactData);
+  const calculatorConfig = getCalculatorConfig(settings);
+  const { allowCustomSize, canopyOptions, sizeOptions } = calculatorConfig;
+  const [data, setData] = useState<ContactFormData>(() =>
+    makeDefaultContactData(calculatorConfig),
+  );
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
+  const [customArea, setCustomArea] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
   const consentText =
     settings.personal_data_consent_text ||
     fallbackSettings.personal_data_consent_text;
+  const selectedCustomArea = parseCustomArea(customArea);
+  const contactSizeOptions = useMemo(
+    () =>
+      allowCustomSize
+        ? [
+            ...sizeOptions,
+            { label: CUSTOM_SIZE_LABEL, value: CUSTOM_SIZE_VALUE },
+          ]
+        : sizeOptions,
+    [allowCustomSize, sizeOptions],
+  );
+
+  useEffect(() => {
+    setData((current) => ({
+      ...current,
+      canopyType: canopyOptions.some(
+        (item) => item.value === current.canopyType,
+      )
+        ? current.canopyType
+        : canopyOptions[0].value,
+      size:
+        sizeOptions.some((item) => item.value === current.size) ||
+        (allowCustomSize && current.size === CUSTOM_SIZE_VALUE)
+          ? current.size
+          : sizeOptions[0].value,
+    }));
+  }, [allowCustomSize, canopyOptions, sizeOptions]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -729,11 +783,22 @@ export function ContactLeadForm({
     setError("");
 
     try {
-      await postLead(makePayload({ source: "contact_form", data }), photo);
+      const submittedData: ContactFormData = {
+        ...data,
+        custom_area:
+          data.size === CUSTOM_SIZE_VALUE && selectedCustomArea
+            ? selectedCustomArea
+            : undefined,
+      };
+      await postLead(
+        makePayload({ source: "contact_form", data: submittedData }),
+        photo,
+      );
       setState("success");
-      setData(defaultContactData);
+      setData(makeDefaultContactData(calculatorConfig));
       setPhoto(null);
       setPhotoError("");
+      setCustomArea("");
       setConsent(false);
       event.currentTarget.reset();
     } catch (submitError) {
@@ -771,7 +836,7 @@ export function ContactLeadForm({
             }
             className="rounded-2xl border bg-background px-4 py-3 text-foreground"
           >
-            {fallbackCalculatorConfig.canopyOptions.map((option) => (
+            {canopyOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -786,12 +851,28 @@ export function ContactLeadForm({
           }
           className="mt-3 w-full rounded-2xl border bg-background px-4 py-3 text-foreground"
         >
-          {fallbackCalculatorConfig.sizeOptions.map((option) => (
+          {contactSizeOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
+        {data.size === CUSTOM_SIZE_VALUE ? (
+          <label className="mt-3 grid gap-2 text-sm font-bold text-foreground">
+            Площадь, м²
+            <input
+              required
+              min="0.01"
+              step="0.01"
+              type="number"
+              inputMode="decimal"
+              value={customArea}
+              onChange={(event) => setCustomArea(event.target.value)}
+              className="rounded-2xl border bg-background px-4 py-3 font-normal text-foreground placeholder:text-muted-foreground"
+              placeholder="Например, 42"
+            />
+          </label>
+        ) : null}
         <textarea
           value={data.comment}
           onChange={(event) =>
