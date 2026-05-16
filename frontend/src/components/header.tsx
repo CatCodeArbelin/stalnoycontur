@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ViewModeSwitcher } from "@/components/view-mode-switcher";
 import { nav } from "@/data/site";
 import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
 import { cn } from "@/lib/utils";
@@ -49,11 +50,15 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
             <MessageCircle className="h-4 w-4" />
             MAX
           </a>
+          <ViewModeSwitcher className="hidden lg:flex" />
           <Button asChild variant="copper"><a href="#contacts"><Phone className="h-4 w-4" />Заказать замер</a></Button>
         </div>
-        <button className="grid h-11 w-11 place-items-center rounded-full border bg-white lg:hidden" onClick={() => setOpen(!open)} aria-label="Открыть меню">
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ViewModeSwitcher className="max-w-[calc(100vw-7rem)] overflow-x-auto" />
+          <button className="grid h-11 w-11 shrink-0 place-items-center rounded-full border bg-white" onClick={() => setOpen(!open)} aria-label="Открыть меню" aria-expanded={open}>
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
       <div className={cn("container grid overflow-hidden transition-all lg:hidden", open ? "max-h-[34rem] pb-4" : "max-h-0")}>
         <div className="rounded-[1.5rem] border bg-white p-3 shadow-card">
