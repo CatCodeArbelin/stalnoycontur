@@ -23,9 +23,8 @@ const themeInitScript = `
 (function() {
   try {
     var savedTheme = window.localStorage.getItem("stalnoycontur:theme");
-    var mode = savedTheme === "light" || savedTheme === "dark" || savedTheme === "system" ? savedTheme : "system";
-    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var shouldUseDark = mode === "dark" || (mode === "system" && prefersDark);
+    var mode = savedTheme === "light" || savedTheme === "dark" ? savedTheme : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var shouldUseDark = mode === "dark";
 
     document.documentElement.classList.toggle("dark", shouldUseDark);
     document.documentElement.style.colorScheme = shouldUseDark ? "dark" : "light";

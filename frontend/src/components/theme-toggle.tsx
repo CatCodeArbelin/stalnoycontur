@@ -1,41 +1,44 @@
 "use client";
 
-import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Moon, Sun, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark";
 
 const STORAGE_KEY = "stalnoycontur:theme";
 const modes: Array<{ value: ThemeMode; label: string; icon: LucideIcon }> = [
   { value: "light", label: "Светлая", icon: Sun },
   { value: "dark", label: "Темная", icon: Moon },
-  { value: "system", label: "Система", icon: Monitor },
 ];
 
 function isThemeMode(value: string | null): value is ThemeMode {
-  return value === "light" || value === "dark" || value === "system";
+  return value === "light" || value === "dark";
 }
 
 function getSystemPrefersDark() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+function getFallbackThemeMode(): ThemeMode {
+  return getSystemPrefersDark() ? "dark" : "light";
+}
+
 function applyTheme(mode: ThemeMode) {
-  const shouldUseDark = mode === "dark" || (mode === "system" && getSystemPrefersDark());
+  const shouldUseDark = mode === "dark";
 
   document.documentElement.classList.toggle("dark", shouldUseDark);
   document.documentElement.style.colorScheme = shouldUseDark ? "dark" : "light";
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [mode, setMode] = useState<ThemeMode>("system");
+  const [mode, setMode] = useState<ThemeMode>("light");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(STORAGE_KEY);
-    const nextMode = isThemeMode(savedTheme) ? savedTheme : "system";
+    const nextMode = isThemeMode(savedTheme) ? savedTheme : getFallbackThemeMode();
 
     setMode(nextMode);
     applyTheme(nextMode);
@@ -47,17 +50,9 @@ export function ThemeToggle({ className }: { className?: string }) {
 
     window.localStorage.setItem(STORAGE_KEY, mode);
     applyTheme(mode);
-
-    if (mode !== "system") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => applyTheme("system");
-
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
   }, [mode, ready]);
 
-  const activeLabel = useMemo(() => modes.find((item) => item.value === mode)?.label ?? "Система", [mode]);
+  const activeLabel = useMemo(() => modes.find((item) => item.value === mode)?.label ?? "Светлая", [mode]);
 
   return (
     <div className={cn("flex items-center gap-1 rounded-full border bg-card/85 p-1 shadow-card backdrop-blur", className)} aria-label={`Тема: ${activeLabel}`}>
