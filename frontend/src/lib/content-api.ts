@@ -227,10 +227,12 @@ function getSsrApiBase() {
   return normalizedApiBase;
 }
 
-async function fetchPublic<T>(path: string, fallback: T): Promise<T> {
+async function fetchPublic<T>(path: string, fallback: T): Promise<T>;
+async function fetchPublic<T>(path: string, fallback?: T): Promise<T | null>;
+async function fetchPublic<T>(path: string, fallback?: T): Promise<T | null> {
   const apiBase = getSsrApiBase();
   if (!apiBase) {
-    return fallback;
+    return fallback ?? null;
   }
 
   try {
@@ -238,11 +240,11 @@ async function fetchPublic<T>(path: string, fallback: T): Promise<T> {
       next: { revalidate: 60 },
     });
     if (!response.ok) {
-      return fallback;
+      return fallback ?? null;
     }
     return (await response.json()) as T;
   } catch {
-    return fallback;
+    return fallback ?? null;
   }
 }
 
@@ -262,8 +264,17 @@ export async function getPublicSettings(): Promise<PublicSettings> {
 export async function getPublicLandingPage(
   slug: string,
   fallback: PublicLandingPage,
-): Promise<PublicLandingPage> {
-  return fetchPublic(`/content/landing-pages/${encodeURIComponent(slug)}`, fallback);
+): Promise<PublicLandingPage>;
+export async function getPublicLandingPage(
+  slug: string,
+): Promise<PublicLandingPage | null>;
+export async function getPublicLandingPage(
+  slug: string,
+  fallback?: PublicLandingPage,
+): Promise<PublicLandingPage | null> {
+  return fallback
+    ? fetchPublic(`/content/landing-pages/${encodeURIComponent(slug)}`, fallback)
+    : fetchPublic<PublicLandingPage>(`/content/landing-pages/${encodeURIComponent(slug)}`);
 }
 
 export async function getManagedContent(): Promise<ManagedContent> {
