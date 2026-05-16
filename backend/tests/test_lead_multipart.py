@@ -16,8 +16,8 @@ from app.models.upload import Upload
 
 def _png_bytes() -> bytes:
     return base64.b64decode(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGJxMgcAAQMB"
-        "AFrJxYkAAAAASUVORK5CYII="
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/"
+        "AAX+Av4N70a4AAAAAElFTkSuQmCC"
     )
 
 

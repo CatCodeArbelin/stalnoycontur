@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, MapPin, MessageCircle, Phone, Send, ShoppingBag } from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageCircle, Phone, Send, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -157,7 +157,6 @@ export function CasesMapReviewsFaqContacts({
   return (
     <>
       <section className="section-effects section-padding"><div className="container relative z-10"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item) => <Card key={item.slug ?? item.title} className="interactive-card h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600 dark:text-copper-400">{item.materials.join(" · ")}</p> : null}</CardContent></Card>)}</div></div></section>
-      <section className="surface-section section-padding"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full border border-border/70 bg-muted/80 px-4 py-2 text-sm font-bold shadow-[inset_0_1px_0_hsl(var(--foreground)/0.04)]">{city}</span>)}</div></div><div className="dark-panel rounded-[2rem] p-6"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding">
         <div className="container">
           <Badge>FAQ</Badge>

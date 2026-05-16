@@ -14,11 +14,10 @@ PublicSettingKey = Literal[
     "telegram",
     "max",
     "avito",
-    "cities",
     "personal_data_consent_text",
     "calculator_config",
 ]
-PublicSettingExpectedType = type[str] | type[list[PublicPhone]] | type[list[str]] | type[CalculatorConfig]
+PublicSettingExpectedType = type[str] | type[list[PublicPhone]] | type[CalculatorConfig]
 
 PUBLIC_SETTING_VALUE_TYPES: dict[PublicSettingKey, PublicSettingExpectedType] = {
     "company_name": str,
@@ -27,7 +26,6 @@ PUBLIC_SETTING_VALUE_TYPES: dict[PublicSettingKey, PublicSettingExpectedType] = 
     "telegram": str,
     "max": str,
     "avito": str,
-    "cities": list[str],
     "personal_data_consent_text": str,
     "calculator_config": CalculatorConfig,
 }
@@ -41,7 +39,6 @@ PUBLIC_SETTING_VALIDATION_ERRORS: dict[str, str] = {
     "telegram": "Настройка telegram должна быть строкой",
     "max": "Настройка max должна быть строкой",
     "avito": "Настройка avito должна быть строкой",
-    "cities": "Настройка cities должна быть списком непустых строк",
     "personal_data_consent_text": "Настройка personal_data_consent_text должна быть строкой",
     "calculator_config": "Настройка calculator_config должна содержать непустые массивы canopyOptions, sizeOptions и materialOptions с корректными label, value, коэффициентами и ценами",
 }
@@ -62,11 +59,6 @@ def validate_public_setting_value(key: str, value: SettingValue) -> None:
                 PublicPhone.model_validate(item)
             except ValidationError as exc:
                 raise ValueError(PUBLIC_SETTING_VALIDATION_ERRORS[key]) from exc
-        return
-
-    if key == "cities":
-        if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
-            raise ValueError(PUBLIC_SETTING_VALIDATION_ERRORS[key])
         return
 
     if key == "calculator_config":

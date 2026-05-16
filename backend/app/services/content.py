@@ -97,7 +97,6 @@ DEFAULT_SETTINGS = PublicSettings(
     telegram="https://t.me/stalnoycontur",
     max="https://max.ru/stalnoycontur",
     avito="https://www.avito.ru/user/928fae1559262c1b5f0287a39844d580/profile?src=search_seller_info&iid=7818044615",
-    cities=["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч"],
     personal_data_consent_text="Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
     calculator_config=DEFAULT_CALCULATOR_CONFIG,
 )

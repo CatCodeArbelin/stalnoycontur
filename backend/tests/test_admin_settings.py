@@ -60,7 +60,6 @@ def _admin_client(tmp_path) -> Iterator[tuple[TestClient, sessionmaker, dict[str
         ("phones", [{"label": "+7 978 000-44-88", "href": "tel:+79780004488"}]),
         ("telegram", "https://t.me/stalnoycontur"),
         ("max", "https://max.ru/stalnoycontur"),
-        ("cities", ["Симферополь", "Севастополь"]),
         ("personal_data_consent_text", "Согласие на обработку персональных данных."),
         ("calculator_config", {
             "canopyOptions": [{"label": "Для авто", "value": "Навес для авто", "multiplier": 1}],
@@ -90,8 +89,6 @@ def test_create_public_setting_accepts_valid_value(tmp_path, key: str, value: An
         ("phone", ["+7 978 000-44-88"], "Настройка phone должна быть строкой"),
         ("phones", {"label": "+7 978 000-44-88", "href": "tel:+79780004488"}, "Настройка phones должна быть списком телефонов с label и href"),
         ("phones", [{"label": "+7 978 000-44-88"}], "Настройка phones должна быть списком телефонов с label и href"),
-        ("cities", ["Симферополь", ""], "Настройка cities должна быть списком непустых строк"),
-        ("cities", "Симферополь", "Настройка cities должна быть списком непустых строк"),
         ("personal_data_consent_text", False, "Настройка personal_data_consent_text должна быть строкой"),
         ("calculator_config", {
             "canopyOptions": [],
@@ -125,7 +122,7 @@ def test_create_public_setting_rejects_invalid_value(
 def test_update_public_setting_rejects_invalid_value(tmp_path) -> None:
     with _admin_client(tmp_path) as (client, testing_session_local, headers):
         with testing_session_local() as db:
-            setting = Setting(key="cities", value=["Симферополь"], description=None)
+            setting = Setting(key="phone", value="+7 978 000-44-88", description=None)
             db.add(setting)
             db.commit()
             db.refresh(setting)
@@ -134,11 +131,11 @@ def test_update_public_setting_rejects_invalid_value(tmp_path) -> None:
         response = client.patch(
             f"/admin/settings/{setting_id}",
             headers=headers,
-            json={"value": ["Симферополь", " "]},
+            json={"value": ["+7 978 000-44-88"]},
         )
 
     assert response.status_code == 422
-    assert response.json()["detail"] == "Настройка cities должна быть списком непустых строк"
+    assert response.json()["detail"] == "Настройка phone должна быть строкой"
 
 
 def test_update_setting_to_public_key_validates_existing_value(tmp_path) -> None:
