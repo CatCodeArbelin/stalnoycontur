@@ -199,30 +199,14 @@ body {
     transform 180ms ease;
 }
 
-html[data-view-mode="compact"] .section-padding {
-  @apply py-9 md:py-12 lg:py-14;
-}
-
-html[data-view-mode="compact"] .section-title {
-  @apply text-2xl sm:text-3xl lg:text-4xl;
-}
-
-html[data-view-mode="compact"] .section-lead {
-  @apply mt-3 text-sm leading-6 sm:text-base;
-}
-
-html[data-view-mode="compact"] .container {
-  max-width: 1040px;
-}
-
 @media (min-width: 768px) {
-  html[data-view-mode="mobile-preview"] body {
+  html[data-view-mode="mobile"] body {
     background:
       radial-gradient(circle at 50% 0%, rgba(217, 135, 47, 0.18), transparent 26rem),
       hsl(var(--background));
   }
 
-  html[data-view-mode="mobile-preview"] .site-main {
+  html[data-view-mode="mobile"] .site-main {
     position: relative;
     max-width: 430px;
     margin: 1.25rem auto 2rem;
@@ -235,8 +219,8 @@ html[data-view-mode="compact"] .container {
       0 0 0 10px rgba(23, 35, 45, 0.06);
   }
 
-  html[data-view-mode="mobile-preview"] .site-main::before {
-    content: "Мобильный preview · не PSD-макет";
+  html[data-view-mode="mobile"] .site-main::before {
+    content: "Мобильная версия · не PSD-макет";
     position: sticky;
     top: 0;
     z-index: 30;
@@ -252,27 +236,27 @@ html[data-view-mode="compact"] .container {
     backdrop-filter: blur(14px);
   }
 
-  html[data-view-mode="mobile-preview"] .site-main .container {
+  html[data-view-mode="mobile"] .site-main .container {
     max-width: 100%;
     padding-right: 1rem;
     padding-left: 1rem;
   }
 
-  html[data-view-mode="mobile-preview"] .site-main .section-padding {
+  html[data-view-mode="mobile"] .site-main .section-padding {
     @apply py-10;
   }
 
-  html[data-view-mode="mobile-preview"] .site-main .section-title {
+  html[data-view-mode="mobile"] .site-main .section-title {
     @apply text-3xl;
   }
 
-  html[data-view-mode="mobile-preview"] .site-main .section-lead {
+  html[data-view-mode="mobile"] .site-main .section-lead {
     @apply text-base leading-7;
   }
 }
 
 @media (max-width: 767px) {
-  html[data-view-mode="mobile-preview"] .site-main {
+  html[data-view-mode="mobile"] .site-main {
     max-width: none;
     margin: 0;
     overflow: visible;
