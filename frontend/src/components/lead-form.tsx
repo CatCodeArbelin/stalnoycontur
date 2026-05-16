@@ -157,11 +157,11 @@ function makePayload({ source, data, quiz, estimatedPrice }: { source: LeadSourc
 
 function StatusMessage({ state, error }: { state: SubmitState; error: string }) {
   if (state === "success") {
-    return <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">Заявка отправлена. Мы свяжемся с вами и подготовим точную смету.</p>;
+    return <p className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-300">Заявка отправлена. Мы свяжемся с вами и подготовим точную смету.</p>;
   }
 
   if (state === "error") {
-    return <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error || "Не удалось отправить заявку. Попробуйте еще раз или позвоните нам."}</p>;
+    return <p className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">{error || "Не удалось отправить заявку. Попробуйте еще раз или позвоните нам."}</p>;
   }
 
   return null;
@@ -217,7 +217,7 @@ function PhotoPicker({ photo, onPhotoChange, error, onErrorChange }: { photo: Fi
         />
       </label>
       <p className="mt-2 text-xs text-muted-foreground">JPG, PNG или WEBP до {formatFileSize(MAX_IMAGE_SIZE_BYTES)} МБ. После загрузки изображение будет оптимизировано в WEBP.</p>
-      {error ? <p className="mt-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{error}</p> : null}
+      {error ? <p className="mt-2 rounded-2xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-700 dark:text-red-300">{error}</p> : null}
       {previewUrl ? (
         <div className="mt-3 overflow-hidden rounded-2xl border bg-muted/40">
           <Image src={previewUrl} alt="Предпросмотр выбранного фото" width={640} height={360} unoptimized className="max-h-64 w-full object-contain" />
@@ -284,7 +284,7 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
   }
 
   return (
-    <section id="quiz" className="section-padding bg-white">
+    <section id="quiz" className="section-padding bg-card">
       <div className="container grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <MotionReveal delay={0.05} direction="right">
           <Badge>Квиз-калькулятор</Badge>
@@ -309,7 +309,7 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {steps.map((item, index) => (
-                <span key={item} className={`rounded-full px-3 py-1 text-xs font-bold ${index <= step ? "bg-copper-100 text-copper-700" : "bg-muted text-muted-foreground"}`}>{item}</span>
+                <span key={item} className={`rounded-full px-3 py-1 text-xs font-bold ${index <= step ? "bg-copper-500/15 text-copper-600 dark:text-copper-300" : "bg-muted text-muted-foreground"}`}>{item}</span>
               ))}
             </div>
           </div>
@@ -323,10 +323,10 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
               <div>
                 <h3 className="text-2xl font-black">Куда отправить точную смету?</h3>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Ваше имя" />
-                  <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Телефон" type="tel" />
+                  <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Ваше имя" />
+                  <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Телефон" type="tel" />
                 </div>
-                <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: адрес, сроки, особенности участка" />
+                <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-24 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Комментарий: адрес, сроки, особенности участка" />
                 <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
                 <Consent checked={consent} onChange={setConsent} text={consentText} />
               </div>
@@ -362,7 +362,7 @@ function OptionGrid({ title, options, value, onChange }: { title: string; option
       <h3 className="text-2xl font-black">{title}</h3>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {options.map((option) => (
-          <label key={option.value} className={`cursor-pointer rounded-3xl border p-4 transition ${value === option.value ? "border-copper-500 bg-copper-50" : "bg-muted/40 hover:border-copper-300"}`}>
+          <label key={option.value} className={`cursor-pointer rounded-3xl border p-4 transition ${value === option.value ? "border-copper-500 bg-copper-500/15 text-foreground" : "bg-muted/40 hover:border-copper-300"}`}>
             <input type="radio" name={title} value={option.value} checked={value === option.value} onChange={() => onChange(option.value)} className="sr-only" />
             <span className="font-bold">{option.label}</span>
           </label>
@@ -406,11 +406,11 @@ export function ContactLeadForm({ settings = fallbackSettings }: { settings?: Pi
     <Card className="p-6">
       <form onSubmit={handleSubmit}>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Ваше имя" />
-          <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border px-4 py-3" placeholder="Телефон" type="tel" />
+          <input required minLength={2} value={data.name} onChange={(event) => setData((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Ваше имя" />
+          <input required value={data.phone} onChange={(event) => setData((current) => ({ ...current, phone: event.target.value }))} className="rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Телефон" type="tel" />
         </div>
-        <input value={data.city} onChange={(event) => setData((current) => ({ ...current, city: event.target.value }))} className="mt-3 w-full rounded-2xl border px-4 py-3" placeholder="Город" />
-        <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-28 w-full rounded-2xl border px-4 py-3" placeholder="Комментарий: что нужно построить, размеры, сроки" />
+        <input value={data.city} onChange={(event) => setData((current) => ({ ...current, city: event.target.value }))} className="mt-3 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Город" />
+        <textarea value={data.comment} onChange={(event) => setData((current) => ({ ...current, comment: event.target.value }))} className="mt-3 h-28 w-full rounded-2xl border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground" placeholder="Комментарий: что нужно построить, размеры, сроки" />
         <PhotoPicker photo={photo} onPhotoChange={setPhoto} error={photoError} onErrorChange={setPhotoError} />
         <Consent checked={consent} onChange={setConsent} text={consentText} />
         <Button type="submit" disabled={!consent || state === "loading"} className="mt-4 w-full" variant="copper">

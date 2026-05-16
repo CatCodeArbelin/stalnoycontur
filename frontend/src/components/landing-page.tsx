@@ -18,7 +18,7 @@ export async function LandingPage({ badge, title, description, points, path }: {
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container grid items-center gap-10 lg:grid-cols-2">
           <div>
-            <Badge className="border-white/20 bg-white/10 text-copper-400">{badge}</Badge>
+            <Badge className="border-border/40 bg-card/10 text-copper-400">{badge}</Badge>
             <h1 className="mt-5 text-4xl font-black tracking-tight md:text-6xl">{title}</h1>
             <p className="mt-5 text-lg leading-8 text-white/70">{description}</p>
             <div className="mt-7 grid gap-3">
@@ -26,7 +26,7 @@ export async function LandingPage({ badge, title, description, points, path }: {
             </div>
             <Button asChild className="mt-8" size="lg" variant="copper"><a href="#contacts">Заказать расчет</a></Button>
           </div>
-          <Image src="/images/hero-canopy.svg" alt={title} width={780} height={560} priority sizes="(min-width: 1024px) 50vw, 100vw" className="rounded-[2.5rem] bg-white/10 p-3" />
+          <Image src="/images/hero-canopy.svg" alt={title} width={780} height={560} priority sizes="(min-width: 1024px) 50vw, 100vw" className="rounded-[2.5rem] bg-card/10 p-3" />
         </div>
       </section>
       <QuizCalculator settings={content.settings} />

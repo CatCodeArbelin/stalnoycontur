@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
   --background: 36 33% 97%;
   --foreground: 204 32% 13%;
   --card: 0 0% 100%;
@@ -23,6 +24,27 @@
   --radius: 1.5rem;
 }
 
+.dark {
+  color-scheme: dark;
+  --background: 204 32% 8%;
+  --foreground: 204 20% 94%;
+  --card: 204 28% 12%;
+  --card-foreground: 204 20% 94%;
+  --primary: 34 76% 52%;
+  --primary-foreground: 204 32% 8%;
+  --secondary: 204 22% 18%;
+  --secondary-foreground: 204 20% 94%;
+  --muted: 204 20% 17%;
+  --muted-foreground: 204 13% 68%;
+  --accent: 34 76% 52%;
+  --accent-foreground: 204 32% 8%;
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 204 18% 24%;
+  --input: 204 18% 24%;
+  --ring: 34 76% 52%;
+}
+
 * { border-color: hsl(var(--border)); }
 html { scroll-behavior: smooth; }
 body {
@@ -35,9 +57,8 @@ body {
 ::selection { background: #d9872f; color: white; }
 
 .section-padding { @apply py-14 md:py-20 lg:py-24; }
-.section-title { @apply text-3xl font-black tracking-tight text-steel-900 sm:text-4xl lg:text-5xl; }
+.section-title { @apply text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl; }
 .section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
-.glass { @apply border border-white/20 bg-white/80 shadow-soft backdrop-blur-xl; }
 
 .section-effects {
   position: relative;
@@ -203,7 +224,7 @@ html[data-view-mode="compact"] .container {
     max-width: 430px;
     margin: 1.25rem auto 2rem;
     overflow: hidden;
-    border: 1px solid rgba(23, 35, 45, 0.14);
+    border: 1px solid hsl(var(--border));
     border-radius: 2.25rem;
     background: hsl(var(--background));
     box-shadow:
@@ -219,8 +240,8 @@ html[data-view-mode="compact"] .container {
     display: block;
     padding: 0.55rem 1rem;
     border-bottom: 1px solid rgba(23, 35, 45, 0.1);
-    background: rgba(255, 255, 255, 0.92);
-    color: #344653;
+    background: hsl(var(--card) / 0.92);
+    color: hsl(var(--muted-foreground));
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.02em;
