@@ -1,22 +1,29 @@
 "use client";
 
-import { MonitorSmartphone } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Monitor, Smartphone, type LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-type ViewMode = "site" | "mobile-preview" | "compact";
+type ViewMode = "desktop" | "mobile";
 
 const STORAGE_KEY = "stalnoycontur:view-mode";
 
-const modes: Array<{ value: ViewMode; label: string; shortLabel: string }> = [
-  { value: "site", label: "Сайт", shortLabel: "С" },
-  { value: "mobile-preview", label: "Мобильный preview", shortLabel: "М" },
-  { value: "compact", label: "Компактно", shortLabel: "К" },
+const modes: Array<{ value: ViewMode; label: string; Icon: LucideIcon }> = [
+  { value: "desktop", label: "Версия для ПК", Icon: Monitor },
+  { value: "mobile", label: "Мобильная версия", Icon: Smartphone },
 ];
 
-function isViewMode(value: string | null): value is ViewMode {
-  return value === "site" || value === "mobile-preview" || value === "compact";
+function getSavedViewMode(value: string | null): ViewMode | null {
+  if (value === "desktop" || value === "mobile") {
+    return value;
+  }
+
+  return null;
+}
+
+function getDefaultViewMode() {
+  return window.matchMedia("(max-width: 767px)").matches ? "mobile" : "desktop";
 }
 
 function applyViewMode(mode: ViewMode) {
@@ -24,26 +31,29 @@ function applyViewMode(mode: ViewMode) {
 }
 
 export function ViewModeSwitcher({ className }: { className?: string }) {
-  const [mode, setMode] = useState<ViewMode>("site");
+  const [mode, setMode] = useState<ViewMode>("desktop");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const savedMode = window.localStorage.getItem(STORAGE_KEY);
-    const nextMode = isViewMode(savedMode) ? savedMode : "site";
+    const savedMode = getSavedViewMode(window.localStorage.getItem(STORAGE_KEY));
+    const nextMode = savedMode ?? getDefaultViewMode();
 
     setMode(nextMode);
     applyViewMode(nextMode);
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) {
+      return;
+    }
+
     window.localStorage.setItem(STORAGE_KEY, mode);
     applyViewMode(mode);
-  }, [mode]);
-
-  const activeLabel = useMemo(() => modes.find((item) => item.value === mode)?.label ?? "Сайт", [mode]);
+  }, [isInitialized, mode]);
 
   return (
-    <div className={cn("flex items-center gap-1 rounded-full border border-border bg-card/85 p-1 shadow-card backdrop-blur", className)} aria-label={`Режим отображения: ${activeLabel}`}>
-      <MonitorSmartphone className="hidden h-4 w-4 shrink-0 text-muted-foreground xl:block" aria-hidden="true" />
+    <div className={cn("flex items-center gap-1 rounded-full border border-border bg-card/85 p-1 shadow-card backdrop-blur", className)} aria-label="Переключение версии сайта">
       {modes.map((item) => {
         const active = item.value === mode;
 
@@ -52,14 +62,14 @@ export function ViewModeSwitcher({ className }: { className?: string }) {
             key={item.value}
             type="button"
             className={cn(
-              "rounded-full px-2 py-1.5 text-[11px] font-black leading-none text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-500 sm:text-xs",
+              "inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-500",
               active && "bg-steel-900 text-white shadow-card hover:bg-steel-900 hover:text-white",
             )}
+            aria-label={item.label}
             aria-pressed={active}
             onClick={() => setMode(item.value)}
           >
-            <span className="hidden sm:inline">{item.label}</span>
-            <span className="sm:hidden">{item.shortLabel}</span>
+            <item.Icon className="h-4 w-4" aria-hidden="true" />
           </button>
         );
       })}
