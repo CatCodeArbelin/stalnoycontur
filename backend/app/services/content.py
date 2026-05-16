@@ -72,6 +72,27 @@ DEFAULT_FAQ = [
     FaqItem(question="Можно ли заказать навес под ключ?", answer="Да, делаем проект, фундамент, каркас, кровлю, водосток и уборку площадки.", sort_order=30),
 ]
 
+DEFAULT_CALCULATOR_CONFIG = {
+    "canopyOptions": [
+        {"label": "Для авто", "value": "Навес для авто", "multiplier": 1},
+        {"label": "К дому / терраса", "value": "Навес к дому", "multiplier": 1.08},
+        {"label": "Односкатный", "value": "Односкатный навес", "multiplier": 0.95},
+        {"label": "Двускатный", "value": "Двускатный навес", "multiplier": 1.18},
+    ],
+    "sizeOptions": [
+        {"label": "3×4 м", "value": "3×4 м", "area": 12},
+        {"label": "4×6 м", "value": "4×6 м", "area": 24},
+        {"label": "6×6 м", "value": "6×6 м", "area": 36},
+        {"label": "6×8 м", "value": "6×8 м", "area": 48},
+    ],
+    "materialOptions": [
+        {"label": "Поликарбонат", "value": "Поликарбонат", "pricePerMeter": 7600},
+        {"label": "Профнастил", "value": "Профнастил", "pricePerMeter": 6900},
+        {"label": "Металлочерепица", "value": "Металлочерепица", "pricePerMeter": 8400},
+        {"label": "Мягкая кровля", "value": "Мягкая кровля", "pricePerMeter": 9200},
+    ],
+}
+
 DEFAULT_SETTINGS = PublicSettings(
     company_name="Стальной Контур",
     phone="+7 978 000-44-88",
@@ -83,6 +104,7 @@ DEFAULT_SETTINGS = PublicSettings(
     max="https://max.ru/stalnoycontur",
     cities=["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керч"],
     personal_data_consent_text="Нажимая кнопку отправки, вы соглашаетесь на обработку персональных данных.",
+    calculator_config=DEFAULT_CALCULATOR_CONFIG,
 )
 
 

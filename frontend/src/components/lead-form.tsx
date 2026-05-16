@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
-import { fallbackSettings, type PublicSettings } from "@/lib/content-api";
+import { fallbackCalculatorConfig, fallbackSettings, type CalculatorConfig, type PublicSettings } from "@/lib/content-api";
 
 const API_URL = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -37,38 +37,33 @@ type ContactFormData = {
   comment: string;
 };
 
-const canopyOptions = [
-  { label: "Для авто", value: "Навес для авто", multiplier: 1 },
-  { label: "К дому / терраса", value: "Навес к дому", multiplier: 1.08 },
-  { label: "Односкатный", value: "Односкатный навес", multiplier: 0.95 },
-  { label: "Двускатный", value: "Двускатный навес", multiplier: 1.18 },
-];
+function getCalculatorConfig(settings?: Pick<PublicSettings, "calculator_config">): CalculatorConfig {
+  return {
+    canopyOptions: settings?.calculator_config?.canopyOptions?.length
+      ? settings.calculator_config.canopyOptions
+      : fallbackCalculatorConfig.canopyOptions,
+    sizeOptions: settings?.calculator_config?.sizeOptions?.length
+      ? settings.calculator_config.sizeOptions
+      : fallbackCalculatorConfig.sizeOptions,
+    materialOptions: settings?.calculator_config?.materialOptions?.length
+      ? settings.calculator_config.materialOptions
+      : fallbackCalculatorConfig.materialOptions,
+  };
+}
 
-const sizeOptions = [
-  { label: "3×4 м", value: "3×4 м", area: 12 },
-  { label: "4×6 м", value: "4×6 м", area: 24 },
-  { label: "6×6 м", value: "6×6 м", area: 36 },
-  { label: "6×8 м", value: "6×8 м", area: 48 },
-];
-
-const materialOptions = [
-  { label: "Поликарбонат", value: "Поликарбонат", pricePerMeter: 7600 },
-  { label: "Профнастил", value: "Профнастил", pricePerMeter: 6900 },
-  { label: "Металлочерепица", value: "Металлочерепица", pricePerMeter: 8400 },
-  { label: "Мягкая кровля", value: "Мягкая кровля", pricePerMeter: 9200 },
-];
+function makeDefaultQuizData(config = fallbackCalculatorConfig): QuizData {
+  return {
+    canopyType: config.canopyOptions[0]?.value ?? fallbackCalculatorConfig.canopyOptions[0].value,
+    size: config.sizeOptions[1]?.value ?? config.sizeOptions[0]?.value ?? fallbackCalculatorConfig.sizeOptions[1].value,
+    material: config.materialOptions[0]?.value ?? fallbackCalculatorConfig.materialOptions[0].value,
+    city: cityOptions[0],
+    name: "",
+    phone: "",
+    comment: "",
+  };
+}
 
 const cityOptions = ["Симферополь", "Севастополь", "Ялта", "Евпатория", "Алушта", "Феодосия", "Керчь", "Другой город"];
-
-const defaultQuizData: QuizData = {
-  canopyType: canopyOptions[0].value,
-  size: sizeOptions[1].value,
-  material: materialOptions[0].value,
-  city: cityOptions[0],
-  name: "",
-  phone: "",
-  comment: "",
-};
 
 const defaultContactData: ContactFormData = {
   name: "",
@@ -242,15 +237,32 @@ function Consent({ checked, onChange, text }: { checked: boolean; onChange: (che
   );
 }
 
-export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text"> }) {
+export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pick<PublicSettings, "personal_data_consent_text" | "calculator_config"> }) {
+  const calculatorConfig = getCalculatorConfig(settings);
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<QuizData>(defaultQuizData);
+  const [data, setData] = useState<QuizData>(() => makeDefaultQuizData(calculatorConfig));
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
   const consentText = settings.personal_data_consent_text || fallbackSettings.personal_data_consent_text;
+  const { canopyOptions, materialOptions, sizeOptions } = calculatorConfig;
+
+  useEffect(() => {
+    setData((current) => ({
+      ...current,
+      canopyType: canopyOptions.some((item) => item.value === current.canopyType)
+        ? current.canopyType
+        : canopyOptions[0].value,
+      size: sizeOptions.some((item) => item.value === current.size)
+        ? current.size
+        : sizeOptions[0].value,
+      material: materialOptions.some((item) => item.value === current.material)
+        ? current.material
+        : materialOptions[0].value,
+    }));
+  }, [canopyOptions, materialOptions, sizeOptions]);
 
   const steps = ["Тип навеса", "Размер", "Кровля", "Город", "Контакты"];
   const progress = ((step + 1) / steps.length) * 100;
@@ -259,7 +271,7 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
     const size = sizeOptions.find((item) => item.value === data.size) ?? sizeOptions[0];
     const material = materialOptions.find((item) => item.value === data.material) ?? materialOptions[0];
     return Math.round(size.area * material.pricePerMeter * canopy.multiplier);
-  }, [data.canopyType, data.material, data.size]);
+  }, [canopyOptions, data.canopyType, data.material, data.size, materialOptions, sizeOptions]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -271,7 +283,7 @@ export function QuizCalculator({ settings = fallbackSettings }: { settings?: Pic
     try {
       await postLead(makePayload({ source: "quiz", data, quiz: data, estimatedPrice }), photo);
       setState("success");
-      setData(defaultQuizData);
+      setData(makeDefaultQuizData(calculatorConfig));
       setPhoto(null);
       setPhotoError("");
       setStep(0);
