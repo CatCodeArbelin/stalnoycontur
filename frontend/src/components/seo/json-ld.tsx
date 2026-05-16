@@ -20,6 +20,14 @@ type ReviewProps = {
   itemName?: string;
 };
 
+type ServiceJsonLdProps = {
+  name: string;
+  description: string;
+  url: string;
+  image?: string;
+  settings?: PublicSettings;
+};
+
 function JsonLd({ data }: { data: JsonValue }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
 }
@@ -122,6 +130,56 @@ export function BreadcrumbListJsonLd({ items }: { items: BreadcrumbItem[] }) {
           name: item.name,
           item: absoluteUrl(item.url),
         })),
+      }}
+    />
+  );
+}
+
+export function ServiceJsonLd({
+  name,
+  description,
+  url,
+  image = siteConfig.image,
+  settings,
+}: ServiceJsonLdProps) {
+  const telephone = publicSettingsTelephone(settings);
+
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "@id": `${absoluteUrl(url)}#service`,
+        name,
+        description,
+        serviceType: "Изготовление и монтаж навесов для авто",
+        url: absoluteUrl(url),
+        image: absoluteUrl(image),
+        areaServed: [
+          "Симферополь",
+          "Севастополь",
+          "Ялта",
+          "Евпатория",
+          "Керчь",
+          "Феодосия",
+          "Алушта",
+          "Крым",
+        ],
+        provider: {
+          "@type": "LocalBusiness",
+          "@id": absoluteUrl("/#local-business"),
+          name: siteConfig.name,
+          url: absoluteUrl("/"),
+          telephone,
+          address,
+          geo,
+        },
+        offers: {
+          "@type": "Offer",
+          availability: "https://schema.org/InStock",
+          priceCurrency: "RUB",
+          url: absoluteUrl(url),
+        },
       }}
     />
   );

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { ContactLeadForm, QuizCalculator } from "@/components/lead-form";
-import { BreadcrumbListJsonLd } from "@/components/seo";
+import { BreadcrumbListJsonLd, ServiceJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,17 +40,17 @@ const benefits = [
   {
     icon: Ruler,
     title: "Замер",
-    text: "Бесплатно выезжаем на участок, проверяем заезд, уклоны, ветровую нагрузку и точки крепления.",
+    text: "Бесплатно выезжаем на участок и рассчитываем навес для авто в Крыму с учетом заезда, уклонов, ветровой нагрузки и точек крепления.",
   },
   {
     icon: Wrench,
     title: "Производство",
-    text: "Изготавливаем металлический каркас под размер автомобиля, двора и выбранный материал кровли.",
+    text: "Изготавливаем металлический навес для машины под размер автомобиля, двора и выбранный материал кровли.",
   },
   {
     icon: CheckCircle2,
     title: "Монтаж",
-    text: "Привозим готовые элементы, устанавливаем опоры, фермы, кровлю и водоотвод без затяжных работ.",
+    text: "Делаем автонавес под ключ: привозим готовые элементы, устанавливаем опоры, фермы, кровлю и водоотвод без затяжных работ.",
   },
   {
     icon: ShieldCheck,
@@ -63,7 +63,7 @@ const sizeOptions = [
   {
     size: "3×4 м",
     purpose: "компактный навес для одного легкового авто",
-    materials: "поликарбонат 6–8 мм, профильная труба",
+    materials: "навес для автомобиля из поликарбоната 6–8 мм на профильной трубе",
   },
   {
     size: "4×6 м",
@@ -92,6 +92,8 @@ const cities = [
   "Алушта",
 ];
 
+const materialIntro =
+  "Подберем навес для автомобиля из поликарбоната, профнастила или металлочерепицы под архитектуру дома, ширину заезда и снеговую нагрузку.";
 
 function landingSections(
   sections: PublicLandingPage["sections"],
@@ -141,6 +143,13 @@ export default async function AutoCanopyCrimeaPage() {
           { name: landingPage.title, url: path },
         ]}
       />
+      <ServiceJsonLd
+        name="Навес для авто в Крыму под ключ"
+        description="Проектирование, производство и монтаж навесов для авто в Симферополе, Севастополе, Ялте, Евпатории, Керчи, Феодосии, Алуште и других городах Крыма."
+        url={path}
+        image="/images/canopy-auto.svg"
+        settings={content.settings}
+      />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container grid items-center gap-10 lg:grid-cols-2">
           <div>
@@ -170,7 +179,7 @@ export default async function AutoCanopyCrimeaPage() {
           </div>
           <Image
             src="/images/canopy-auto.svg"
-            alt="Металлический навес для авто в Крыму"
+            alt="Навес для авто в Крыму из металлокаркаса"
             width={780}
             height={560}
             priority
@@ -183,7 +192,7 @@ export default async function AutoCanopyCrimeaPage() {
       <section className="surface-section section-padding">
         <div className="container">
           <Badge>Преимущества</Badge>
-          <h2 className="section-title mt-4">{sectionText(sections, "benefits", "title", "Берем автонавес под контроль от замера до гарантии")}</h2>
+          <h2 className="section-title mt-4">{sectionText(sections, "benefits", "title", "Берем автонавес под ключ под контроль от замера до гарантии")}</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((item) => (
               <Card key={item.title} className="h-full p-6">
@@ -204,6 +213,7 @@ export default async function AutoCanopyCrimeaPage() {
         <div className="container relative z-10">
           <Badge>Размеры и материалы</Badge>
           <h2 className="section-title mt-4">{sectionText(sections, "sizes", "title", "Типовые решения для автонавесов")}</h2>
+          <p className="section-lead">{materialIntro}</p>
           <div className="mt-8 grid gap-5 md:grid-cols-2">
             {sizeOptions.map((item) => (
               <Card key={item.size} className="interactive-card h-full p-6">
@@ -233,7 +243,7 @@ export default async function AutoCanopyCrimeaPage() {
               <Card key={item.slug ?? item.title} className="interactive-card h-full overflow-hidden">
                 <Image
                   src={item.cover_image || "/images/case-1.svg"}
-                  alt={item.title}
+                  alt={`${item.title}: навес для авто в Крыму${item.city ? `, ${item.city}` : ""}`}
                   width={520}
                   height={330}
                   loading="lazy"
@@ -276,7 +286,7 @@ export default async function AutoCanopyCrimeaPage() {
                 sections,
                 "geo",
                 "description",
-                "Организуем замер, доставку металлокаркаса и монтажную бригаду в крупные города и ближайшие поселки.",
+                "Организуем замер, доставку металлокаркаса и монтажную бригаду в Симферополь, Севастополь, Ялту, Евпаторию, Керчь, Феодосию, Алушту и ближайшие поселки.",
               )}
             </p>
           </div>
@@ -301,7 +311,7 @@ export default async function AutoCanopyCrimeaPage() {
                 sections,
                 "contacts",
                 "description",
-                "Оставьте телефон, размеры площадки или фото заезда — подскажем оптимальную форму, материал и ориентировочную стоимость.",
+                "Оставьте телефон, размеры площадки или фото заезда — подскажем оптимальную форму, материал и ориентировочную стоимость автонавеса под ключ.",
               )}
             </p>
             <div className="mt-6 grid gap-3 text-sm text-muted-foreground">
