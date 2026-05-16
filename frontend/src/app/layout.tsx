@@ -23,12 +23,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const settings = await getPublicSettings();
 
   return (
-    <html lang="ru" className={manrope.variable}>
+    <html lang="ru" className={manrope.variable} data-view-mode="site">
       <body className="font-sans antialiased">
         <LocalBusinessJsonLd settings={settings} />
         <ConstructionBusinessJsonLd settings={settings} />
         <Header settings={settings} />
-        <main>{children}</main>
+        <main className="site-main">{children}</main>
         <Footer settings={settings} />
         <QuickContact settings={settings} />
         <MobileCta settings={settings} />
