@@ -26,23 +26,23 @@
 
 .dark {
   color-scheme: dark;
-  --background: 204 32% 8%;
-  --foreground: 204 20% 94%;
-  --card: 204 28% 12%;
-  --card-foreground: 204 20% 94%;
-  --primary: 34 76% 52%;
-  --primary-foreground: 204 32% 8%;
-  --secondary: 204 22% 18%;
-  --secondary-foreground: 204 20% 94%;
-  --muted: 204 20% 17%;
-  --muted-foreground: 204 13% 68%;
-  --accent: 34 76% 52%;
-  --accent-foreground: 204 32% 8%;
+  --background: 206 42% 6%;
+  --foreground: 204 24% 95%;
+  --card: 205 34% 13%;
+  --card-foreground: 204 24% 95%;
+  --primary: 34 80% 56%;
+  --primary-foreground: 206 42% 6%;
+  --secondary: 205 28% 18%;
+  --secondary-foreground: 204 24% 95%;
+  --muted: 205 24% 18%;
+  --muted-foreground: 204 18% 76%;
+  --accent: 34 80% 56%;
+  --accent-foreground: 206 42% 6%;
   --destructive: 0 72% 52%;
   --destructive-foreground: 0 0% 100%;
-  --border: 204 18% 24%;
-  --input: 204 18% 24%;
-  --ring: 34 76% 52%;
+  --border: 205 24% 29%;
+  --input: 205 24% 29%;
+  --ring: 34 80% 56%;
 }
 
 * { border-color: hsl(var(--border)); }
@@ -54,13 +54,26 @@ body {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
+body.dark,
+.dark body {
+  background:
+    radial-gradient(circle at 12% 8%, hsl(var(--accent) / 0.2), transparent 28rem),
+    radial-gradient(circle at 72% 12%, rgba(76, 128, 164, 0.22), transparent 34rem),
+    radial-gradient(circle at 50% 100%, rgba(7, 18, 30, 0.92), transparent 44rem),
+    hsl(var(--background));
+  background-attachment: fixed;
+}
+
 ::selection { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
 
 @layer components {
   .section-padding { @apply py-14 md:py-20 lg:py-24; }
   .section-title { @apply text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl; }
   .section-lead { @apply mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg; }
-  .glass { @apply border border-border bg-card/75 text-card-foreground shadow-card backdrop-blur-xl; }
+  .glass { @apply border border-border/80 bg-card/80 text-card-foreground shadow-[0_20px_60px_rgba(5,14,23,0.16),inset_0_1px_0_hsl(var(--foreground)/0.08)] backdrop-blur-xl; }
+  .dark-panel { @apply relative overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_18%_0%,rgba(229,162,74,0.2),transparent_32rem),linear-gradient(135deg,rgba(23,35,45,0.96),rgba(8,19,31,0.98)_58%,rgba(32,48,62,0.96))] text-white shadow-[0_30px_90px_rgba(4,11,18,0.42),inset_0_1px_0_rgba(255,255,255,0.08)]; }
+  .surface-section { @apply border-y border-border/70 bg-card/80 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.04),inset_0_-1px_0_hsl(var(--background)/0.42)]; }
+  .interactive-card { @apply border-border/80 bg-card/80 shadow-[0_16px_45px_rgba(5,14,23,0.1),inset_0_1px_0_hsl(var(--foreground)/0.05)] transition-colors duration-200 hover:border-accent/60 hover:bg-card hover:shadow-[0_20px_55px_rgba(5,14,23,0.14),0_0_0_1px_hsl(var(--accent)/0.14),inset_0_1px_0_hsl(var(--foreground)/0.08)]; }
 }
 
 .section-effects {
