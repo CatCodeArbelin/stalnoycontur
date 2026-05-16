@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { Advantages, CasesMapReviewsFaqContacts, Hero, SolutionsProductionSteps, Types } from "@/components/sections/home-sections";
 import { QuizCalculator } from "@/components/lead-form";
-import { FAQPageJsonLd, ReviewJsonLd } from "@/components/seo";
+import { FAQPageJsonLd } from "@/components/seo";
 import { getManagedContent } from "@/lib/content-api";
 import { metadataForPath } from "@/lib/seo";
 
@@ -14,13 +14,12 @@ export default async function Home() {
   return (
     <>
       <FAQPageJsonLd items={content.faq.slice(0, 2)} />
-      <ReviewJsonLd author={content.reviews[0]?.author ?? "Алексей"} text={content.reviews[0]?.text ?? "Сделали навес для двух машин, помогли выбрать цвет под забор. Монтаж занял два дня, участок оставили чистым."} ratingValue={5} />
       <Hero />
       <Advantages />
       <QuizCalculator settings={content.settings} />
       <Types />
       <SolutionsProductionSteps gallery={content.gallery} />
-      <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
     </>
   );
 }

@@ -12,7 +12,6 @@ import {
 import {
   casesResource,
   faqResource,
-  reviewsResource,
 } from "@/components/admin/resource-configs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +25,6 @@ type SettingsTab =
   | "cities"
   | "calculator"
   | "cases"
-  | "reviews"
   | "faq"
   | "images";
 
@@ -106,7 +104,6 @@ const uploadCategories: { value: UploadCategory; label: string }[] = [
   { value: "uploads", label: "Общие" },
   { value: "cases", label: "Кейсы" },
   { value: "gallery", label: "Галерея" },
-  { value: "reviews", label: "Отзывы" },
   { value: "production", label: "Производство" },
 ];
 
@@ -135,7 +132,6 @@ const dashboardTabs: {
     title: "Кейсы / работы",
     description: "CRUD выполненных работ",
   },
-  { key: "reviews", title: "Отзывы", description: "CRUD отзывов клиентов" },
   { key: "faq", title: "FAQ", description: "CRUD вопросов и ответов" },
   {
     key: "images",
@@ -1027,13 +1023,6 @@ export function SiteSettingsForm() {
             {activeTab === "cases" ? (
               <AdminCrudPanel
                 {...casesResource}
-                request={request}
-                showMessage={showMessage}
-              />
-            ) : null}
-            {activeTab === "reviews" ? (
-              <AdminCrudPanel
-                {...reviewsResource}
                 request={request}
                 showMessage={showMessage}
               />

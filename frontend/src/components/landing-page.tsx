@@ -31,7 +31,7 @@ export async function LandingPage({ badge, title, description, points, path }: {
       </section>
       <QuizCalculator settings={content.settings} />
       <Types />
-      <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
     </>
   );
 }

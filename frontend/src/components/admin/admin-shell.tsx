@@ -63,7 +63,6 @@ export const adminNav = [
   ["/admin/leads", "Заявки"],
   ["/admin/cases", "Кейсы"],
   ["/admin/gallery", "Галерея"],
-  ["/admin/reviews", "Отзывы"],
   ["/admin/faq", "FAQ"],
   ["/admin/settings", "Настройки"],
 ];
