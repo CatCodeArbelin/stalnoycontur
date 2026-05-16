@@ -119,6 +119,7 @@ export const landingPagesResource: AdminResourceConfig = {
   columns: [
     { key: "id", label: "ID" },
     { key: "slug", label: "Адрес страницы" },
+    { key: "landing_url", label: "Ссылка", format: "landingUrl" },
     { key: "title", label: "Внутреннее название страницы" },
     { key: "hero_title", label: "Главный заголовок страницы" },
     { key: "is_published", label: "Опубликован" },
