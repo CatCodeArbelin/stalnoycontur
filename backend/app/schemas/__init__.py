@@ -34,3 +34,5 @@ __all__ = [
     "SettingUpdate",
     "UploadRead",
 ]
+
+from app.schemas.landing_page import LandingPageCreate, LandingPageRead, LandingPageUpdate, PublicLandingPage

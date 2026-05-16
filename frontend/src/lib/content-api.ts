@@ -89,10 +89,72 @@ export type PublicSettings = {
   calculator_config: CalculatorConfig;
 };
 
+
+export type LandingPageSection = {
+  key?: string;
+  title?: string;
+  description?: string;
+  items?: unknown[];
+  [key: string]: unknown;
+};
+
+export type PublicLandingPage = {
+  slug: string;
+  title: string;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  hero_badge?: string | null;
+  hero_title: string;
+  hero_description?: string | null;
+  points?: string[] | null;
+  sections?: LandingPageSection[] | Record<string, LandingPageSection> | null;
+};
+
 export type ManagedContent = {
   cases: PublicCase[];
   gallery: PublicGalleryItem[];
   settings: PublicSettings;
+};
+
+
+export const fallbackAutoCanopyLandingPage: PublicLandingPage = {
+  slug: "naves-dlya-avto-v-krymu",
+  title: "Навес для авто в Крыму под ключ",
+  meta_title: "Навес для авто в Крыму под ключ — Стальной Контур",
+  meta_description:
+    "Производство и монтаж навесов для авто в Крыму под ключ: замер, расчет стоимости, материалы, кейсы, гарантия и монтаж в городах Крыма.",
+  hero_badge: "Автонавесы под ключ",
+  hero_title: "Навес для авто в Крыму под ключ",
+  hero_description:
+    "Проектируем, производим и монтируем металлические навесы для автомобилей с учетом крымского солнца, ветра, соли и особенностей участка.",
+  points: [
+    "индивидуальный размер под один или два автомобиля",
+    "кровля из поликарбоната, профнастила или металлочерепицы",
+    "замер, смета, производство, монтаж и гарантия в одном договоре",
+  ],
+  sections: [
+    {
+      key: "benefits",
+      title: "Берем автонавес под контроль от замера до гарантии",
+    },
+    { key: "sizes", title: "Типовые решения для автонавесов" },
+    {
+      key: "cases",
+      title: "Автонавесы, которые уже защищают машины клиентов",
+    },
+    {
+      key: "geo",
+      title: "Монтируем навесы для авто по всему Крыму",
+      description:
+        "Организуем замер, доставку металлокаркаса и монтажную бригаду в крупные города и ближайшие поселки.",
+    },
+    {
+      key: "contacts",
+      title: "Получите расчет автонавеса под ваш участок",
+      description:
+        "Оставьте телефон, размеры площадки или фото заезда — подскажем оптимальную форму, материал и ориентировочную стоимость.",
+    },
+  ],
 };
 
 export const fallbackSettings: PublicSettings = {
@@ -194,6 +256,14 @@ export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
 
 export async function getPublicSettings(): Promise<PublicSettings> {
   return fetchPublic("/settings", fallbackSettings);
+}
+
+
+export async function getPublicLandingPage(
+  slug: string,
+  fallback: PublicLandingPage,
+): Promise<PublicLandingPage> {
+  return fetchPublic(`/content/landing-pages/${encodeURIComponent(slug)}`, fallback);
 }
 
 export async function getManagedContent(): Promise<ManagedContent> {
