@@ -54,7 +54,12 @@ export const galleryResource: AdminResourceConfig = {
       uploadCategory: "gallery",
     },
     { key: "sort_order", label: "Порядок", type: "number" },
-    { key: "is_active", label: "Активен", type: "checkbox", defaultValue: true },
+    {
+      key: "is_active",
+      label: "Активен",
+      type: "checkbox",
+      defaultValue: true,
+    },
   ],
   columns: [
     { key: "id", label: "ID" },
@@ -65,7 +70,6 @@ export const galleryResource: AdminResourceConfig = {
     { key: "is_active", label: "Активен" },
   ],
 };
-
 
 export const landingPagesResource: AdminResourceConfig = {
   title: "Лендинги",
@@ -100,20 +104,46 @@ export const landingPagesResource: AdminResourceConfig = {
     {
       key: "sections",
       label: "Дополнительные блоки страницы",
-      type: "json",
+      type: "section-list",
       defaultValue: "[]",
       description:
-        "Можно использовать ключи benefits, sizes, cases, geo, contacts.",
+        "Заполните заголовки типовых секций. JSON доступен только в расширенном режиме для разработчика.",
       placeholder:
         '[{"key":"benefits","title":"Почему выбирают нас","items":["Собственное производство","Монтаж по Крыму"]}]',
+      sections: [
+        {
+          key: "benefits",
+          label: "Преимущества: заголовок",
+          placeholder: "Почему выбирают нас",
+        },
+        {
+          key: "sizes",
+          label: "Размеры и материалы: заголовок",
+          placeholder: "Типовые решения и материалы",
+        },
+        {
+          key: "cases",
+          label: "Кейсы: заголовок",
+          placeholder: "Готовые работы",
+        },
+        {
+          key: "geo",
+          label: "География: заголовок",
+          placeholder: "Где работаем",
+        },
+        {
+          key: "contacts",
+          label: "Контакты: заголовок",
+          placeholder: "Получите расчет",
+        },
+      ],
     },
     {
       key: "is_published",
       label: "Опубликован",
       type: "checkbox",
       defaultValue: false,
-      description:
-        "Включите, чтобы страница стала доступна посетителям сайта.",
+      description: "Включите, чтобы страница стала доступна посетителям сайта.",
     },
   ],
   columns: [
