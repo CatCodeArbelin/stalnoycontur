@@ -83,7 +83,7 @@ export function Types() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {canopyTypes.map((item, index) => (
             <MotionReveal key={item.href} delay={index * 0.07} direction={index % 3 === 0 ? "right" : "up"}>
-              <Link href={item.href} className="group block overflow-hidden rounded-[2rem] bg-card shadow-card">
+              <Link href={item.href} className="group block overflow-hidden rounded-[2rem] border border-border bg-card text-card-foreground shadow-card">
                 <Image src={item.image} alt={item.title} width={520} height={320} loading="lazy" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="h-48 w-full object-cover transition group-hover:scale-105" />
                 <div className="flex items-center justify-between p-5"><span className="text-lg font-black">{item.title}</span><ArrowRight className="h-5 w-5 text-copper-500" /></div>
               </Link>
@@ -168,7 +168,7 @@ export function CasesMapReviewsFaqContacts({
 
   return (
     <>
-      <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item, index) => <MotionReveal key={item.slug ?? item.title} delay={index * 0.08} direction={index % 2 === 0 ? "up" : "left"}><Card className="h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600">{item.materials.join(" · ")}</p> : null}</CardContent></Card></MotionReveal>)}</div></div></section>
+      <section className="section-padding"><div className="container"><Badge>Кейсы</Badge><h2 className="section-title mt-4">Реализованные объекты</h2><div className="mt-8 grid gap-5 md:grid-cols-3">{cases.map((item, index) => <MotionReveal key={item.slug ?? item.title} delay={index * 0.08} direction={index % 2 === 0 ? "up" : "left"}><Card className="h-full overflow-hidden"><Image src={item.cover_image || "/images/case-1.svg"} alt={item.title} width={520} height={330} loading="lazy" sizes="(min-width: 768px) 33vw, 100vw" className="h-52 w-full object-cover" /><CardHeader><CardTitle>{item.title}</CardTitle></CardHeader><CardContent>{item.city ? <p className="text-sm text-muted-foreground">{item.city}</p> : null}{item.description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}{item.materials?.length ? <p className="mt-2 font-black text-copper-600 dark:text-copper-400">{item.materials.join(" · ")}</p> : null}</CardContent></Card></MotionReveal>)}</div></div></section>
       <section className="section-padding bg-card"><div className="container grid gap-8 lg:grid-cols-2"><div><Badge>География</Badge><h2 className="section-title mt-4">Работаем по всему Крыму</h2><p className="section-lead">Выезжаем на замер в крупные города и поселки. Учитываем ветровой район, соленый воздух и особенности участка.</p><div className="mt-6 flex flex-wrap gap-2">{settings.cities.map((city) => <span key={city} className="rounded-full bg-muted px-4 py-2 text-sm font-bold">{city}</span>)}</div></div><div className="rounded-[2rem] bg-steel-900 p-6 text-white"><MapPin className="h-10 w-10 text-copper-400" /><p className="mt-6 text-2xl font-black">Карта Крыма</p><p className="mt-3 text-white/65">Симферополь — центральный склад и производство. Бригады выезжают по всему полуострову.</p></div></div></section>
       <section className="section-padding">
         <div className="container grid gap-8 lg:grid-cols-2">
@@ -178,7 +178,7 @@ export function CasesMapReviewsFaqContacts({
             {visibleReviews.length ? (
               <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleReviews.map((review) => (
-                  <article key={review.id ?? `${review.author}-${review.text}`} className="flex h-full flex-col overflow-hidden rounded-[2rem] bg-card shadow-card">
+                  <article key={review.id ?? `${review.author}-${review.text}`} className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border bg-card text-card-foreground shadow-card">
                     {review.image ? (
                       <Image
                         src={review.image}
@@ -203,13 +203,13 @@ export function CasesMapReviewsFaqContacts({
                 ))}
               </div>
             ) : (
-              <div className="mt-6 rounded-[2rem] bg-card p-6 shadow-card">
+              <div className="mt-6 rounded-[2rem] border border-border bg-card p-6 text-card-foreground shadow-card">
                 <p className="font-black">Отзывы скоро появятся</p>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">Мы уже собираем публичные отзывы клиентов и скоро добавим их на главную.</p>
               </div>
             )}
           </div>
-          <div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="rounded-2xl bg-card p-5 shadow-card"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div></div>
+          <div><Badge>FAQ</Badge><div className="mt-6 grid gap-3">{faq.map((item) => <details key={item.id ?? item.question} className="rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-card"><summary className="cursor-pointer font-black">{item.question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p></details>)}</div></div>
         </div>
       </section>
       <section id="contacts" className="section-padding bg-card"><div className="container grid gap-8 lg:grid-cols-[1fr_0.8fr]"><div><Badge>Контакты</Badge><h2 className="section-title mt-4">Запишитесь на бесплатный замер</h2><p className="section-lead">Пришлите размеры или фото участка — подготовим предварительный расчет в день обращения.</p><div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><a href={primaryPhone.href}><Phone className="h-5 w-5" /> {primaryPhone.label}</a></Button><Button asChild size="lg" variant="outline"><a href={telegramHref}><Send className="h-5 w-5" /> Telegram</a></Button><Button asChild size="lg" variant="copper"><a href={maxHref}><MessageCircle className="h-5 w-5" /> MAX</a></Button></div></div><ContactLeadForm settings={settings} /></div></section>
