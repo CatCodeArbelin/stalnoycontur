@@ -8,7 +8,7 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { MotionReveal } from "@/components/motion-reveal";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,8 @@ const API_URL = getBrowserApiBase();
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
+const CUSTOM_SIZE_VALUE = "custom_size";
+const CUSTOM_SIZE_LABEL = "Свой размер";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 type LeadSource = "quiz" | "contact_form";
@@ -36,6 +38,7 @@ type QuizData = {
   material: string;
   phone: string;
   comment: string;
+  custom_area?: number;
 };
 
 type ContactFormData = {
@@ -58,6 +61,9 @@ function getCalculatorConfig(
     materialOptions: settings?.calculator_config?.materialOptions?.length
       ? settings.calculator_config.materialOptions
       : fallbackCalculatorConfig.materialOptions,
+    allowCustomSize:
+      settings?.calculator_config?.allowCustomSize ??
+      fallbackCalculatorConfig.allowCustomSize,
   };
 }
 
@@ -111,6 +117,28 @@ function validatePhotoFile(file: File) {
   }
 
   return "";
+}
+
+function parseCustomArea(value: string) {
+  const normalized = Number(value.replace(",", "."));
+  return Number.isFinite(normalized) && normalized > 0 ? normalized : null;
+}
+
+function formatArea(value: number) {
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(
+    value,
+  );
+}
+
+function getQuizSizePayload(data: QuizData) {
+  if (data.size !== CUSTOM_SIZE_VALUE || !data.custom_area) {
+    return data;
+  }
+
+  return {
+    ...data,
+    size: `Свой размер: ${formatArea(data.custom_area)} м²`,
+  };
 }
 
 function getSourcePage() {
@@ -340,13 +368,26 @@ export function QuizCalculator({
   );
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState("");
+  const [customArea, setCustomArea] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState("");
   const consentText =
     settings.personal_data_consent_text ||
     fallbackSettings.personal_data_consent_text;
-  const { canopyOptions, materialOptions, sizeOptions } = calculatorConfig;
+  const { allowCustomSize, canopyOptions, materialOptions, sizeOptions } =
+    calculatorConfig;
+  const selectedCustomArea = parseCustomArea(customArea);
+  const quizSizeOptions = useMemo(
+    () =>
+      allowCustomSize
+        ? [
+            ...sizeOptions,
+            { label: CUSTOM_SIZE_LABEL, value: CUSTOM_SIZE_VALUE },
+          ]
+        : sizeOptions,
+    [allowCustomSize, sizeOptions],
+  );
 
   useEffect(() => {
     setData((current) => ({
@@ -356,14 +397,16 @@ export function QuizCalculator({
       )
         ? current.canopyType
         : canopyOptions[0].value,
-      size: sizeOptions.some((item) => item.value === current.size)
-        ? current.size
-        : sizeOptions[0].value,
+      size:
+        sizeOptions.some((item) => item.value === current.size) ||
+        (allowCustomSize && current.size === CUSTOM_SIZE_VALUE)
+          ? current.size
+          : sizeOptions[0].value,
       material: materialOptions.some((item) => item.value === current.material)
         ? current.material
         : materialOptions[0].value,
     }));
-  }, [canopyOptions, materialOptions, sizeOptions]);
+  }, [allowCustomSize, canopyOptions, materialOptions, sizeOptions]);
 
   const steps = ["Тип навеса", "Размер", "Контакты"];
   const progress = ((step + 1) / steps.length) * 100;
@@ -371,18 +414,24 @@ export function QuizCalculator({
     const canopy =
       canopyOptions.find((item) => item.value === data.canopyType) ??
       canopyOptions[0];
-    const size =
-      sizeOptions.find((item) => item.value === data.size) ?? sizeOptions[0];
+    const sizeArea =
+      data.size === CUSTOM_SIZE_VALUE && selectedCustomArea
+        ? selectedCustomArea
+        : (
+            sizeOptions.find((item) => item.value === data.size) ??
+            sizeOptions[0]
+          ).area;
     const material =
       materialOptions.find((item) => item.value === data.material) ??
       materialOptions[0];
-    return Math.round(size.area * material.pricePerMeter * canopy.multiplier);
+    return Math.round(sizeArea * material.pricePerMeter * canopy.multiplier);
   }, [
     canopyOptions,
     data.canopyType,
     data.material,
     data.size,
     materialOptions,
+    selectedCustomArea,
     sizeOptions,
   ]);
 
@@ -394,14 +443,27 @@ export function QuizCalculator({
     setError("");
 
     try {
+      const submittedData = getQuizSizePayload({
+        ...data,
+        custom_area:
+          data.size === CUSTOM_SIZE_VALUE && selectedCustomArea
+            ? selectedCustomArea
+            : undefined,
+      });
       await postLead(
-        makePayload({ source: "quiz", data, quiz: data, estimatedPrice }),
+        makePayload({
+          source: "quiz",
+          data: submittedData,
+          quiz: submittedData,
+          estimatedPrice,
+        }),
         photo,
       );
       setState("success");
       setData(makeDefaultQuizData(calculatorConfig));
       setPhoto(null);
       setPhotoError("");
+      setCustomArea("");
       setStep(0);
       setConsent(false);
       event.currentTarget.reset();
@@ -482,12 +544,29 @@ export function QuizCalculator({
               {step === 1 && (
                 <OptionGrid
                   title="Выберите примерный размер"
-                  options={sizeOptions}
+                  options={quizSizeOptions}
                   value={data.size}
                   onChange={(value) =>
                     setData((current) => ({ ...current, size: value }))
                   }
-                />
+                >
+                  {data.size === CUSTOM_SIZE_VALUE ? (
+                    <label className="mt-5 grid gap-2 text-sm font-bold text-foreground">
+                      Площадь, м²
+                      <input
+                        required
+                        min="0.01"
+                        step="0.01"
+                        type="number"
+                        inputMode="decimal"
+                        value={customArea}
+                        onChange={(event) => setCustomArea(event.target.value)}
+                        className="rounded-2xl border bg-background px-4 py-3 font-normal text-foreground placeholder:text-muted-foreground"
+                        placeholder="Например, 37"
+                      />
+                    </label>
+                  ) : null}
+                </OptionGrid>
               )}
               {step === 2 && (
                 <div>
@@ -546,6 +625,12 @@ export function QuizCalculator({
                   <Button
                     type="button"
                     variant="copper"
+                    disabled={
+                      state === "loading" ||
+                      (step === 1 &&
+                        data.size === CUSTOM_SIZE_VALUE &&
+                        !selectedCustomArea)
+                    }
                     onClick={() =>
                       setStep((current) =>
                         Math.min(steps.length - 1, current + 1),
@@ -587,11 +672,13 @@ function OptionGrid({
   options,
   value,
   onChange,
+  children,
 }: {
   title: string;
   options: Array<{ label: string; value: string }>;
   value: string;
   onChange: (value: string) => void;
+  children?: ReactNode;
 }) {
   return (
     <div>
@@ -614,6 +701,7 @@ function OptionGrid({
           </label>
         ))}
       </div>
+      {children}
     </div>
   );
 }

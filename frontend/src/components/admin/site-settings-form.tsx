@@ -13,7 +13,10 @@ import { casesResource } from "@/components/admin/resource-configs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBrowserApiBase } from "@/lib/api-base";
-import { fallbackCalculatorConfig, type CalculatorConfig } from "@/lib/content-api";
+import {
+  fallbackCalculatorConfig,
+  type CalculatorConfig,
+} from "@/lib/content-api";
 import { cn } from "@/lib/utils";
 
 type MessageType = "success" | "error";
@@ -44,7 +47,10 @@ type SiteSettingsFormState = {
 };
 
 type SiteSettingsKey = keyof SiteSettingsFormState;
-type CalculatorOptionGroup = keyof CalculatorConfig;
+type CalculatorOptionGroup =
+  | "canopyOptions"
+  | "sizeOptions"
+  | "materialOptions";
 
 type SiteSettingsField = {
   key: SiteSettingsKey;
@@ -75,7 +81,8 @@ const siteSettingsFields: SiteSettingsField[] = [
   },
   {
     key: "calculator_config",
-    description: "Настройки квиз-калькулятора: типы, размеры, материалы, коэффициенты и цены",
+    description:
+      "Настройки квиз-калькулятора: типы, размеры, материалы, коэффициенты и цены",
   },
 ];
 
@@ -197,15 +204,21 @@ function normalizePhones(value: unknown): PhoneRow[] {
 
 function normalizePositiveNumber(value: unknown, fallback: number) {
   const numberValue = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : fallback;
+  return Number.isFinite(numberValue) && numberValue > 0
+    ? numberValue
+    : fallback;
 }
 
 function normalizeCalculatorConfig(value: unknown): CalculatorConfig {
   if (!value || typeof value !== "object" || Array.isArray(value))
     return fallbackCalculatorConfig;
 
-  const source = value as Partial<Record<CalculatorOptionGroup, unknown>>;
+  const source = value as Partial<CalculatorConfig>;
   return {
+    allowCustomSize:
+      typeof source.allowCustomSize === "boolean"
+        ? source.allowCustomSize
+        : fallbackCalculatorConfig.allowCustomSize,
     canopyOptions: normalizeCalculatorOptions(
       source.canopyOptions,
       fallbackCalculatorConfig.canopyOptions,
@@ -224,7 +237,9 @@ function normalizeCalculatorConfig(value: unknown): CalculatorConfig {
   };
 }
 
-function normalizeCalculatorOptions<Metric extends "multiplier" | "area" | "pricePerMeter">(
+function normalizeCalculatorOptions<
+  Metric extends "multiplier" | "area" | "pricePerMeter",
+>(
   value: unknown,
   fallback: Array<{ label: string; value: string } & Record<Metric, number>>,
   metric: Metric,
@@ -238,7 +253,10 @@ function normalizeCalculatorOptions<Metric extends "multiplier" | "area" | "pric
     .map((item, index) => ({
       label: normalizeString(item.label),
       value: normalizeString(item.value),
-      [metric]: normalizePositiveNumber(item[metric], fallback[index]?.[metric] ?? 1),
+      [metric]: normalizePositiveNumber(
+        item[metric],
+        fallback[index]?.[metric] ?? 1,
+      ),
     }))
     .filter((item) => item.label && item.value);
   return (normalized.length ? normalized : fallback) as Array<
@@ -263,6 +281,7 @@ function formValueToSettingValue(
   }
   if (key === "calculator_config") {
     return {
+      allowCustomSize: form.calculator_config.allowCustomSize,
       canopyOptions: form.calculator_config.canopyOptions
         .map((item) => ({
           label: item.label.trim(),
@@ -491,7 +510,8 @@ export function SiteSettingsForm() {
           itemIndex === index
             ? {
                 ...item,
-                [key]: key === "label" || key === "value" ? value : Number(value),
+                [key]:
+                  key === "label" || key === "value" ? value : Number(value),
               }
             : item,
         ),
@@ -562,7 +582,12 @@ export function SiteSettingsForm() {
                 className="rounded-2xl border p-3"
                 value={option.label}
                 onChange={(event) =>
-                  updateCalculatorOption(group, index, "label", event.target.value)
+                  updateCalculatorOption(
+                    group,
+                    index,
+                    "label",
+                    event.target.value,
+                  )
                 }
                 placeholder="Label"
               />
@@ -570,7 +595,12 @@ export function SiteSettingsForm() {
                 className="rounded-2xl border p-3"
                 value={option.value}
                 onChange={(event) =>
-                  updateCalculatorOption(group, index, "value", event.target.value)
+                  updateCalculatorOption(
+                    group,
+                    index,
+                    "value",
+                    event.target.value,
+                  )
                 }
                 placeholder="Value"
               />
@@ -916,9 +946,27 @@ export function SiteSettingsForm() {
                 <CardContent>
                   <form className="grid gap-5" onSubmit={saveSettings}>
                     <p className="rounded-2xl bg-copper-50 p-4 text-sm text-steel-700">
-                      Эти значения используются в публичном квиз-калькуляторе для
-                      вариантов навеса, площади и ориентировочной цены за м².
+                      Эти значения используются в публичном квиз-калькуляторе
+                      для вариантов навеса, площади и ориентировочной цены за
+                      м².
                     </p>
+                    <label className="flex items-start gap-3 rounded-2xl border p-4 text-sm font-semibold text-steel-700">
+                      <input
+                        type="checkbox"
+                        checked={form.calculator_config.allowCustomSize}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            calculator_config: {
+                              ...current.calculator_config,
+                              allowCustomSize: event.target.checked,
+                            },
+                          }))
+                        }
+                        className="mt-1 h-4 w-4 rounded border-steel-300 accent-copper-500"
+                      />
+                      <span>Разрешить ввод своего размера, м²</span>
+                    </label>
                     {renderCalculatorGroup(
                       "canopyOptions",
                       "Типы навесов",

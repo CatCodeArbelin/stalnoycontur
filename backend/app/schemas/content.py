@@ -73,6 +73,7 @@ class CalculatorConfig(BaseModel):
     canopyOptions: list[CalculatorCanopyOption]
     sizeOptions: list[CalculatorSizeOption]
     materialOptions: list[CalculatorMaterialOption]
+    allowCustomSize: bool = False
 
     @field_validator("canopyOptions", "sizeOptions", "materialOptions")
     @classmethod
