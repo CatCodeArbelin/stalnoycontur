@@ -15,12 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { canopyTypes } from "@/data/site";
 import {
-  fallbackFaq,
   fallbackGalleryItems,
   fallbackPublicCases,
   fallbackSettings,
   type PublicCase,
-  type PublicFaq,
   type PublicGalleryItem,
   type PublicSettings,
 } from "@/lib/content-api";
@@ -182,13 +180,11 @@ export function SolutionsProductionSteps({
 
 type CasesMapReviewsFaqContactsProps = {
   cases?: PublicCase[];
-  faq?: PublicFaq[];
   settings?: PublicSettings;
 };
 
 export function CasesMapReviewsFaqContacts({
   cases = fallbackPublicCases,
-  faq = fallbackFaq,
   settings = fallbackSettings,
 }: CasesMapReviewsFaqContactsProps) {
   const primaryPhone = settings.phones?.[0] ?? fallbackSettings.phones[0];
@@ -233,26 +229,6 @@ export function CasesMapReviewsFaqContacts({
                   ) : null}
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section className="section-padding">
-        <div className="container">
-          <Badge>FAQ</Badge>
-          <div className="mt-6 grid gap-3">
-            {faq.map((item) => (
-              <details
-                key={item.id ?? item.question}
-                className="interactive-card rounded-2xl p-5 text-card-foreground"
-              >
-                <summary className="cursor-pointer font-black">
-                  {item.question}
-                </summary>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  {item.answer}
-                </p>
-              </details>
             ))}
           </div>
         </div>

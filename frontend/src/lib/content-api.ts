@@ -22,13 +22,6 @@ export type PublicGalleryItem = {
   created_at?: string | null;
 };
 
-export type PublicFaq = {
-  id?: number | null;
-  question: string;
-  answer: string;
-  sort_order?: number | null;
-};
-
 export type PublicPhone = {
   label: string;
   href: string;
@@ -93,7 +86,6 @@ export type PublicSettings = {
 export type ManagedContent = {
   cases: PublicCase[];
   gallery: PublicGalleryItem[];
-  faq: PublicFaq[];
   settings: PublicSettings;
 };
 
@@ -134,13 +126,6 @@ export const fallbackGalleryItems: PublicGalleryItem[] = [
   { title: "Проект и смета", category: "work_step", sort_order: 20 },
   { title: "Производство", category: "work_step", sort_order: 30 },
   { title: "Монтаж и сдача", category: "work_step", sort_order: 40 },
-];
-
-export const fallbackFaq: PublicFaq[] = [
-  { question: "Сколько длится монтаж?", answer: "После замера инженер предложит решение под ваш участок, бюджет и срок службы." },
-  { question: "Какая кровля лучше для Крыма?", answer: "Подбираем поликарбонат, профнастил или металлочерепицу под нагрузку, бюджет и архитектуру объекта." },
-  { question: "Нужен ли фундамент?", answer: "Тип основания рассчитываем после осмотра участка и выбора конструкции навеса." },
-  { question: "Можно ли сделать подсветку?", answer: "Да, предусматриваем подсветку, водосток и декоративные элементы на этапе проекта." },
 ];
 
 function trimTrailingSlashes(value: string) {
@@ -191,21 +176,16 @@ export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
   return fetchPublic("/gallery", fallbackGalleryItems);
 }
 
-export async function getPublicFaq(): Promise<PublicFaq[]> {
-  return fetchPublic("/faq", fallbackFaq);
-}
-
 export async function getPublicSettings(): Promise<PublicSettings> {
   return fetchPublic("/settings", fallbackSettings);
 }
 
 export async function getManagedContent(): Promise<ManagedContent> {
-  const [cases, gallery, faq, settings] = await Promise.all([
+  const [cases, gallery, settings] = await Promise.all([
     getPublicCases(),
     getPublicGallery(),
-    getPublicFaq(),
     getPublicSettings(),
   ]);
 
-  return { cases, gallery, faq, settings };
+  return { cases, gallery, settings };
 }

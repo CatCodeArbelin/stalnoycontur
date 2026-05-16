@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { QuizCalculator } from "@/components/lead-form";
 import { CasesMapReviewsFaqContacts, Types } from "@/components/sections/home-sections";
-import { BreadcrumbListJsonLd, FAQPageJsonLd } from "@/components/seo";
+import { BreadcrumbListJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getManagedContent } from "@/lib/content-api";
@@ -14,7 +14,6 @@ export async function LandingPage({ badge, title, description, points, path }: {
   return (
     <>
       <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: title, url: path }]} />
-      <FAQPageJsonLd items={[{ question: "Как получить точную смету?", answer: "Оставьте заявку и пришлите размеры или фото участка: инженер уточнит задачу, предложит конструкцию и зафиксирует смету в договоре." }, { question: "Что входит в работу под ключ?", answer: "Замер, проект, изготовление каркаса, доставка, монтаж кровли, водосток по необходимости и уборка площадки." }]} />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container grid items-center gap-10 lg:grid-cols-2">
           <div>
@@ -31,7 +30,10 @@ export async function LandingPage({ badge, title, description, points, path }: {
       </section>
       <QuizCalculator settings={content.settings} />
       <Types />
-      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts
+        cases={content.cases}
+        settings={content.settings}
+      />
     </>
   );
 }
