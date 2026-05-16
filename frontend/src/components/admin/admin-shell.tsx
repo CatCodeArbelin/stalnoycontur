@@ -19,6 +19,7 @@ export type UploadCategory =
 type BaseField = {
   key: string;
   label: string;
+  description?: string;
   placeholder?: string;
   defaultValue?: unknown;
 };
@@ -948,6 +949,11 @@ export function AdminResource({
                             uploadImageList(field.key, e.target.files)
                           }
                         />
+                      ) : null}
+                      {field.description ? (
+                        <span className="text-xs font-normal text-steel-500">
+                          {field.description}
+                        </span>
                       ) : null}
                     </label>
                   ))}
