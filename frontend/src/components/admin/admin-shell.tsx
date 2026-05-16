@@ -47,7 +47,7 @@ export type Field =
 export type Column = {
   key: string;
   label: string;
-  format?: "dateTime" | "telegramStatus";
+  format?: "dateTime" | "telegramStatus" | "landingUrl";
 };
 
 export type AdminResourceConfig = {
@@ -166,7 +166,34 @@ function formatCell(value: unknown) {
   return String(value);
 }
 
-function formatColumnCell(column: Column, value: unknown) {
+function normalizeLandingSlug(value: unknown) {
+  return String(value ?? "")
+    .trim()
+    .replace(/^\/+/, "");
+}
+
+function landingUrlFromSlug(value: unknown) {
+  const slug = normalizeLandingSlug(value);
+  return slug ? `/${slug}` : "";
+}
+
+function isLandingPagesResource(endpoint: string) {
+  return endpoint === "/admin/landing-pages";
+}
+
+function shouldShowLandingSlugPreview(endpoint: string, field: Field) {
+  return isLandingPagesResource(endpoint) && field.key === "slug";
+}
+
+function landingSlugPreview(value: unknown) {
+  return landingUrlFromSlug(value) || "/vash-adres-stranitsy";
+}
+
+function formatColumnCell(
+  column: Column,
+  value: unknown,
+  item?: Record<string, unknown>,
+) {
   if (column.format === "dateTime")
     return value ? new Date(String(value)).toLocaleString("ru-RU") : "—";
   if (column.format === "telegramStatus") {
@@ -174,6 +201,31 @@ function formatColumnCell(column: Column, value: unknown) {
     if (value === "failed") return "Ошибка";
     if (value === "skipped") return "Не настроен";
     return "Ожидает";
+  }
+  if (column.format === "landingUrl") {
+    const url = landingUrlFromSlug(item?.slug ?? value);
+    if (!url) return "—";
+
+    return (
+      <div className="grid gap-1">
+        <a
+          className="font-semibold text-copper-700 underline"
+          href={url}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Открыть
+        </a>
+        {item?.is_published === false ? (
+          <span
+            className="text-xs font-normal text-amber-700"
+            title="Не опубликован — ссылка пока не открывается публично"
+          >
+            Не опубликован — ссылка пока не открывается публично
+          </span>
+        ) : null}
+      </div>
+    );
   }
   return formatCell(value);
 }
@@ -474,6 +526,11 @@ export function AdminCrudPanel({
                       }
                     />
                   ) : null}
+                  {shouldShowLandingSlugPreview(endpoint, field) ? (
+                    <span className="text-xs font-normal text-steel-500">
+                      Итоговая ссылка: {landingSlugPreview(form[field.key])}
+                    </span>
+                  ) : null}
                 </label>
               ))}
               <div className="flex gap-2">
@@ -519,7 +576,7 @@ export function AdminCrudPanel({
                         className="max-w-[280px] px-3 py-3 align-top"
                         key={column.key}
                       >
-                        {formatColumnCell(column, item[column.key])}
+                        {formatColumnCell(column, item[column.key], item)}
                       </td>
                     ))}
                     <td className="px-3 py-3">
@@ -950,6 +1007,11 @@ export function AdminResource({
                           }
                         />
                       ) : null}
+                      {shouldShowLandingSlugPreview(endpoint, field) ? (
+                        <span className="text-xs font-normal text-steel-500">
+                          Итоговая ссылка: {landingSlugPreview(form[field.key])}
+                        </span>
+                      ) : null}
                       {field.description ? (
                         <span className="text-xs font-normal text-steel-500">
                           {field.description}
@@ -1000,7 +1062,7 @@ export function AdminResource({
                             className="max-w-[280px] px-3 py-3 align-top"
                             key={column.key}
                           >
-                            {formatColumnCell(column, item[column.key])}
+                            {formatColumnCell(column, item[column.key], item)}
                           </td>
                         ))}
                         <td className="px-3 py-3">
