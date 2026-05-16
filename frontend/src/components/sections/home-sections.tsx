@@ -79,8 +79,8 @@ export function Types() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {canopyTypes.map((item, index) => (
             <MotionReveal key={item.href} delay={index * 0.07} direction={index % 3 === 0 ? "right" : "up"}>
-              <Link href={item.href} className="interactive-card group block overflow-hidden rounded-[2rem] text-card-foreground">
-                <Image src={item.image} alt={item.title} width={520} height={320} loading="lazy" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="h-48 w-full object-cover transition duration-300 motion-safe:sm:group-hover:scale-[1.03]" />
+              <Link href={item.href} className="interactive-card group block overflow-hidden rounded-[2rem] text-card-foreground hover:border-copper-500/50 hover:shadow-lg">
+                <Image src={item.image} alt={item.title} width={520} height={320} loading="lazy" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="h-48 w-full object-cover transition-opacity duration-300 group-hover:opacity-95 motion-safe:lg:transition-transform motion-safe:lg:group-hover:scale-[1.02]" />
                 <div className="flex items-center justify-between p-5 transition-colors group-hover:text-accent"><span className="text-lg font-black">{item.title}</span><ArrowRight className="h-5 w-5 text-copper-500" /></div>
               </Link>
             </MotionReveal>
