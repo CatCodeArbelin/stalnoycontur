@@ -21,12 +21,12 @@ export function Header({ settings = fallbackSettings }: { settings?: PublicSetti
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-card/85 backdrop-blur-xl">
       <div className="container flex h-20 min-w-0 items-center justify-between gap-3 py-3 xl:gap-4">
-        <div className="flex min-w-0 flex-1 items-center">
+        <div className="flex min-w-0 flex-1 items-center xl:-ml-2 2xl:-ml-3">
           <Link href="/" className="flex min-w-0 items-center gap-3" aria-label={settings.company_name}>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-steel-900 text-lg font-black text-white">СК</span>
-            <span className="min-w-0 leading-tight">
+            <span className="min-w-0 max-w-[10rem] leading-tight 2xl:max-w-[14rem]">
               <span className="block truncate text-base font-black uppercase tracking-wide text-foreground">{settings.company_name}</span>
-              <span className="block truncate text-xs font-semibold text-muted-foreground">навесы под ключ в Крыму</span>
+              <span className="hidden truncate text-xs font-semibold text-muted-foreground 2xl:block">навесы под ключ в Крыму</span>
             </span>
           </Link>
         </div>
