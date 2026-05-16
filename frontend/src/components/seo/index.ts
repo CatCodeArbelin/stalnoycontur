@@ -1,1 +1,8 @@
-export { BreadcrumbListJsonLd, ConstructionBusinessJsonLd, FAQPageJsonLd, LocalBusinessJsonLd, ReviewJsonLd } from "./json-ld";
+export {
+  BreadcrumbListJsonLd,
+  ConstructionBusinessJsonLd,
+  FAQPageJsonLd,
+  LocalBusinessJsonLd,
+  ReviewJsonLd,
+  ServiceJsonLd,
+} from "./json-ld";
