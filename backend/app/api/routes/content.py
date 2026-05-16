@@ -6,9 +6,8 @@ from app.core.database import get_db
 from app.models.case import Case
 from app.models.faq import FAQ
 from app.models.gallery_item import GalleryItem
-from app.models.review import Review
-from app.schemas.content import CaseItem, FaqItem, GalleryItem as GalleryItemSchema, PublicSettings, ReviewItem
-from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_GALLERY_ITEMS, DEFAULT_REVIEWS, assemble_public_settings
+from app.schemas.content import CaseItem, FaqItem, GalleryItem as GalleryItemSchema, PublicSettings
+from app.services.content import DEFAULT_CASES, DEFAULT_FAQ, DEFAULT_GALLERY_ITEMS, assemble_public_settings
 
 router = APIRouter(tags=["content"])
 
@@ -34,12 +33,6 @@ def get_gallery(db: Session = Depends(get_db)) -> list[GalleryItem | GalleryItem
 @router.get("/works", response_model=list[GalleryItemSchema])
 def get_works(db: Session = Depends(get_db)) -> list[GalleryItem | GalleryItemSchema]:
     return get_gallery(db)
-
-
-@router.get("/reviews", response_model=list[ReviewItem])
-def get_reviews(db: Session = Depends(get_db)) -> list[Review | ReviewItem]:
-    reviews = list(db.scalars(select(Review).order_by(Review.id.desc())))
-    return reviews or DEFAULT_REVIEWS
 
 
 @router.get("/faq", response_model=list[FaqItem])

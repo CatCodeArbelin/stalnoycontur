@@ -18,13 +18,11 @@ from app.models.case import Case
 from app.models.faq import FAQ
 from app.models.gallery_item import GalleryItem
 from app.models.lead import Lead
-from app.models.review import Review
 from app.models.setting import Setting
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.faq import FAQCreate, FAQRead, FAQUpdate
 from app.schemas.gallery_item import GalleryItemCreate, GalleryItemRead, GalleryItemUpdate
 from app.schemas.lead import LeadCreate, LeadRead, LeadUpdate
-from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
 from app.schemas.setting import SettingCreate, SettingRead, SettingUpdate, validate_public_setting_value
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -191,36 +189,6 @@ def update_gallery_item(item_id: int, payload: GalleryItemUpdate, db: Session = 
 @router.delete("/gallery/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
 def delete_gallery_item(item_id: int, db: Session = Depends(get_db)) -> None:
     item = get_or_404(db, GalleryItem, item_id)
-    db.delete(item)
-    db.commit()
-
-
-@router.get("/reviews", response_model=list[ReviewRead], dependencies=[Depends(require_admin)])
-def list_reviews(db: Session = Depends(get_db)) -> list[Review]:
-    return list(db.scalars(select(Review).order_by(Review.id.desc())))
-
-
-@router.post("/reviews", response_model=ReviewRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
-def create_review(payload: ReviewCreate, db: Session = Depends(get_db)) -> Review:
-    item = Review(**payload.model_dump())
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return item
-
-
-@router.patch("/reviews/{item_id}", response_model=ReviewRead, dependencies=[Depends(require_admin)])
-def update_review(item_id: int, payload: ReviewUpdate, db: Session = Depends(get_db)) -> Review:
-    item = get_or_404(db, Review, item_id)
-    apply_update(item, payload)
-    db.commit()
-    db.refresh(item)
-    return item
-
-
-@router.delete("/reviews/{item_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
-def delete_review(item_id: int, db: Session = Depends(get_db)) -> None:
-    item = get_or_404(db, Review, item_id)
     db.delete(item)
     db.commit()
 

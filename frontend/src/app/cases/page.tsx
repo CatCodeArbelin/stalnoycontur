@@ -2,22 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { CasesMapReviewsFaqContacts } from "@/components/sections/home-sections";
-import { BreadcrumbListJsonLd, ReviewJsonLd } from "@/components/seo";
+import { BreadcrumbListJsonLd } from "@/components/seo";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { fallbackReviews, getManagedContent } from "@/lib/content-api";
+import { getManagedContent } from "@/lib/content-api";
 import { metadataForPath } from "@/lib/seo";
 
 export const metadata: Metadata = metadataForPath("/cases");
 
 export default async function CasesPage() {
   const content = await getManagedContent();
-  const review = content.reviews[0] ?? fallbackReviews[0];
-
   return (
     <>
       <BreadcrumbListJsonLd items={[{ name: "Главная", url: "/" }, { name: "Кейсы", url: "/cases" }]} />
-      <ReviewJsonLd author={review.author} text={review.text} ratingValue={5} />
       <section className="bg-steel-900 py-16 text-white md:py-24">
         <div className="container">
           <Badge className="border-border/40 bg-card/10 text-copper-400">Портфолио</Badge>
@@ -35,7 +32,7 @@ export default async function CasesPage() {
           ))}
         </div>
       </section>
-      <CasesMapReviewsFaqContacts cases={content.cases} reviews={content.reviews} faq={content.faq} settings={content.settings} />
+      <CasesMapReviewsFaqContacts cases={content.cases} faq={content.faq} settings={content.settings} />
     </>
   );
 }

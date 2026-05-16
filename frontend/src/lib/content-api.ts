@@ -22,14 +22,6 @@ export type PublicGalleryItem = {
   created_at?: string | null;
 };
 
-export type PublicReview = {
-  id?: number | null;
-  author: string;
-  text: string;
-  image?: string | null;
-  avito_url?: string | null;
-};
-
 export type PublicFaq = {
   id?: number | null;
   question: string;
@@ -101,7 +93,6 @@ export type PublicSettings = {
 export type ManagedContent = {
   cases: PublicCase[];
   gallery: PublicGalleryItem[];
-  reviews: PublicReview[];
   faq: PublicFaq[];
   settings: PublicSettings;
 };
@@ -143,10 +134,6 @@ export const fallbackGalleryItems: PublicGalleryItem[] = [
   { title: "Проект и смета", category: "work_step", sort_order: 20 },
   { title: "Производство", category: "work_step", sort_order: 30 },
   { title: "Монтаж и сдача", category: "work_step", sort_order: 40 },
-];
-
-export const fallbackReviews: PublicReview[] = [
-  { author: "Алексей", text: "Сделали навес для двух машин, помогли выбрать цвет под забор. Монтаж занял два дня, участок оставили чистым." },
 ];
 
 export const fallbackFaq: PublicFaq[] = [
@@ -204,10 +191,6 @@ export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
   return fetchPublic("/gallery", fallbackGalleryItems);
 }
 
-export async function getPublicReviews(): Promise<PublicReview[]> {
-  return fetchPublic("/reviews", fallbackReviews);
-}
-
 export async function getPublicFaq(): Promise<PublicFaq[]> {
   return fetchPublic("/faq", fallbackFaq);
 }
@@ -217,13 +200,12 @@ export async function getPublicSettings(): Promise<PublicSettings> {
 }
 
 export async function getManagedContent(): Promise<ManagedContent> {
-  const [cases, gallery, reviews, faq, settings] = await Promise.all([
+  const [cases, gallery, faq, settings] = await Promise.all([
     getPublicCases(),
     getPublicGallery(),
-    getPublicReviews(),
     getPublicFaq(),
     getPublicSettings(),
   ]);
 
-  return { cases, gallery, reviews, faq, settings };
+  return { cases, gallery, faq, settings };
 }

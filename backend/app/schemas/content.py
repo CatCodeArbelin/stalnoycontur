@@ -29,16 +29,6 @@ class GalleryItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ReviewItem(BaseModel):
-    id: int | None = None
-    author: str
-    text: str
-    image: str | None = None
-    avito_url: str | None = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class FaqItem(BaseModel):
     id: int | None = None
     question: str

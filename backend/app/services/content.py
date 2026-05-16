@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.setting import Setting
-from app.schemas.content import CaseItem, FaqItem, GalleryItem, PublicSettings, ReviewItem
+from app.schemas.content import CaseItem, FaqItem, GalleryItem, PublicSettings
 from app.schemas.setting import PUBLIC_SETTING_KEYS
 
 DEFAULT_CASES = [
@@ -59,12 +59,6 @@ DEFAULT_GALLERY_ITEMS = [
     GalleryItem(title="Монтаж и сдача", category="work_step", sort_order=40),
 ]
 
-
-DEFAULT_REVIEWS = [
-    ReviewItem(author="Алексей", text="Сделали навес для двух машин за три дня, аккуратно покрасили каркас."),
-    ReviewItem(author="Марина", text="Помогли подобрать поликарбонат под террасу и вывели водосток."),
-    ReviewItem(author="Игорь", text="Понравились подробная смета и монтаж без затягивания сроков."),
-]
 
 DEFAULT_FAQ = [
     FaqItem(question="Выезжаете ли на замер?", answer="Да, согласуем удобное время и выезжаем на объект по Крыму.", sort_order=10),
