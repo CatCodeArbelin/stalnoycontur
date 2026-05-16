@@ -87,7 +87,7 @@ export function Hero() {
 
 export function Types() {
   return (
-    <section className="section-effects section-padding">
+    <section className="catalog-section section-effects section-padding">
       <div className="container relative z-10">
         <Badge>Каталог</Badge>
         <h2 className="section-title mt-4">Типы навесов</h2>
@@ -194,7 +194,7 @@ export function CasesMapReviewsFaqContacts({
 
   return (
     <>
-      <section className="section-effects section-padding">
+      <section className="cases-section section-effects section-padding">
         <div className="container relative z-10">
           <Badge>Кейсы</Badge>
           <h2 className="section-title mt-4">Реализованные объекты</h2>
