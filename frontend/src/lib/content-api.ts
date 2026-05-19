@@ -49,20 +49,31 @@ export type CalculatorMaterialOption = {
   pricePerMeter: number;
 };
 
+export type CalculatorStep = {
+  title: string;
+  source: "canopyOptions" | "materialOptions" | "sizeOptions" | "contacts";
+};
+
 export type CalculatorConfig = {
   canopyOptions: CalculatorCanopyOption[];
   sizeOptions: CalculatorSizeOption[];
   materialOptions: CalculatorMaterialOption[];
+  steps: CalculatorStep[];
   allowCustomSize: boolean;
 };
 
 export const fallbackCalculatorConfig: CalculatorConfig = {
   allowCustomSize: false,
+  steps: [
+    { title: "Под что нужен навес?", source: "canopyOptions" },
+    { title: "Выберите покрытие крыши", source: "materialOptions" },
+    { title: "Выберите примерный размер", source: "sizeOptions" },
+    { title: "Контакты", source: "contacts" },
+  ],
   canopyOptions: [
-    { label: "Для авто", value: "Навес для авто", multiplier: 1 },
-    { label: "К дому / терраса", value: "Навес к дому", multiplier: 1.08 },
-    { label: "Односкатный", value: "Односкатный навес", multiplier: 0.95 },
-    { label: "Двускатный", value: "Двускатный навес", multiplier: 1.18 },
+    { label: "Под авто", value: "Под авто", multiplier: 1 },
+    { label: "Беседку", value: "Беседку", multiplier: 1.08 },
+    { label: "Терасса", value: "Терасса", multiplier: 1.12 },
   ],
   sizeOptions: [
     { label: "3×4 м", value: "3×4 м", area: 12 },
@@ -71,10 +82,10 @@ export const fallbackCalculatorConfig: CalculatorConfig = {
     { label: "6×8 м", value: "6×8 м", area: 48 },
   ],
   materialOptions: [
-    { label: "Поликарбонат", value: "Поликарбонат", pricePerMeter: 7600 },
     { label: "Профнастил", value: "Профнастил", pricePerMeter: 6900 },
-    { label: "Металлочерепица", value: "Металлочерепица", pricePerMeter: 8400 },
-    { label: "Мягкая кровля", value: "Мягкая кровля", pricePerMeter: 9200 },
+    { label: "Мягкая", value: "Мягкая", pricePerMeter: 9200 },
+    { label: "Поликарбонат", value: "Поликарбонат", pricePerMeter: 7600 },
+    { label: "Монолит", value: "Монолит", pricePerMeter: 9800 },
   ],
 };
 

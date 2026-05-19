@@ -62,6 +62,9 @@ function getCalculatorConfig(
     materialOptions: settings?.calculator_config?.materialOptions?.length
       ? settings.calculator_config.materialOptions
       : fallbackCalculatorConfig.materialOptions,
+    steps: settings?.calculator_config?.steps?.length
+      ? settings.calculator_config.steps
+      : fallbackCalculatorConfig.steps,
     allowCustomSize:
       settings?.calculator_config?.allowCustomSize ??
       fallbackCalculatorConfig.allowCustomSize,
@@ -394,7 +397,7 @@ export function QuizCalculator({
   const consentText =
     settings.personal_data_consent_text ||
     fallbackSettings.personal_data_consent_text;
-  const { allowCustomSize, canopyOptions, materialOptions, sizeOptions } =
+  const { allowCustomSize, canopyOptions, materialOptions, sizeOptions, steps } =
     calculatorConfig;
   const selectedCustomArea = parseCustomArea(customArea);
   const quizSizeOptions = useMemo(
@@ -427,7 +430,6 @@ export function QuizCalculator({
     }));
   }, [allowCustomSize, canopyOptions, materialOptions, sizeOptions]);
 
-  const steps = ["Тип навеса", "Размер", "Контакты"];
   const progress = ((step + 1) / steps.length) * 100;
   const estimatedPrice = useMemo(() => {
     const canopy =
@@ -552,7 +554,7 @@ export function QuizCalculator({
             <form onSubmit={handleSubmit}>
               {step === 0 && (
                 <OptionGrid
-                  title="Какой навес нужен?"
+                  title={steps[0]?.title || "Какой навес нужен?"}
                   options={canopyOptions}
                   value={data.canopyType}
                   onChange={(value) =>
@@ -562,7 +564,17 @@ export function QuizCalculator({
               )}
               {step === 1 && (
                 <OptionGrid
-                  title="Выберите примерный размер"
+                  title={steps[1]?.title || "Выберите покрытие крыши"}
+                  options={materialOptions}
+                  value={data.material}
+                  onChange={(value) =>
+                    setData((current) => ({ ...current, material: value }))
+                  }
+                />
+              )}
+              {step === 2 && (
+                <OptionGrid
+                  title={steps[2]?.title || "Выберите примерный размер"}
                   options={quizSizeOptions}
                   value={data.size}
                   onChange={(value) =>
@@ -587,10 +599,10 @@ export function QuizCalculator({
                   ) : null}
                 </OptionGrid>
               )}
-              {step === 2 && (
+              {step === 3 && (
                 <div>
                   <h3 className="text-2xl font-black">
-                    Куда отправить точную смету?
+                    {steps[3]?.title || "Куда отправить точную смету?"}
                   </h3>
                   <input
                     required
