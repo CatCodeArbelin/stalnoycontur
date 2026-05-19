@@ -50,6 +50,7 @@ export type CalculatorMaterialOption = {
 };
 
 export type CalculatorStep = {
+  id: string;
   title: string;
   source: "canopyOptions" | "materialOptions" | "sizeOptions" | "contacts";
 };
@@ -65,10 +66,14 @@ export type CalculatorConfig = {
 export const fallbackCalculatorConfig: CalculatorConfig = {
   allowCustomSize: false,
   steps: [
-    { title: "Под что нужен навес?", source: "canopyOptions" },
-    { title: "Выберите покрытие крыши", source: "materialOptions" },
-    { title: "Выберите примерный размер", source: "sizeOptions" },
-    { title: "Контакты", source: "contacts" },
+    { id: "canopy", title: "Под что нужен навес?", source: "canopyOptions" },
+    {
+      id: "material",
+      title: "Выберите покрытие крыши",
+      source: "materialOptions",
+    },
+    { id: "size", title: "Выберите примерный размер", source: "sizeOptions" },
+    { id: "contacts", title: "Контакты", source: "contacts" },
   ],
   canopyOptions: [
     { label: "Под авто", value: "Под авто", multiplier: 1 },
