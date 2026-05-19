@@ -155,3 +155,29 @@ def test_update_setting_to_public_key_validates_existing_value(tmp_path) -> None
 
     assert response.status_code == 422
     assert response.json()["detail"] == "Настройка phones должна быть списком телефонов с label и href"
+
+
+def test_get_public_settings_merges_legacy_calculator_config_with_defaults(tmp_path) -> None:
+    with _admin_client(tmp_path) as (client, testing_session_local, _headers):
+        with testing_session_local() as db:
+            db.add(
+                Setting(
+                    key="calculator_config",
+                    value={
+                        "allowCustomSize": True,
+                        "materialOptions": [
+                            {"label": "Мягкая", "value": "Мягкая", "pricePerMeter": 9200.01}
+                        ],
+                    },
+                    description=None,
+                )
+            )
+            db.commit()
+
+        response = client.get("/api/settings")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["calculator_config"]["allowCustomSize"] is True
+    assert body["calculator_config"]["materialOptions"][0]["pricePerMeter"] == 9200.01
+    assert body["calculator_config"]["steps"]
