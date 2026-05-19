@@ -52,6 +52,8 @@ type CalculatorOptionGroup =
   | "sizeOptions"
   | "materialOptions";
 
+type CalculatorStepSource = "canopyOptions" | "materialOptions" | "sizeOptions" | "contacts";
+
 type SiteSettingsField = {
   key: SiteSettingsKey;
   description: string;
@@ -234,6 +236,16 @@ function normalizeCalculatorConfig(value: unknown): CalculatorConfig {
       fallbackCalculatorConfig.materialOptions,
       "pricePerMeter",
     ),
+    steps: Array.isArray(source.steps) && source.steps.length
+      ? source.steps
+          .filter((step): step is { title: string; source: CalculatorStepSource } => Boolean(step && typeof step === "object" && !Array.isArray(step)))
+          .map((step, index) => ({
+            title: normalizeString(step.title) || fallbackCalculatorConfig.steps[index]?.title || "Шаг",
+            source: (["canopyOptions", "materialOptions", "sizeOptions", "contacts"] as CalculatorStepSource[]).includes(step.source)
+              ? step.source
+              : fallbackCalculatorConfig.steps[index]?.source || "contacts",
+          }))
+      : fallbackCalculatorConfig.steps,
   };
 }
 
@@ -303,6 +315,9 @@ function formValueToSettingValue(
           pricePerMeter: item.pricePerMeter,
         }))
         .filter((item) => item.label && item.value),
+      steps: form.calculator_config.steps
+        .map((step) => ({ title: step.title.trim(), source: step.source }))
+        .filter((step) => step.title),
     };
   }
   return String(form[key] ?? "").trim();
@@ -980,6 +995,52 @@ export function SiteSettingsForm() {
                       "area",
                       "Площадь, м²",
                     )}
+                    <div className="grid gap-3 rounded-2xl border p-4">
+                      <p className="text-sm font-semibold text-steel-700">Этапы квиза</p>
+                      <div className="grid gap-3">
+                        {form.calculator_config.steps.map((quizStep, index) => (
+                          <div key={`quiz-step-${index}`} className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_220px]">
+                            <input
+                              className="rounded-2xl border p-3"
+                              value={quizStep.title}
+                              onChange={(event) =>
+                                setForm((current) => ({
+                                  ...current,
+                                  calculator_config: {
+                                    ...current.calculator_config,
+                                    steps: current.calculator_config.steps.map((item, itemIndex) =>
+                                      itemIndex === index ? { ...item, title: event.target.value } : item,
+                                    ),
+                                  },
+                                }))
+                              }
+                              placeholder="Название этапа"
+                            />
+                            <select
+                              className="rounded-2xl border p-3"
+                              value={quizStep.source}
+                              onChange={(event) =>
+                                setForm((current) => ({
+                                  ...current,
+                                  calculator_config: {
+                                    ...current.calculator_config,
+                                    steps: current.calculator_config.steps.map((item, itemIndex) =>
+                                      itemIndex === index ? { ...item, source: event.target.value as CalculatorStepSource } : item,
+                                    ),
+                                  },
+                                }))
+                              }
+                            >
+                              <option value="canopyOptions">Тип навеса</option>
+                              <option value="materialOptions">Покрытие крыши</option>
+                              <option value="sizeOptions">Размер</option>
+                              <option value="contacts">Контакты</option>
+                            </select>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     {renderCalculatorGroup(
                       "materialOptions",
                       "Материалы",

@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -69,13 +71,19 @@ class CalculatorMaterialOption(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class CalculatorStep(BaseModel):
+    title: str = Field(..., min_length=1)
+    source: Literal["canopyOptions", "materialOptions", "sizeOptions", "contacts"]
+
+
 class CalculatorConfig(BaseModel):
     canopyOptions: list[CalculatorCanopyOption]
     sizeOptions: list[CalculatorSizeOption]
     materialOptions: list[CalculatorMaterialOption]
+    steps: list[CalculatorStep]
     allowCustomSize: bool = False
 
-    @field_validator("canopyOptions", "sizeOptions", "materialOptions")
+    @field_validator("canopyOptions", "sizeOptions", "materialOptions", "steps")
     @classmethod
     def validate_options_are_not_empty(cls, value: list[BaseModel]) -> list[BaseModel]:
         if not value:
