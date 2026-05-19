@@ -542,7 +542,7 @@ export function QuizCalculator({
               <div className="mt-3 flex flex-wrap gap-2">
                 {steps.map((item, index) => (
                   <span
-                    key={item.id}
+                    key={`${item.id}-${index}`}
                     className={`rounded-full px-3 py-1 text-xs font-bold ${index <= step ? "bg-copper-500/15 text-copper-600 dark:text-copper-300" : "bg-muted text-muted-foreground"}`}
                   >
                     {item.title}
