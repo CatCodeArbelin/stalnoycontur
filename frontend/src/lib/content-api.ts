@@ -27,23 +27,27 @@ export type PublicGalleryItem = {
 };
 
 export type PublicPhone = {
+  id?: string;
   label: string;
   href: string;
 };
 
 export type CalculatorCanopyOption = {
+  id?: string;
   label: string;
   value: string;
   multiplier: number;
 };
 
 export type CalculatorSizeOption = {
+  id?: string;
   label: string;
   value: string;
   area: number;
 };
 
 export type CalculatorMaterialOption = {
+  id?: string;
   label: string;
   value: string;
   pricePerMeter: number;
