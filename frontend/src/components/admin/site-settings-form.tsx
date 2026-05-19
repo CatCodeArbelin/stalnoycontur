@@ -31,6 +31,7 @@ type AdminSetting = {
 };
 
 type PhoneRow = {
+  id: string;
   label: string;
   href: string;
 };
@@ -190,6 +191,13 @@ function normalizeString(value: unknown) {
   return typeof value === "string" ? value : "";
 }
 
+let localIdCounter = 0;
+
+function createLocalId(prefix: string) {
+  localIdCounter += 1;
+  return `${prefix}-${localIdCounter}`;
+}
+
 function normalizePhones(value: unknown): PhoneRow[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -197,7 +205,8 @@ function normalizePhones(value: unknown): PhoneRow[] {
       (item): item is Record<string, unknown> =>
         Boolean(item) && typeof item === "object" && !Array.isArray(item),
     )
-    .map((item) => ({
+    .map((item, index) => ({
+      id: normalizeString(item.id) || `phone-${index + 1}`,
       label: normalizeString(item.label),
       href: normalizeString(item.href),
     }))
@@ -287,7 +296,7 @@ function normalizeCalculatorOptions<
   Metric extends "multiplier" | "area" | "pricePerMeter",
 >(
   value: unknown,
-  fallback: Array<{ label: string; value: string } & Record<Metric, number>>,
+  fallback: Array<{ id?: string; label: string; value: string } & Record<Metric, number>>,
   metric: Metric,
 ) {
   if (!Array.isArray(value)) return fallback;
@@ -297,6 +306,7 @@ function normalizeCalculatorOptions<
         Boolean(item) && typeof item === "object" && !Array.isArray(item),
     )
     .map((item, index) => ({
+      id: normalizeString(item.id) || `${metric}-${index + 1}`,
       label: normalizeString(item.label),
       value: normalizeString(item.value),
       [metric]: normalizePositiveNumber(
@@ -306,7 +316,7 @@ function normalizeCalculatorOptions<
     }))
     .filter((item) => item.label && item.value);
   return (normalized.length ? normalized : fallback) as Array<
-    { label: string; value: string } & Record<Metric, number>
+    { id: string; label: string; value: string } & Record<Metric, number>
   >;
 }
 
@@ -322,7 +332,7 @@ function formValueToSettingValue(
 ) {
   if (key === "phones") {
     return form.phones
-      .map((item) => ({ label: item.label.trim(), href: item.href.trim() }))
+      .map((item) => ({ id: item.id, label: item.label.trim(), href: item.href.trim() }))
       .filter((item) => item.label || item.href);
   }
   if (key === "calculator_config") {
@@ -330,6 +340,7 @@ function formValueToSettingValue(
       allowCustomSize: form.calculator_config.allowCustomSize,
       canopyOptions: form.calculator_config.canopyOptions
         .map((item) => ({
+          id: item.id,
           label: item.label.trim(),
           value: item.value.trim(),
           multiplier: item.multiplier,
@@ -337,6 +348,7 @@ function formValueToSettingValue(
         .filter((item) => item.label && item.value),
       sizeOptions: form.calculator_config.sizeOptions
         .map((item) => ({
+          id: item.id,
           label: item.label.trim(),
           value: item.value.trim(),
           area: item.area,
@@ -344,6 +356,7 @@ function formValueToSettingValue(
         .filter((item) => item.label && item.value),
       materialOptions: form.calculator_config.materialOptions
         .map((item) => ({
+          id: item.id,
           label: item.label.trim(),
           value: item.value.trim(),
           pricePerMeter: item.pricePerMeter,
@@ -538,7 +551,7 @@ export function SiteSettingsForm() {
   function addPhone() {
     setForm((current) => ({
       ...current,
-      phones: [...current.phones, { label: "", href: "" }],
+      phones: [...current.phones, { id: createLocalId("phone"), label: "", href: "" }],
     }));
   }
 
@@ -581,7 +594,7 @@ export function SiteSettingsForm() {
           ...current.calculator_config,
           [group]: [
             ...current.calculator_config[group],
-            { ...fallbackItem, label: "", value: "" },
+            { ...fallbackItem, id: createLocalId(group), label: "", value: "" },
           ],
         },
       };
@@ -629,7 +642,7 @@ export function SiteSettingsForm() {
           {form.calculator_config[group].map((option, index) => (
             <div
               className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_1fr_160px_auto]"
-              key={`${group}-${index}`}
+              key={option.id}
             >
               <input
                 className="rounded-2xl border p-3"
@@ -874,7 +887,7 @@ export function SiteSettingsForm() {
                         {form.phones.map((phone, index) => (
                           <div
                             className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_1fr_auto]"
-                            key={index}
+                            key={phone.id}
                           >
                             <input
                               className="rounded-2xl border p-3"
@@ -1037,7 +1050,7 @@ export function SiteSettingsForm() {
                       <p className="text-sm font-semibold text-steel-700">Этапы квиза</p>
                       <div className="grid gap-3">
                         {form.calculator_config.steps.map((quizStep, index) => (
-                          <div key={`quiz-step-${index}`} className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_220px]">
+                          <div key={quizStep.id} className="grid gap-2 rounded-2xl bg-slate-100 p-3 md:grid-cols-[1fr_220px]">
                             <input
                               className="rounded-2xl border p-3"
                               value={quizStep.title}
