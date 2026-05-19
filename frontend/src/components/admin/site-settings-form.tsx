@@ -236,17 +236,51 @@ function normalizeCalculatorConfig(value: unknown): CalculatorConfig {
       fallbackCalculatorConfig.materialOptions,
       "pricePerMeter",
     ),
-    steps: Array.isArray(source.steps) && source.steps.length
-      ? source.steps
-          .filter((step): step is { title: string; source: CalculatorStepSource } => Boolean(step && typeof step === "object" && !Array.isArray(step)))
-          .map((step, index) => ({
-            title: normalizeString(step.title) || fallbackCalculatorConfig.steps[index]?.title || "Шаг",
-            source: (["canopyOptions", "materialOptions", "sizeOptions", "contacts"] as CalculatorStepSource[]).includes(step.source)
-              ? step.source
-              : fallbackCalculatorConfig.steps[index]?.source || "contacts",
-          }))
-      : fallbackCalculatorConfig.steps,
+    steps: normalizeCalculatorSteps(source.steps),
   };
+}
+
+function normalizeCalculatorSteps(value: unknown): CalculatorConfig["steps"] {
+  const fallbackSteps = fallbackCalculatorConfig.steps;
+  if (!Array.isArray(value) || !value.length) {
+    return fallbackSteps;
+  }
+
+  const usedIds = new Set<string>();
+  const normalized = value
+    .filter(
+      (step): step is Record<string, unknown> =>
+        Boolean(step) && typeof step === "object" && !Array.isArray(step),
+    )
+    .map((step, index) => {
+      const source = (
+        ["canopyOptions", "materialOptions", "sizeOptions", "contacts"] as const
+      ).includes(step.source as CalculatorStepSource)
+        ? (step.source as CalculatorStepSource)
+        : fallbackSteps[index]?.source || "contacts";
+      const fallbackId = fallbackSteps[index]?.id || `${source}-${index + 1}`;
+      const rawId = normalizeString(step.id) || fallbackId;
+      const id = ensureUniqueStepId(rawId, usedIds);
+      return {
+        id,
+        title: normalizeString(step.title) || fallbackSteps[index]?.title || "Шаг",
+        source,
+      };
+    });
+
+  return normalized.length ? normalized : fallbackSteps;
+}
+
+function ensureUniqueStepId(baseId: string, usedIds: Set<string>) {
+  const normalizedBase = baseId.trim() || "step";
+  let candidate = normalizedBase;
+  let suffix = 2;
+  while (usedIds.has(candidate)) {
+    candidate = `${normalizedBase}-${suffix}`;
+    suffix += 1;
+  }
+  usedIds.add(candidate);
+  return candidate;
 }
 
 function normalizeCalculatorOptions<
@@ -316,7 +350,11 @@ function formValueToSettingValue(
         }))
         .filter((item) => item.label && item.value),
       steps: form.calculator_config.steps
-        .map((step) => ({ title: step.title.trim(), source: step.source }))
+        .map((step) => ({
+          id: step.id.trim(),
+          title: step.title.trim(),
+          source: step.source,
+        }))
         .filter((step) => step.title),
     };
   }
