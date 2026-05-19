@@ -1,4 +1,4 @@
-import { Car, Factory, Home, MapPin, ShieldCheck, Sparkles, Timer, Wrench } from "lucide-react";
+import { Car, Factory, Home, Layers, MapPin, ShieldCheck, Sparkles, Timer, Wrench } from "lucide-react";
 
 export const phone = "+7 978 000-44-88";
 
@@ -26,13 +26,62 @@ export const advantages = [
 ];
 
 export const canopyTypes = [
-  { href: "/navesy-dlya-avto", title: "Навесы для авто", image: "/images/canopy-auto.svg", icon: Car },
-  { href: "/odnoskatnye-navesy", title: "Односкатные", image: "/images/canopy-single.svg", icon: Home },
-  { href: "/dvuskatnye-navesy", title: "Двускатные", image: "/images/canopy-double.svg", icon: Home },
-  { href: "/arochnye-navesy", title: "Арочные", image: "/images/canopy-arched.svg", icon: Sparkles },
-  { href: "/navesy-iz-polikarbonata", title: "Из поликарбоната", image: "/images/canopy-poly.svg", icon: Sparkles },
-  { href: "/navesy-iz-profnastila", title: "Из профнастила", image: "/images/canopy-metal.svg", icon: Factory },
-  { href: "/navesy-k-domu", title: "Навесы к дому", image: "/images/canopy-home.svg", icon: Home },
+  {
+    href: "/navesy-iz-profnastila",
+    title: "Навесы из профнастила",
+    subtitle: "Практично и долговечно",
+    image: "/images/canopy-metal.svg",
+    icon: Factory,
+    tags: ["Кровля: профлист", "Для двора и бизнеса"],
+  },
+  {
+    href: "/navesy-iz-polikarbonata",
+    title: "Навесы из поликарбоната",
+    subtitle: "Больше света под навесом",
+    image: "/images/canopy-poly.svg",
+    icon: Sparkles,
+    tags: ["Светопропускание", "Для авто и террас"],
+  },
+  {
+    href: "/arochnye-navesy",
+    title: "Навесы из монолита",
+    subtitle: "Премиальная прозрачная кровля",
+    image: "/images/canopy-arched.svg",
+    icon: Layers,
+    tags: ["Монолитный поликарбонат", "Стиль: ХайТэк"],
+  },
+  {
+    href: "/navesy-k-domu",
+    title: "Навесы из мягкой кровли",
+    subtitle: "В стиле дома и беседки",
+    image: "/images/canopy-home.svg",
+    icon: Home,
+    tags: ["Битумная черепица", "Стиль: Лофт"],
+  },
+  {
+    href: "/navesy-dlya-avto",
+    title: "Навесы для авто",
+    subtitle: "Под 1–2 машины и внедорожники",
+    image: "/images/canopy-auto.svg",
+    icon: Car,
+    tags: ["Точный расчет высоты", "Защита от солнца"],
+  },
+  {
+    href: "/odnoskatnye-navesy",
+    title: "Современные ХайТэк",
+    subtitle: "Прямые линии и минимализм",
+    image: "/images/canopy-single.svg",
+    icon: Home,
+    tags: ["Ровная геометрия", "Лаконичный дизайн"],
+  },
+  {
+    href: "/dvuskatnye-navesy",
+    title: "Классика и Лофт",
+    subtitle: "Сочетаются с домом и фасадом",
+    image: "/images/canopy-double.svg",
+    icon: Home,
+    tags: ["Теплый внешний вид", "Для коттеджей"],
+  },
 ];
 
 export const cases = [

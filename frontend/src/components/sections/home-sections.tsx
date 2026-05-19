@@ -111,9 +111,24 @@ export function Types() {
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="h-48 w-full object-cover transition-opacity duration-300 group-hover:opacity-95 motion-safe:lg:transition-transform motion-safe:lg:group-hover:scale-[1.02]"
                 />
-                <div className="flex items-center justify-between p-5 transition-colors group-hover:text-accent">
-                  <span className="text-lg font-black">{item.title}</span>
-                  <ArrowRight className="h-5 w-5 text-copper-500" />
+                <div className="space-y-3 p-5 transition-colors group-hover:text-accent">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-black">{item.title}</span>
+                    <ArrowRight className="h-5 w-5 text-copper-500" />
+                  </div>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {item.subtitle}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.tags?.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-copper-300/40 bg-copper-50/80 px-2.5 py-1 text-xs font-semibold text-copper-700 dark:border-copper-500/30 dark:bg-copper-500/10 dark:text-copper-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </Link>
             </MotionReveal>
