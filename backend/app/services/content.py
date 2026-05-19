@@ -115,8 +115,17 @@ def normalize_setting_value(value: Any) -> Any:
     return value
 
 
+def _merge_calculator_config_with_defaults(value: Any) -> Any:
+    if not isinstance(value, dict):
+        return value
+    merged = dict(DEFAULT_CALCULATOR_CONFIG)
+    merged.update(value)
+    return merged
+
+
 def assemble_public_settings(db: Session) -> PublicSettings:
     rows = db.scalars(select(Setting).where(Setting.key.in_(PUBLIC_SETTING_KEYS))).all()
     values = DEFAULT_SETTINGS.model_dump()
     values.update({row.key: normalize_setting_value(row.value) for row in rows if row.value is not None})
+    values["calculator_config"] = _merge_calculator_config_with_defaults(values.get("calculator_config"))
     return PublicSettings.model_validate(values)
